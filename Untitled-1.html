@@ -1,0 +1,1675 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Hệ thống đổi pin xe điện thông minh - Quản lý người dùng, trạm, thanh toán với bản đồ tương tác" />
+  <title>Hệ Thống Đổi Pin Xe Điện - Dashboard Thông Minh</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121831;
+      --muted:#9aa4c7;
+      --text:#e8ecff;
+      --brand:#4f8cff;
+      --brand-2:#6ae3ff;
+      --ok:#19c37d;
+      --warn:#ffb020;
+      --danger:#ff5573;
+      --ring:rgba(111,153,255,.45);
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:14px;
+      --radius-sm:10px;
+      --radius-lg:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1020 0%,#0e1430 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1120px;margin:0 auto;padding:0 20px}
+    
+    /* Header */
+    header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.2) blur(10px);background:rgba(10,14,32,.55);border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:18px}
+    .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;box-shadow:var(--shadow)}
+    .logo svg{width:18px;height:18px;fill:white}
+    .nav-links{display:flex;gap:18px}
+    .nav-links a:hover{color:var(--brand-2)}
+    .auth-buttons{display:flex;gap:10px}
+    
+    /* Buttons */
+    .btn{padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;font-size:14px;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));border:none;color:#061023;font-weight:700}
+    .btn-success{background:linear-gradient(135deg,var(--ok),#9effce);border:none;color:#061023;font-weight:700}
+    .btn-warning{background:linear-gradient(135deg,var(--warn),#ffd0a0);border:none;color:#061023;font-weight:700}
+    .btn-danger{background:linear-gradient(135deg,var(--danger),#ff8fa3);border:none;color:white;font-weight:700}
+    .btn:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+    .btn-primary:hover{box-shadow:0 8px 25px rgba(79,140,255,.3)}
+    
+    /* Hero */
+    .hero{padding:56px 0 18px;text-align:center;background:radial-gradient(1200px 500px at 50% -50%,rgba(111,153,255,.25),transparent 60%),radial-gradient(600px 280px at 0% 0%,rgba(106,227,255,.16),transparent 60%),radial-gradient(600px 280px at 100% 0%,rgba(106,227,255,.12),transparent 60%)}
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:var(--muted);font-size:13px;background:rgba(255,255,255,.03);margin-bottom:18px}
+    .title{font-size:44px;line-height:1.1;margin:18px 0 14px}
+    .title strong{background:linear-gradient(135deg,#fff,#9bc2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .subtitle{color:var(--muted);max-width:780px;margin:0 auto 22px;font-size:16px}
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+    
+    /* Sections */
+    section{padding:36px 0}
+    .grid{display:grid;gap:18px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);transition:all .3s}
+    .card:hover{border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
+    .card.featured{border-color:var(--brand);box-shadow:0 10px 40px rgba(79,140,255,.2)}
+    .icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;margin-bottom:10px;background:linear-gradient(135deg,rgba(79,140,255,.25),rgba(106,227,255,.18));border:1px solid rgba(255,255,255,.12);font-size:18px}
+    
+    h1,h2,h3,h4,h5,h6{margin:0}
+    h2{font-size:26px;margin:0 0 12px}
+    h3{margin:8px 0 6px}
+    h4{margin:12px 0 8px;color:var(--brand-2)}
+    .muted{color:var(--muted);font-size:14px}
+    
+    /* Features */
+    #features .grid{grid-template-columns:repeat(3,1fr)}
+    
+    /* Pricing */
+    .pricing{display:grid;gap:18px;grid-template-columns:repeat(3,1fr)}
+    .price{font-size:28px;font-weight:800;margin:8px 0}
+    .chip{display:inline-block;font-size:12px;color:#061023;background:linear-gradient(135deg,var(--ok),#9effce);padding:6px 10px;border-radius:999px;margin-left:8px}
+    ul.clean{list-style:none;padding:0;margin:12px 0 0}
+    ul.clean li{display:flex;gap:8px;align-items:flex-start;margin:8px 0;color:var(--muted)}
+    .tick{color:var(--ok);font-weight:800}
+    
+    /* Map */
+    .map-container{margin:20px 0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+    .station-info{margin-top:20px}
+    .stations{grid-template-columns:repeat(3,1fr)}
+    
+    /* Contact */
+    .contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    
+    /* Footer */
+    footer{padding:22px 0;color:var(--muted);border-top:1px solid rgba(255,255,255,.08);margin-top:28px}
+    .footer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:20px}
+    .footer-grid a{display:block;margin:4px 0;color:var(--muted);transition:color .2s}
+    .footer-grid a:hover{color:var(--brand-2)}
+    .footer-bottom{text-align:center;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);font-size:14px}
+    
+    /* Modal */
+    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+    .modal-content{background:var(--card);margin:5% auto;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);width:90%;max-width:500px;box-shadow:var(--shadow);animation:modalSlideIn .3s ease}
+    @keyframes modalSlideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .modal-header h3{margin:0}
+    .close-btn{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .2s}
+    .close-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+    
+    /* Forms */
+    form{padding:24px}
+    .form-group{margin-bottom:16px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-group label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--text);font-size:14px;outline:none;transition:all .2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--ring)}
+    .form-actions{display:flex;gap:12px;margin-top:20px}
+    .form-actions .btn{flex:1}
+    
+    /* Demo Accounts */
+    .demo-accounts{padding:0 24px 24px;border-top:1px solid rgba(255,255,255,.1);margin-top:20px;padding-top:20px}
+    .demo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+    .demo-btn{padding:8px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--muted);cursor:pointer;font-size:12px;text-align:center;transition:all .2s}
+    .demo-btn:hover{background:rgba(255,255,255,.1);color:var(--text);border-color:rgba(255,255,255,.2)}
+    
+    /* Toast */
+    .toast{position:fixed;right:20px;bottom:20px;padding:12px 16px;background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:12px;box-shadow:var(--shadow);display:none;z-index:1001;max-width:300px;animation:toastSlideIn .3s ease}
+    @keyframes toastSlideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.success{border-color:var(--ok)}
+    .toast.error{border-color:var(--danger)}
+    .toast.warning{border-color:var(--warn)}
+    
+    /* Dashboard */
+    .dashboard{display:none;min-height:100vh}
+    .dashboard.active{display:block}
+    .dashboard-header{background:var(--card);border-bottom:1px solid rgba(255,255,255,.1);padding:20px 0}
+    .dashboard-nav{display:flex;justify-content:space-between;align-items:center}
+    .user-info{display:flex;align-items:center;gap:12px}
+    .user-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;color:white;font-weight:700}
+    .logout-btn{padding:8px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--muted);cursor:pointer;font-size:14px;transition:all .2s}
+    .logout-btn:hover{background:rgba(255,93,115,.1);border-color:var(--danger);color:var(--danger)}
+    .dashboard-content{padding:24px 0}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px}
+    .stat-card{background:linear-gradient(135deg,var(--card) 0%,rgba(18,24,49,.8) 100%);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:20px;text-align:center}
+    .stat-value{font-size:32px;font-weight:800;margin-bottom:8px}
+    .stat-label{color:var(--muted);font-size:14px}
+    
+    /* Tables */
+    .data-table{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);overflow:hidden}
+    .table-header{background:rgba(255,255,255,.05);padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center}
+    .table-filters{display:flex;gap:12px;align-items:center}
+    .filter-select,.filter-input{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--text);font-size:13px}
+    table{width:100%;border-collapse:collapse}
+    th,td{text-align:left;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+    th{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+    .status{padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600}
+    .status.success{background:rgba(25,195,125,.2);color:var(--ok)}
+    .status.warning{background:rgba(255,176,32,.2);color:var(--warn)}
+    .status.danger{background:rgba(255,85,115,.2);color:var(--danger)}
+    .action-btn{padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-size:12px;margin-right:4px}
+    .action-btn:hover{background:rgba(255,255,255,.1)}
+    
+    /* User Dashboard Tabs */
+    .user-nav{background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.1);padding:0}
+    .nav-tabs{display:flex;gap:0;overflow-x:auto}
+    .nav-tab{padding:16px 24px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;font-weight:500;transition:all .2s;border-bottom:3px solid transparent;white-space:nowrap}
+    .nav-tab:hover{color:var(--text);background:rgba(255,255,255,.05)}
+    .nav-tab.active{color:var(--brand);border-bottom-color:var(--brand);background:rgba(79,140,255,.1)}
+    
+    /* Tab Content */
+    .tab-content{display:none;padding-top:24px}
+    .tab-content.active{display:block}
+    
+    /* Station Posts Selection */
+    .post-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px}
+    .post-item{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:8px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+    .post-item:hover{border-color:var(--brand);background:rgba(79,140,255,.1)}
+    .post-item.selected{border-color:var(--brand);background:var(--brand);color:#061023}
+    .post-item.occupied{border-color:var(--danger);background:rgba(255,85,115,.1);color:var(--danger);cursor:not-allowed}
+    
+    /* Station List Items */
+    .station-item{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s}
+    .station-item:hover{background:rgba(255,255,255,.05)}
+    .station-item:last-child{border-bottom:none}
+    
+    /* Payment Method Icons */
+    .payment-method{display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;transition:all .2s}
+    .payment-method:hover{background:rgba(255,255,255,.05)}
+    
+    /* Top-up Amount Display */
+    .amount-display{font-size:18px;font-weight:600;color:var(--brand);text-align:center;margin:8px 0}
+    
+    /* Map Container in User Dashboard */
+    #user-map{border:1px solid rgba(255,255,255,.1)}
+    
+    /* Responsive for User Dashboard */
+    @media (max-width:768px){
+      .nav-tabs{flex-direction:column}
+      .nav-tab{text-align:center;border-bottom:1px solid rgba(255,255,255,.1);border-left:3px solid transparent}
+      .nav-tab.active{border-left-color:var(--brand);border-bottom-color:transparent}
+    }
+    
+    /* Responsive */
+    @media (max-width:1024px){
+      #features .grid{grid-template-columns:repeat(2,1fr)}
+      .pricing{grid-template-columns:1fr}
+      .stations{grid-template-columns:repeat(2,1fr)}
+      .contact-grid{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr;text-align:center}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:768px){
+      .nav{flex-wrap:wrap;height:auto;padding:12px 0}
+      .nav-links{order:3;width:100%;justify-content:center;margin-top:12px}
+      .title{font-size:34px}
+      #features .grid{grid-template-columns:1fr}
+      .stations{grid-template-columns:1fr}
+      .form-row{grid-template-columns:1fr}
+      .demo-grid{grid-template-columns:1fr}
+      .form-actions{flex-direction:column}
+      .stats-grid{grid-template-columns:1fr}
+      .table-filters{flex-direction:column;align-items:stretch}
+      .dashboard-nav{flex-direction:column;gap:16px;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 3h6l-1.5 3H7.8L6 3zm12 18h-6l1.5-3h2.7L18 21zM5 9h9l-1.5 3H6.5L5 9zm14 6h-9l1.5-3h6.5L19 15z"/></svg>
+        </div>
+        Đổi Pin Smart
+      </div>
+      <nav class="nav-links">
+        <a href="#features">Tính năng</a>
+        <a href="#pricing">Bảng giá</a>
+        <a href="#stations">Trạm</a>
+        <a href="#contact">Liên hệ</a>
+      </nav>
+      <div class="auth-buttons">
+        <button class="btn" onclick="showLogin()">Đăng nhập</button>
+        <button class="btn btn-primary" onclick="showRegister()">Đăng ký</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="eyebrow">Đổi pin trong 3 phút • Thanh toán thông minh • Quản lý tự động</div>
+        <h1 class="title">Hệ thống <strong>đổi pin xe điện</strong> thông minh</h1>
+        <p class="subtitle">Nền tảng quản lý toàn diện cho người dùng, nhân viên và quản trị viên. Tích hợp bản đồ, thanh toán và theo dõi real-time.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="showLogin()">Truy cập hệ thống</button>
+          <button class="btn" onclick="scrollToId('stations')">Xem bản đồ trạm</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="container">
+        <h2>Tính năng hệ thống</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">👤</div>
+            <h3>Dashboard người dùng</h3>
+            <p class="muted">Theo dõi lịch sử đổi pin, thanh toán, tìm trạm gần nhất và đặt lịch online.</p>
+          </div>
+          <div class="card">
+            <div class="icon">👨‍�</div>
+            <h3>Dashboard nhân viên</h3>
+            <p class="muted">Quản lý trạm, theo dõi tình trạng pin, xử lý yêu cầu khách hàng.</p>
+          </div>
+          <div class="card">
+            <div class="icon">⚙️</div>
+            <h3>Dashboard quản trị</h3>
+            <p class="muted">Thống kê toàn hệ thống, quản lý người dùng, cấu hình và báo cáo.</p>
+          </div>
+          <div class="card">
+            <div class="icon">�️</div>
+            <h3>Bản đồ tương tác</h3>
+            <p class="muted">Tìm trạm theo vị trí, xem tình trạng real-time, điều hướng GPS.</p>
+          </div>
+          <div class="card">
+            <div class="icon">💳</div>
+            <h3>Thanh toán thông minh</h3>
+            <p class="muted">Nhiều phương thức thanh toán, lọc giao dịch, xuất báo cáo chi tiết.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🔋</div>
+            <h3>Quản lý pin</h3>
+            <p class="muted">Theo dõi tình trạng pin, lịch bảo trì, tối ưu hóa hiệu suất.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="container">
+        <h2>Gói dịch vụ</h2>
+        <div class="pricing">
+          <div class="card">
+            <h3>Cơ bản</h3>
+            <div class="price">89.000đ/lượt</div>
+            <ul class="clean">
+              <li><span class="tick">✓</span> Đổi pin tiêu chuẩn</li>
+              <li><span class="tick">✓</span> App mobile</li>
+              <li><span class="tick">✓</span> Thanh toán QR</li>
+            </ul>
+            <button class="btn btn-primary" onclick="showLogin()">Đăng ký ngay</button>
+          </div>
+          <div class="card featured">
+            <h3>Premium <span class="chip">Phổ biến</span></h3>
+            <div class="price">299.000đ/tháng</div>
+            <ul class="clean">
+              <li><span class="tick">✓</span> 8 lượt/tháng</li>
+              <li><span class="tick">✓</span> Ưu tiên tại trạm</li>
+              <li><span class="tick">✓</span> Hỗ trợ 24/7</li>
+              <li><span class="tick">✓</span> Báo cáo chi tiết</li>
+            </ul>
+            <button class="btn btn-primary" onclick="showLogin()">Chọn gói</button>
+          </div>
+          <div class="card">
+            <h3>Doanh nghiệp</h3>
+            <div class="price">Liên hệ</div>
+            <ul class="clean">
+              <li><span class="tick">✓</span> Không giới hạn</li>
+              <li><span class="tick">✓</span> API tích hợp</li>
+              <li><span class="tick">✓</span> Dashboard quản lý</li>
+              <li><span class="tick">✓</span> SLA 99.9%</li>
+            </ul>
+            <button class="btn" onclick="showContact()">Tư vấn</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stations">
+      <div class="container">
+        <h2>Bản đồ trạm đổi pin</h2>
+        <div class="map-container">
+          <div id="map" style="height: 400px; border-radius: 12px; overflow: hidden;"></div>
+        </div>
+        <div class="station-info">
+          <div class="grid stations">
+            <div class="card" id="selected-station">
+              <h3>Chọn trạm trên bản đồ</h3>
+              <p class="muted">Click vào các marker để xem thông tin chi tiết trạm.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <h2>Liên hệ hỗ trợ</h2>
+        <div class="contact-grid">
+          <div class="card">
+            <h3>📞 Hotline</h3>
+            <p>1900 xxxx (24/7)</p>
+            <p class="muted">Hỗ trợ khẩn cấp và tư vấn</p>
+          </div>
+          <div class="card">
+            <h3>✉️ Email</h3>
+            <p>support@doipin.vn</p>
+            <p class="muted">Góp ý và hỗ trợ kỹ thuật</p>
+          </div>
+          <div class="card">
+            <h3>📍 Văn phòng</h3>
+            <p>Tầng 10, Tòa nhà FPT</p>
+            <p class="muted">TP.HCM & Hà Nội</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Đăng nhập hệ thống</h3>
+        <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+      </div>
+      <form id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Tên đăng nhập / Email</label>
+          <input id="username" type="text" required placeholder="admin@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input id="password" type="password" required placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label for="userRole">Vai trò</label>
+          <select id="userRole" required>
+            <option value="">Chọn vai trò</option>
+            <option value="user">Người dùng</option>
+            <option value="staff">Nhân viên</option>
+            <option value="admin">Quản trị viên</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Đăng nhập</button>
+          <button type="button" class="btn" onclick="showRegister()">Đăng ký tài khoản</button>
+        </div>
+      </form>
+      <div class="demo-accounts">
+        <h4>Tài khoản demo:</h4>
+        <div class="demo-grid">
+          <button class="demo-btn" onclick="quickLogin('user', 'user@demo.com', '123456')">
+            👤 User Demo
+          </button>
+          <button class="demo-btn" onclick="quickLogin('staff', 'staff@demo.com', '123456')">
+            👨‍💼 Staff Demo
+          </button>
+          <button class="demo-btn" onclick="quickLogin('admin', 'admin@demo.com', '123456')">
+            ⚙️ Admin Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Đăng ký tài khoản</h3>
+        <button class="close-btn" onclick="closeModal('registerModal')">&times;</button>
+      </div>
+      <form id="registerForm" onsubmit="return handleRegister(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="regName">Họ và tên</label>
+            <input id="regName" type="text" required placeholder="Nguyễn Văn A" />
+          </div>
+          <div class="form-group">
+            <label for="regPhone">Số điện thoại</label>
+            <input id="regPhone" type="tel" required placeholder="09xx xxx xxx" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" required placeholder="example@email.com" />
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Mật khẩu</label>
+          <input id="regPassword" type="password" required placeholder="••••••••" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Đăng ký</button>
+          <button type="button" class="btn" onclick="showLogin()">Đã có tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h4>Đổi Pin Smart</h4>
+          <p>Hệ thống đổi pin xe điện thông minh hàng đầu Việt Nam</p>
+        </div>
+        <div>
+          <h4>Liên kết</h4>
+          <a href="#features">Tính năng</a>
+          <a href="#pricing">Bảng giá</a>
+          <a href="#stations">Trạm</a>
+        </div>
+        <div>
+          <h4>Hỗ trợ</h4>
+          <a href="#contact">Liên hệ</a>
+          <a href="#">Hướng dẫn</a>
+          <a href="#">FAQ</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        © 2025 Đổi Pin Smart • Hệ thống quản lý thông minh
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script>
+    // Authentication System
+    class AuthSystem {
+      constructor() {
+        this.currentUser = null;
+        this.init();
+      }
+
+      init() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          this.currentUser = JSON.parse(savedUser);
+          this.showDashboard();
+        }
+      }
+
+      login(username, password, role) {
+        const demoUsers = {
+          'user@demo.com': { role: 'user', name: 'Nguyễn Văn User', password: '123456' },
+          'staff@demo.com': { role: 'staff', name: 'Trần Thị Staff', password: '123456' },
+          'admin@demo.com': { role: 'admin', name: 'Lê Văn Admin', password: '123456' }
+        };
+
+        const user = demoUsers[username];
+        if (user && user.password === password && user.role === role) {
+          this.currentUser = {
+            username,
+            name: user.name,
+            role: user.role,
+            loginTime: new Date().toISOString()
+          };
+          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+          this.showDashboard();
+          return true;
+        }
+        return false;
+      }
+
+      logout() {
+        this.currentUser = null;
+        localStorage.removeItem('currentUser');
+        this.showLandingPage();
+        showToast('Đã đăng xuất thành công', 'success');
+      }
+
+      showDashboard() {
+        if (!this.currentUser) return;
+
+        document.querySelector('main').style.display = 'none';
+        document.querySelector('header').style.display = 'none';
+        document.querySelector('footer').style.display = 'none';
+
+        const role = this.currentUser.role;
+        let dashboardId = role + 'Dashboard';
+        
+        if (!document.getElementById(dashboardId)) {
+          this.createDashboard(role);
+        }
+
+        document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
+        document.getElementById(dashboardId).classList.add('active');
+      }
+
+      showLandingPage() {
+        document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
+        document.querySelector('main').style.display = 'block';
+        document.querySelector('header').style.display = 'block';
+        document.querySelector('footer').style.display = 'block';
+      }
+
+      createDashboard(role) {
+        const dashboardHtml = this.getDashboardHtml(role);
+        document.body.insertAdjacentHTML('beforeend', dashboardHtml);
+      }
+
+      getDashboardHtml(role) {
+        const dashboards = {
+          user: this.getUserDashboardHtml(),
+          staff: this.getStaffDashboardHtml(),
+          admin: this.getAdminDashboardHtml()
+        };
+        return dashboards[role];
+      }
+
+      getUserDashboardHtml() {
+        return `
+          <div id="userDashboard" class="dashboard">
+            <div class="dashboard-header">
+              <div class="container">
+                <div class="dashboard-nav">
+                  <div class="brand">
+                    <div class="logo">
+                      <svg viewBox="0 0 24 24"><path d="M6 3h6l-1.5 3H7.8L6 3zm12 18h-6l1.5-3h2.7L18 21zM5 9h9l-1.5 3H6.5L5 9zm14 6h-9l1.5-3h6.5L19 15z"/></svg>
+                    </div>
+                    Dashboard Người Dùng
+                  </div>
+                  <div class="user-info">
+                    <div class="user-avatar">${this.currentUser.name.charAt(0)}</div>
+                    <div>
+                      <div>${this.currentUser.name}</div>
+                      <div class="muted">Người dùng</div>
+                    </div>
+                    <button class="logout-btn" onclick="auth.logout()">Đăng xuất</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Dashboard Navigation -->
+            <div class="user-nav">
+              <div class="container">
+                <div class="nav-tabs">
+                  <button class="nav-tab active" onclick="showUserTab('overview')">📊 Tổng quan</button>
+                  <button class="nav-tab" onclick="showUserTab('battery-swap')">🔋 Đổi pin</button>
+                  <button class="nav-tab" onclick="showUserTab('payment-history')">💳 Lịch sử thanh toán</button>
+                  <button class="nav-tab" onclick="showUserTab('plans')">📦 Gói dịch vụ</button>
+                  <button class="nav-tab" onclick="showUserTab('map')">🗺️ Bản đồ trạm</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-content">
+              <div class="container">
+                
+                <!-- Overview Tab -->
+                <div id="overview-tab" class="tab-content active">
+                  <div class="stats-grid">
+                    <div class="stat-card">
+                      <div class="stat-value">12</div>
+                      <div class="stat-label">Lượt đổi pin</div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-value">1,240,000đ</div>
+                      <div class="stat-label">Tổng chi phí</div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-value">Premium</div>
+                      <div class="stat-label">Gói hiện tại</div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-value">4.8★</div>
+                      <div class="stat-label">Đánh giá của bạn</div>
+                    </div>
+                  </div>
+
+                  <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="data-table">
+                      <div class="table-header">
+                        <h3>Hoạt động gần đây</h3>
+                      </div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Thời gian</th>
+                            <th>Hoạt động</th>
+                            <th>Trạng thái</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>15/10/2025 14:30</td>
+                            <td>Đổi pin tại Trạm Bùi Thị Xuân</td>
+                            <td><span class="status success">Hoàn thành</span></td>
+                          </tr>
+                          <tr>
+                            <td>14/10/2025 10:20</td>
+                            <td>Nạp tiền vào tài khoản</td>
+                            <td><span class="status success">Thành công</span></td>
+                          </tr>
+                          <tr>
+                            <td>12/10/2025 09:15</td>
+                            <td>Đổi pin tại Trạm Cầu Giấy</td>
+                            <td><span class="status success">Hoàn thành</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="card">
+                      <h3>Gói dịch vụ hiện tại</h3>
+                      <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 24px; font-weight: 700; color: var(--brand);">Premium</div>
+                        <div class="muted">299,000đ/tháng</div>
+                        <div style="margin: 16px 0;">
+                          <div style="background: rgba(79,140,255,0.2); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: var(--brand); height: 100%; width: 60%; border-radius: 4px;"></div>
+                          </div>
+                          <div class="muted" style="margin-top: 8px;">4/8 lượt đã sử dụng</div>
+                        </div>
+                      </div>
+                      <button class="btn btn-primary" style="width: 100%;" onclick="showUserTab('plans')">Xem gói khác</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Battery Swap Tab -->
+                <div id="battery-swap-tab" class="tab-content">
+                  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="card">
+                      <h3>🔋 Đặt lịch đổi pin</h3>
+                      <form onsubmit="return bookBatterySwap(event)">
+                        <div class="form-group">
+                          <label>Chọn trạm</label>
+                          <select id="station-select" required onchange="loadStationPosts()">
+                            <option value="">Chọn trạm đổi pin</option>
+                            <option value="station1">Trạm Bùi Thị Xuân (8 pin sẵn sàng)</option>
+                            <option value="station2">Trạm Cầu Giấy (12 pin sẵn sàng)</option>
+                            <option value="station3">Trạm Thủ Đức (15 pin sẵn sàng)</option>
+                            <option value="station4">Trạm Hải Châu (6 pin sẵn sàng)</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Chọn trụ đổi pin</label>
+                          <select id="post-select" required disabled>
+                            <option value="">Vui lòng chọn trạm trước</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Loại pin</label>
+                          <select required>
+                            <option value="">Chọn loại pin</option>
+                            <option value="72v20ah">LiFePO4 72V 20Ah (+0đ)</option>
+                            <option value="72v32ah">LiFePO4 72V 32Ah (+50,000đ)</option>
+                            <option value="60v20ah">LiFePO4 60V 20Ah (-10,000đ)</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Thời gian</label>
+                          <input type="datetime-local" required>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Ghi chú</label>
+                          <textarea placeholder="Thông tin thêm về xe, yêu cầu đặc biệt..." style="min-height: 80px;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Đặt lịch đổi pin</button>
+                      </form>
+                    </div>
+
+                    <div class="card">
+                      <h3>📋 Lịch sử đổi pin</h3>
+                      <div class="table-filters" style="margin-bottom: 16px;">
+                        <select class="filter-select">
+                          <option value="all">Tất cả</option>
+                          <option value="success">Thành công</option>
+                          <option value="pending">Đang xử lý</option>
+                          <option value="cancelled">Đã hủy</option>
+                        </select>
+                      </div>
+                      <div style="max-height: 400px; overflow-y: auto;">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Ngày</th>
+                              <th>Trạm/Trụ</th>
+                              <th>Giá</th>
+                              <th>Trạng thái</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>15/10 14:30</td>
+                              <td>BT Xuân/Trụ A2</td>
+                              <td>89,000đ</td>
+                              <td><span class="status success">Thành công</span></td>
+                            </tr>
+                            <tr>
+                              <td>12/10 09:15</td>
+                              <td>Cầu Giấy/Trụ B1</td>
+                              <td>89,000đ</td>
+                              <td><span class="status success">Thành công</span></td>
+                            </tr>
+                            <tr>
+                              <td>08/10 16:45</td>
+                              <td>Thủ Đức/Trụ C3</td>
+                              <td>0đ (Premium)</td>
+                              <td><span class="status success">Thành công</span></td>
+                            </tr>
+                            <tr>
+                              <td>05/10 11:20</td>
+                              <td>Hải Châu/Trụ D2</td>
+                              <td>139,000đ</td>
+                              <td><span class="status success">Thành công</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment History Tab -->
+                <div id="payment-history-tab" class="tab-content">
+                  <div class="data-table">
+                    <div class="table-header">
+                      <h3>💳 Lịch sử thanh toán</h3>
+                      <div class="table-filters">
+                        <select class="filter-select" onchange="filterPaymentHistory()">
+                          <option value="all">Tất cả giao dịch</option>
+                          <option value="battery-swap">Đổi pin</option>
+                          <option value="plan-purchase">Mua gói</option>
+                          <option value="top-up">Nạp tiền</option>
+                          <option value="refund">Hoàn tiền</option>
+                        </select>
+                        <select class="filter-select" onchange="filterPaymentHistory()">
+                          <option value="all">Tất cả phương thức</option>
+                          <option value="credit-card">Thẻ tín dụng</option>
+                          <option value="momo">Ví MoMo</option>
+                          <option value="zalopay">ZaloPay</option>
+                          <option value="bank-transfer">Chuyển khoản</option>
+                        </select>
+                        <input type="date" class="filter-input" onchange="filterPaymentHistory()">
+                      </div>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Mã GD</th>
+                          <th>Thời gian</th>
+                          <th>Loại giao dịch</th>
+                          <th>Số tiền</th>
+                          <th>Phương thức</th>
+                          <th>Trạng thái</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody id="payment-history-table">
+                        <tr>
+                          <td>#PAY001</td>
+                          <td>15/10/2025 14:35</td>
+                          <td>Đổi pin</td>
+                          <td>89,000đ</td>
+                          <td>Ví MoMo</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY001')">Chi tiết</button></td>
+                        </tr>
+                        <tr>
+                          <td>#PAY002</td>
+                          <td>14/10/2025 10:20</td>
+                          <td>Nạp tiền</td>
+                          <td>500,000đ</td>
+                          <td>Chuyển khoản</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY002')">Chi tiết</button></td>
+                        </tr>
+                        <tr>
+                          <td>#PAY003</td>
+                          <td>12/10/2025 09:20</td>
+                          <td>Đổi pin</td>
+                          <td>89,000đ</td>
+                          <td>ZaloPay</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY003')">Chi tiết</button></td>
+                        </tr>
+                        <tr>
+                          <td>#PAY004</td>
+                          <td>10/10/2025 16:50</td>
+                          <td>Mua gói Premium</td>
+                          <td>299,000đ</td>
+                          <td>Thẻ tín dụng</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY004')">Chi tiết</button></td>
+                        </tr>
+                        <tr>
+                          <td>#PAY005</td>
+                          <td>08/10/2025 16:50</td>
+                          <td>Đổi pin</td>
+                          <td>0đ</td>
+                          <td>Gói Premium</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY005')">Chi tiết</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Plans Tab -->
+                <div id="plans-tab" class="tab-content">
+                  <h2>📦 Chọn gói dịch vụ phù hợp</h2>
+                  <p class="muted">Tiết kiệm chi phí với các gói dịch vụ linh hoạt</p>
+                  
+                  <div class="pricing">
+                    <div class="card">
+                      <h3>Cơ bản</h3>
+                      <div class="price">89.000đ/lượt</div>
+                      <ul class="clean">
+                        <li><span class="tick">✓</span> Thanh toán theo lượt</li>
+                        <li><span class="tick">✓</span> Không cam kết dài hạn</li>
+                        <li><span class="tick">✓</span> Phù hợp sử dụng thỉnh thoảng</li>
+                        <li><span class="tick">✓</span> Hỗ trợ qua hotline</li>
+                      </ul>
+                      <button class="btn" onclick="selectPlan('basic')">Đang sử dụng</button>
+                    </div>
+                    
+                    <div class="card featured">
+                      <h3>Premium <span class="chip">Đang dùng</span></h3>
+                      <div class="price">299.000đ/tháng</div>
+                      <div class="muted">Tiết kiệm 46% so với trả theo lượt</div>
+                      <ul class="clean">
+                        <li><span class="tick">✓</span> 8 lượt đổi pin/tháng</li>
+                        <li><span class="tick">✓</span> Ưu tiên tại trạm</li>
+                        <li><span class="tick">✓</span> Hỗ trợ 24/7</li>
+                        <li><span class="tick">✓</span> Báo cáo chi tiết</li>
+                        <li><span class="tick">✓</span> Miễn phí lượt đầu mỗi ngày</li>
+                      </ul>
+                      <button class="btn btn-primary" onclick="extendPlan('premium')">Gia hạn gói</button>
+                    </div>
+                    
+                    <div class="card">
+                      <h3>Enterprise</h3>
+                      <div class="price">899.000đ/tháng</div>
+                      <div class="muted">Cho doanh nghiệp vận tải</div>
+                      <ul class="clean">
+                        <li><span class="tick">✓</span> Không giới hạn lượt đổi</li>
+                        <li><span class="tick">✓</span> API tích hợp</li>
+                        <li><span class="tick">✓</span> Dashboard quản lý đội xe</li>
+                        <li><span class="tick">✓</span> Hỗ trợ kỹ thuật riêng</li>
+                        <li><span class="tick">✓</span> Báo cáo tùy chỉnh</li>
+                      </ul>
+                      <button class="btn btn-primary" onclick="upgradePlan('enterprise')">Nâng cấp</button>
+                    </div>
+                  </div>
+
+                  <div class="card" style="margin-top: 24px;">
+                    <h3>💰 Nạp tiền vào tài khoản</h3>
+                    <p class="muted">Nạp trước để thanh toán nhanh chóng hơn</p>
+                    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                      <div>
+                        <div class="form-group">
+                          <label>Số tiền nạp</label>
+                          <select id="top-up-amount" onchange="updateTopUpAmount()">
+                            <option value="100000">100,000đ</option>
+                            <option value="200000">200,000đ (+10,000đ bonus)</option>
+                            <option value="500000">500,000đ (+30,000đ bonus)</option>
+                            <option value="1000000">1,000,000đ (+80,000đ bonus)</option>
+                            <option value="custom">Số tiền khác</option>
+                          </select>
+                          <input type="number" id="custom-amount" placeholder="Nhập số tiền" style="display: none; margin-top: 8px;" min="50000" step="10000">
+                        </div>
+                        <div class="form-group">
+                          <label>Phương thức thanh toán</label>
+                          <select>
+                            <option value="momo">Ví MoMo</option>
+                            <option value="zalopay">ZaloPay</option>
+                            <option value="vnpay">VNPay</option>
+                            <option value="bank">Chuyển khoản ngân hàng</option>
+                            <option value="credit-card">Thẻ tín dụng/ghi nợ</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <div style="background: rgba(79,140,255,0.1); padding: 16px; border-radius: 8px; text-align: center;">
+                          <div style="font-size: 18px; font-weight: 600;">Số dư hiện tại</div>
+                          <div style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">156,000đ</div>
+                          <button class="btn btn-primary" onclick="processTopUp()">Nạp tiền</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Map Tab -->
+                <div id="map-tab" class="tab-content">
+                  <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="card">
+                      <h3>🗺️ Bản đồ trạm đổi pin</h3>
+                      <div id="user-map" style="height: 500px; border-radius: 12px; overflow: hidden; margin-top: 16px;"></div>
+                      <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" onclick="findMyLocation()">📍 Vị trí của tôi</button>
+                        <button class="btn" onclick="filterActiveStations()">🟢 Chỉ trạm hoạt động</button>
+                        <button class="btn" onclick="showAllStations()">🔄 Hiện tất cả</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="card" style="margin-bottom: 20px;">
+                        <h3>📊 Thông tin trạm đã chọn</h3>
+                        <div id="selected-station-info">
+                          <p class="muted">Click vào trạm trên bản đồ để xem thông tin chi tiết</p>
+                        </div>
+                      </div>
+
+                      <div class="card">
+                        <h3>🔍 Tìm kiếm trạm</h3>
+                        <div class="form-group">
+                          <input type="text" placeholder="Tìm theo tên trạm hoặc địa chỉ..." id="station-search" onkeyup="searchStations()">
+                        </div>
+                        <div class="form-group">
+                          <select onchange="filterByDistance()">
+                            <option value="all">Tất cả khoảng cách</option>
+                            <option value="1">Trong vòng 1km</option>
+                            <option value="3">Trong vòng 3km</option>
+                            <option value="5">Trong vòng 5km</option>
+                            <option value="10">Trong vòng 10km</option>
+                          </select>
+                        </div>
+
+                        <h4>📋 Danh sách trạm gần</h4>
+                        <div id="nearby-stations" style="max-height: 200px; overflow-y: auto;">
+                          <div class="station-item" onclick="focusStation('station1')">
+                            <strong>Trạm Bùi Thị Xuân</strong><br>
+                            <span class="muted">Quận 1, TP.HCM • 0.8km</span><br>
+                            <span class="status success">8 pin sẵn sàng</span>
+                          </div>
+                          <div class="station-item" onclick="focusStation('station2')">
+                            <strong>Trạm Cầu Giấy</strong><br>
+                            <span class="muted">Cầu Giấy, Hà Nội • 2.1km</span><br>
+                            <span class="status success">12 pin sẵn sàng</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      getStaffDashboardHtml() {
+        return `
+          <div id="staffDashboard" class="dashboard">
+            <div class="dashboard-header">
+              <div class="container">
+                <div class="dashboard-nav">
+                  <div class="brand">
+                    <div class="logo">
+                      <svg viewBox="0 0 24 24"><path d="M6 3h6l-1.5 3H7.8L6 3zm12 18h-6l1.5-3h2.7L18 21zM5 9h9l-1.5 3H6.5L5 9zm14 6h-9l1.5-3h6.5L19 15z"/></svg>
+                    </div>
+                    Dashboard Nhân Viên
+                  </div>
+                  <div class="user-info">
+                    <div class="user-avatar">${this.currentUser.name.charAt(0)}</div>
+                    <div>
+                      <div>${this.currentUser.name}</div>
+                      <div class="muted">Nhân viên</div>
+                    </div>
+                    <button class="logout-btn" onclick="auth.logout()">Đăng xuất</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="dashboard-content">
+              <div class="container">
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Pin sẵn sàng</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">Pin đang sạc</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">Đổi pin hôm nay</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">95%</div>
+                    <div class="stat-label">Hiệu suất trạm</div>
+                  </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                  <div class="data-table">
+                    <div class="table-header">
+                      <h3>Quản lý pin</h3>
+                      <div class="table-filters">
+                        <select class="filter-select">
+                          <option value="all">Tất cả</option>
+                          <option value="ready">Sẵn sàng</option>
+                          <option value="charging">Đang sạc</option>
+                          <option value="maintenance">Bảo trì</option>
+                        </select>
+                      </div>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>ID Pin</th>
+                          <th>Loại</th>
+                          <th>Tình trạng</th>
+                          <th>Pin (%)</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>#B001</td>
+                          <td>72V 20Ah</td>
+                          <td><span class="status success">Sẵn sàng</span></td>
+                          <td>100%</td>
+                          <td><button class="action-btn">Quản lý</button></td>
+                        </tr>
+                        <tr>
+                          <td>#B002</td>
+                          <td>72V 32Ah</td>
+                          <td><span class="status warning">Đang sạc</span></td>
+                          <td>85%</td>
+                          <td><button class="action-btn">Quản lý</button></td>
+                        </tr>
+                        <tr>
+                          <td>#B003</td>
+                          <td>72V 20Ah</td>
+                          <td><span class="status success">Sẵn sàng</span></td>
+                          <td>98%</td>
+                          <td><button class="action-btn">Quản lý</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="data-table">
+                    <div class="table-header">
+                      <h3>Yêu cầu đổi pin</h3>
+                      <div class="table-filters">
+                        <select class="filter-select">
+                          <option value="all">Tất cả</option>
+                          <option value="pending">Chờ xử lý</option>
+                          <option value="processing">Đang xử lý</option>
+                          <option value="completed">Hoàn thành</option>
+                        </select>
+                      </div>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Khách hàng</th>
+                          <th>Thời gian</th>
+                          <th>Trạng thái</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Nguyễn Văn A</td>
+                          <td>16:30</td>
+                          <td><span class="status warning">Chờ xử lý</span></td>
+                          <td><button class="action-btn btn-primary">Xử lý</button></td>
+                        </tr>
+                        <tr>
+                          <td>Trần Thị B</td>
+                          <td>15:45</td>
+                          <td><span class="status warning">Đang xử lý</span></td>
+                          <td><button class="action-btn btn-success">Hoàn thành</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      getAdminDashboardHtml() {
+        return `
+          <div id="adminDashboard" class="dashboard">
+            <div class="dashboard-header">
+              <div class="container">
+                <div class="dashboard-nav">
+                  <div class="brand">
+                    <div class="logo">
+                      <svg viewBox="0 0 24 24"><path d="M6 3h6l-1.5 3H7.8L6 3zm12 18h-6l1.5-3h2.7L18 21zM5 9h9l-1.5 3H6.5L5 9zm14 6h-9l1.5-3h6.5L19 15z"/></svg>
+                    </div>
+                    Dashboard Quản Trị
+                  </div>
+                  <div class="user-info">
+                    <div class="user-avatar">${this.currentUser.name.charAt(0)}</div>
+                    <div>
+                      <div>${this.currentUser.name}</div>
+                      <div class="muted">Quản trị viên</div>
+                    </div>
+                    <button class="logout-btn" onclick="auth.logout()">Đăng xuất</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="dashboard-content">
+              <div class="container">
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-label">Người dùng</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Trạm hoạt động</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">52.8M</div>
+                    <div class="stat-label">Doanh thu (VNĐ)</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">98.2%</div>
+                    <div class="stat-label">Uptime hệ thống</div>
+                  </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                  <div class="data-table">
+                    <div class="table-header">
+                      <h3>Quản lý thanh toán</h3>
+                      <div class="table-filters">
+                        <select class="filter-select">
+                          <option value="all">Tất cả</option>
+                          <option value="success">Thành công</option>
+                          <option value="pending">Chờ xử lý</option>
+                          <option value="failed">Thất bại</option>
+                        </select>
+                        <select class="filter-select">
+                          <option value="all">Tất cả phương thức</option>
+                          <option value="qr">QR Code</option>
+                          <option value="card">Thẻ tín dụng</option>
+                          <option value="wallet">Ví điện tử</option>
+                        </select>
+                        <input type="date" class="filter-input">
+                      </div>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Mã GD</th>
+                          <th>Khách hàng</th>
+                          <th>Số tiền</th>
+                          <th>Phương thức</th>
+                          <th>Trạng thái</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>#TX001</td>
+                          <td>Nguyễn Văn A</td>
+                          <td>89,000đ</td>
+                          <td>QR Code</td>
+                          <td><span class="status success">Thành công</span></td>
+                          <td><button class="action-btn">Chi tiết</button></td>
+                        </tr>
+                        <tr>
+                          <td>#TX002</td>
+                          <td>Trần Thị B</td>
+                          <td>299,000đ</td>
+                          <td>Ví điện tử</td>
+                          <td><span class="status warning">Chờ xử lý</span></td>
+                          <td><button class="action-btn">Xử lý</button></td>
+                        </tr>
+                        <tr>
+                          <td>#TX003</td>
+                          <td>Lê Văn C</td>
+                          <td>89,000đ</td>
+                          <td>Thẻ tín dụng</td>
+                          <td><span class="status danger">Thất bại</span></td>
+                          <td><button class="action-btn">Hoàn tiền</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div>
+                    <div class="card" style="margin-bottom: 20px;">
+                      <h3>Thống kê trạm</h3>
+                      <div style="margin: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                          <span>Trạm hoạt động:</span>
+                          <span style="color: var(--ok);">24/26</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                          <span>Trạm bảo trì:</span>
+                          <span style="color: var(--warn);">2/26</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                          <span>Pin sẵn sàng:</span>
+                          <span style="color: var(--ok);">342/400</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-primary" style="width: 100%;">Quản lý trạm</button>
+                    </div>
+
+                    <div class="card">
+                      <h3>Hành động nhanh</h3>
+                      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                        <button class="btn">📊 Xuất báo cáo</button>
+                        <button class="btn">👥 Quản lý người dùng</button>
+                        <button class="btn">⚙️ Cài đặt hệ thống</button>
+                        <button class="btn">📋 Xem logs</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Global auth instance
+    const auth = new AuthSystem();
+
+    // Map functionality
+    let map;
+    const stations = [
+      { name: "Trạm Bùi Thị Xuân", lat: 10.7769, lng: 106.7009, area: "Quận 1, TP.HCM", status: "active", pins: 8 },
+      { name: "Trạm Cầu Giấy", lat: 21.0285, lng: 105.8542, area: "Cầu Giấy, Hà Nội", status: "active", pins: 12 },
+      { name: "Trạm Hải Châu", lat: 16.0678, lng: 108.2208, area: "Hải Châu, Đà Nẵng", status: "active", pins: 6 },
+      { name: "Trạm Thủ Đức", lat: 10.8411, lng: 106.8108, area: "TP. Thủ Đức, TP.HCM", status: "active", pins: 15 },
+      { name: "Trạm Long Biên", lat: 21.0467, lng: 105.8917, area: "Long Biên, Hà Nội", status: "maintenance", pins: 0 },
+      { name: "Trạm Sơn Trà", lat: 16.1097, lng: 108.2597, area: "Sơn Trà, Đà Nẵng", status: "active", pins: 9 }
+    ];
+
+    function initMap() {
+      map = L.map('map').setView([16.0678, 108.2208], 6);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      stations.forEach(station => {
+        const color = station.status === 'active' ? 'green' : 'red';
+        const icon = L.divIcon({
+          html: `<div style="background: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [20, 20],
+          className: 'custom-div-icon'
+        });
+
+        const marker = L.marker([station.lat, station.lng], { icon })
+          .addTo(map)
+          .bindPopup(`
+            <strong>${station.name}</strong><br>
+            ${station.area}<br>
+            Pin sẵn sàng: ${station.pins}<br>
+            Trạng thái: ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}
+          `);
+
+        marker.on('click', () => {
+          document.getElementById('selected-station').innerHTML = `
+            <h3>${station.name}</h3>
+            <p class="muted">${station.area}</p>
+            <p>Pin sẵn sàng: <strong>${station.pins}</strong></p>
+            <p>Trạng thái: <span class="status ${station.status === 'active' ? 'success' : 'danger'}">${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}</span></p>
+            <button class="btn btn-primary" onclick="showLogin()">Đặt lịch đổi pin</button>
+          `;
+        });
+      });
+    }
+
+    // Modal functions
+    function showLogin() {
+      document.getElementById('loginModal').style.display = 'block';
+      closeModal('registerModal');
+    }
+
+    function showRegister() {
+      document.getElementById('registerModal').style.display = 'block';
+      closeModal('loginModal');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    function quickLogin(role, username, password) {
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = password;
+      document.getElementById('userRole').value = role;
+      handleLogin(new Event('submit'));
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('userRole').value;
+
+      if (auth.login(username, password, role)) {
+        showToast('Đăng nhập thành công!', 'success');
+        closeModal('loginModal');
+      } else {
+        showToast('Thông tin đăng nhập không đúng!', 'error');
+      }
+      return false;
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+      showToast('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+      closeModal('registerModal');
+      showLogin();
+      return false;
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    function scrollToId(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function showContact() {
+      scrollToId('contact');
+    }
+
+    function bookBatterySwap(event) {
+      event.preventDefault();
+      showToast('Đặt lịch thành công! Chúng tôi sẽ xác nhận qua SMS.', 'success');
+      return false;
+    }
+
+    function findNearestStation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          map.setView([lat, lng], 12);
+          showToast('Đã tìm trạm gần nhất dựa trên vị trí của bạn', 'success');
+        });
+      } else {
+        showToast('Trình duyệt không hỗ trợ định vị', 'warning');
+      }
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+      initMap();
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+
+    // User Dashboard Functions
+    function showUserTab(tabName) {
+      // Remove active class from all tabs and contents
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      // Add active class to selected tab and content
+      event.target.classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+      
+      // Initialize map if map tab is selected
+      if (tabName === 'map') {
+        setTimeout(() => initUserMap(), 100);
+      }
+    }
+
+    function loadStationPosts() {
+      const stationSelect = document.getElementById('station-select');
+      const postSelect = document.getElementById('post-select');
+      const selectedStation = stationSelect.value;
+      
+      postSelect.innerHTML = '<option value="">Chọn trụ đổi pin</option>';
+      
+      if (selectedStation) {
+        postSelect.disabled = false;
+        
+        // Demo data for different stations
+        const stationPosts = {
+          station1: [
+            { id: 'A1', status: 'available', name: 'Trụ A1' },
+            { id: 'A2', status: 'occupied', name: 'Trụ A2 (Đang sử dụng)' },
+            { id: 'A3', status: 'available', name: 'Trụ A3' },
+            { id: 'B1', status: 'maintenance', name: 'Trụ B1 (Bảo trì)' },
+            { id: 'B2', status: 'available', name: 'Trụ B2' }
+          ],
+          station2: [
+            { id: 'C1', status: 'available', name: 'Trụ C1' },
+            { id: 'C2', status: 'available', name: 'Trụ C2' },
+            { id: 'D1', status: 'occupied', name: 'Trụ D1 (Đang sử dụng)' },
+            { id: 'D2', status: 'available', name: 'Trụ D2' }
+          ],
+          station3: [
+            { id: 'E1', status: 'available', name: 'Trụ E1' },
+            { id: 'E2', status: 'available', name: 'Trụ E2' },
+            { id: 'F1', status: 'available', name: 'Trụ F1' },
+            { id: 'F2', status: 'occupied', name: 'Trụ F2 (Đang sử dụng)' },
+            { id: 'F3', status: 'available', name: 'Trụ F3' }
+          ]
+        };
+        
+        const posts = stationPosts[selectedStation] || [];
+        posts.forEach(post => {
+          const option = document.createElement('option');
+          option.value = post.id;
+          option.textContent = post.name;
+          option.disabled = post.status !== 'available';
+          postSelect.appendChild(option);
+        });
+      } else {
+        postSelect.disabled = true;
+      }
+    }
+
+    function filterPaymentHistory() {
+      // Demo filter function - in real app would filter the table
+      showToast('Đã áp dụng bộ lọc', 'success');
+    }
+
+    function viewPaymentDetail(paymentId) {
+      showToast(`Xem chi tiết giao dịch ${paymentId}`, 'success');
+    }
+
+    function selectPlan(planType) {
+      if (planType === 'basic') {
+        showToast('Bạn đã chuyển sang thanh toán theo lượt', 'success');
+      }
+    }
+
+    function extendPlan(planType) {
+      showToast('Đã gia hạn gói Premium thêm 1 tháng', 'success');
+    }
+
+    function upgradePlan(planType) {
+      showToast('Yêu cầu nâng cấp lên Enterprise đã được gửi', 'success');
+    }
+
+    function updateTopUpAmount() {
+      const select = document.getElementById('top-up-amount');
+      const customInput = document.getElementById('custom-amount');
+      
+      if (select.value === 'custom') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+      }
+    }
+
+    function processTopUp() {
+      const amount = document.getElementById('top-up-amount').value;
+      const customAmount = document.getElementById('custom-amount').value;
+      const finalAmount = amount === 'custom' ? customAmount : amount;
+      
+      if (finalAmount) {
+        showToast(`Đang xử lý nạp ${parseInt(finalAmount).toLocaleString()}đ...`, 'success');
+        // In real app, would redirect to payment gateway
+      } else {
+        showToast('Vui lòng chọn số tiền cần nạp', 'warning');
+      }
+    }
+
+    let userMap;
+    function initUserMap() {
+      if (userMap) return; // Don't reinitialize if already exists
+      
+      userMap = L.map('user-map').setView([16.0678, 108.2208], 6);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(userMap);
+
+      stations.forEach((station, index) => {
+        const color = station.status === 'active' ? '#19c37d' : '#ff5573';
+        const icon = L.divIcon({
+          html: `<div style="background: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${station.pins}</div>`,
+          iconSize: [24, 24],
+          className: 'custom-div-icon'
+        });
+
+        const marker = L.marker([station.lat, station.lng], { icon })
+          .addTo(userMap)
+          .bindPopup(`
+            <div style="min-width: 200px;">
+              <strong>${station.name}</strong><br>
+              📍 ${station.area}<br>
+              🔋 ${station.pins} pin sẵn sàng<br>
+              📊 Trạng thái: ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}<br>
+              <button onclick="selectStationForBooking('${station.name}')" style="margin-top: 8px; padding: 4px 8px; background: #4f8cff; border: none; border-radius: 4px; color: white; cursor: pointer;">Đặt lịch tại đây</button>
+            </div>
+          `);
+
+        marker.on('click', () => {
+          updateSelectedStationInfo(station);
+        });
+      });
+    }
+
+    function updateSelectedStationInfo(station) {
+      const infoDiv = document.getElementById('selected-station-info');
+      infoDiv.innerHTML = `
+        <h4>${station.name}</h4>
+        <p><strong>📍 Địa chỉ:</strong> ${station.area}</p>
+        <p><strong>🔋 Pin sẵn sàng:</strong> ${station.pins}</p>
+        <p><strong>📊 Trạng thái:</strong> <span class="status ${station.status === 'active' ? 'success' : 'danger'}">${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}</span></p>
+        <div style="margin-top: 12px;">
+          <button class="btn btn-primary" onclick="selectStationForBooking('${station.name}')" style="width: 100%;">Đặt lịch tại đây</button>
+        </div>
+      `;
+    }
+
+    function selectStationForBooking(stationName) {
+      // Switch to battery-swap tab and pre-select station
+      showUserTab('battery-swap');
+      
+      // Find and select the station in dropdown
+      const stationSelect = document.getElementById('station-select');
+      for (let option of stationSelect.options) {
+        if (option.text.includes(stationName)) {
+          stationSelect.value = option.value;
+          loadStationPosts();
+          break;
+        }
+      }
+      
+      showToast(`Đã chọn ${stationName} để đặt lịch`, 'success');
+    }
+
+    function findMyLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          if (userMap) {
+            userMap.setView([lat, lng], 12);
+            
+            // Add user location marker
+            L.marker([lat, lng], {
+              icon: L.divIcon({
+                html: '<div style="background: #4f8cff; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                iconSize: [16, 16],
+                className: 'user-location-marker'
+              })
+            }).addTo(userMap).bindPopup('Vị trí của bạn');
+          }
+          
+          showToast('Đã định vị thành công', 'success');
+        }, (error) => {
+          showToast('Không thể xác định vị trí', 'warning');
+        });
+      } else {
+        showToast('Trình duyệt không hỗ trợ định vị', 'warning');
+      }
+    }
+
+    function filterActiveStations() {
+      showToast('Hiển thị chỉ các trạm đang hoạt động', 'success');
+      // In real app, would filter map markers
+    }
+
+    function showAllStations() {
+      showToast('Hiển thị tất cả các trạm', 'success');
+      // In real app, would show all markers
+    }
+
+    function searchStations() {
+      const searchTerm = document.getElementById('station-search').value.toLowerCase();
+      showToast(`Tìm kiếm: "${searchTerm}"`, 'success');
+      // In real app, would filter stations list and map
+    }
+
+    function filterByDistance() {
+      showToast('Đã áp dụng bộ lọc khoảng cách', 'success');
+      // In real app, would filter by distance from user location
+    }
+
+    function focusStation(stationId) {
+      const station = stations.find(s => s.name.includes('Bùi Thị Xuân') && stationId === 'station1') ||
+                    stations.find(s => s.name.includes('Cầu Giấy') && stationId === 'station2');
+      
+      if (station && userMap) {
+        userMap.setView([station.lat, station.lng], 15);
+        updateSelectedStationInfo(station);
+        showToast(`Đã focus vào ${station.name}`, 'success');
+      }
+    }
+  </script>
+</body>
+</html>
