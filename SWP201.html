@@ -1710,12 +1710,12 @@
         } else if (slot.status === 'charging') {
           const slotElement = document.createElement('div');
           if (slot.battery === '100%') {
-            // Charging complete - can be picked up
-            slotElement.className = 'slot-item charging';
+            // Charging complete - can be picked up, show as green like has-battery
+            slotElement.className = 'slot-item has-battery';
             slotElement.onclick = () => selectPickupSlot(slot);
             slotElement.innerHTML = `
               <div>Slot ${slot.id}</div>
-              <div style="font-size: 10px;">⚡${slot.battery}</div>
+              <div style="font-size: 10px;">${slot.battery}</div>
               <div style="font-size: 9px; color: var(--ok);">Sẵn sàng</div>
             `;
           } else {
