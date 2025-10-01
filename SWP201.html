@@ -1878,6 +1878,9 @@
     }
     
     function finishSwap() {
+      // Add new swap record to history
+      addSwapHistory();
+      
       // Reset form
       document.getElementById('station-select').value = '';
       hideSelectedPostInfo();
@@ -1896,6 +1899,100 @@
       
       updateSwapButton();
       showToast('Cảm ơn bạn đã sử dụng dịch vụ!', 'success');
+    }
+
+    function addSwapHistory() {
+      const now = new Date();
+      const timeString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      
+      const stationName = document.getElementById('station-select').selectedOptions[0].text.split('(')[0].trim();
+      const stationShort = stationName.replace('Trạm ', '').substring(0, 8);
+      
+      // Add to battery swap history table
+      const historyTable = document.querySelector('#battery-swap-tab table tbody');
+      if (historyTable) {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+          <td>${timeString}</td>
+          <td>${stationShort}/${selectedPost.name.replace('Trụ ', '')}</td>
+          <td>0đ (Premium)</td>
+          <td><span class="status success">Thành công</span></td>
+        `;
+        historyTable.insertBefore(newRow, historyTable.firstChild);
+        
+        // Remove last row if more than 5 records
+        if (historyTable.children.length > 5) {
+          historyTable.removeChild(historyTable.lastChild);
+        }
+      }
+      
+      // Add to payment history if in that tab
+      const paymentHistoryTable = document.getElementById('payment-history-table');
+      if (paymentHistoryTable) {
+        const paymentId = '#PAY' + String(Date.now()).slice(-3);
+        const newPaymentRow = document.createElement('tr');
+        newPaymentRow.innerHTML = `
+          <td>${paymentId}</td>
+          <td>${timeString}</td>
+          <td>Đổi pin</td>
+          <td>0đ</td>
+          <td>Gói Premium</td>
+          <td><span class="status success">Thành công</span></td>
+          <td><button class="action-btn" onclick="viewPaymentDetail('${paymentId}')">Chi tiết</button></td>
+        `;
+        paymentHistoryTable.insertBefore(newPaymentRow, paymentHistoryTable.firstChild);
+        
+        // Remove last row if more than 8 records
+        if (paymentHistoryTable.children.length > 8) {
+          paymentHistoryTable.removeChild(paymentHistoryTable.lastChild);
+        }
+      }
+      
+      // Add to overview recent activity
+      const overviewTable = document.querySelector('#overview-tab table tbody');
+      if (overviewTable) {
+        const newActivityRow = document.createElement('tr');
+        newActivityRow.innerHTML = `
+          <td>${timeString}</td>
+          <td>Đổi pin tại ${stationShort}</td>
+          <td><span class="status success">Hoàn thành</span></td>
+        `;
+        overviewTable.insertBefore(newActivityRow, overviewTable.firstChild);
+        
+        // Remove last row if more than 3 records
+        if (overviewTable.children.length > 3) {
+          overviewTable.removeChild(overviewTable.lastChild);
+        }
+      }
+      
+      // Update stats - decrease remaining swaps for premium plan
+      updatePremiumPlanStats();
+    }
+    
+    function updatePremiumPlanStats() {
+      // Update plan status in battery swap tab
+      const planStatus = document.getElementById('plan-status');
+      if (planStatus) {
+        const currentRemaining = 4; // This would come from user data in real app
+        const newRemaining = Math.max(0, currentRemaining - 1);
+        planStatus.innerHTML = `
+          <div style="background: rgba(25,195,125,0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(25,195,125,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span>📦 Gói Premium:</span><br>
+                <span class="muted">Còn lại ${newRemaining}/8 lượt tháng này</span>
+              </div>
+              <span style="font-size: 20px; font-weight: 700; color: var(--ok);">MIỄN PHÍ</span>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Update overview stats
+      const swapCountStat = document.querySelector('#overview-tab .stat-card .stat-value');
+      if (swapCountStat && swapCountStat.textContent === '12') {
+        swapCountStat.textContent = '13';
+      }
     }
 
     function filterPaymentHistory() {
