@@ -1700,11 +1700,19 @@
       post.slots.forEach(slot => {
         if (slot.status === 'has-battery') {
           const slotElement = document.createElement('div');
-          slotElement.className = 'slot-item has-battery';
-          slotElement.onclick = () => selectPickupSlot(slot);
+          // Only show green if battery is 100%, otherwise show as charging
+          if (slot.battery === '100%') {
+            slotElement.className = 'slot-item has-battery';
+            slotElement.onclick = () => selectPickupSlot(slot);
+          } else {
+            slotElement.className = 'slot-item charging';
+            slotElement.style.cursor = 'not-allowed';
+            slotElement.style.opacity = '0.8';
+          }
           slotElement.innerHTML = `
             <div>Slot ${slot.id}</div>
             <div style="font-size: 10px;">${slot.battery}</div>
+            ${slot.battery !== '100%' ? '<div style="font-size: 9px; color: var(--warn);">Chưa đủ</div>' : ''}
           `;
           availableSlots.appendChild(slotElement);
         } else if (slot.status === 'charging') {
@@ -1744,9 +1752,9 @@
     }
     
     function selectPickupSlot(slot) {
-      // Only allow selection if battery is ready
-      if (slot.status === 'charging' && slot.battery !== '100%') {
-        showToast(`Slot ${slot.id} đang sạc ${slot.battery}, vui lòng đợi đạt 100%`, 'warning');
+      // Only allow selection if battery is 100%
+      if (slot.battery !== '100%') {
+        showToast(`Slot ${slot.id} có pin ${slot.battery}, chỉ có thể lấy pin 100%`, 'warning');
         return;
       }
       
