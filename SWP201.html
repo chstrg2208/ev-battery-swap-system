@@ -598,7 +598,7 @@
               <div class="container">
                 <div class="nav-tabs">
                   <button class="nav-tab active" onclick="showUserTab('overview')">📊 Tổng quan</button>
-                  <button class="nav-tab" onclick="showUserTab('battery-swap')">🔋 Đổi pin</button>
+                  <button class="nav-tab" onclick="showUserTab('battery-swap')">🔋 Đổi pin ngay</button>
                   <button class="nav-tab" onclick="showUserTab('payment-history')">💳 Lịch sử thanh toán</button>
                   <button class="nav-tab" onclick="showUserTab('plans')">📦 Gói dịch vụ</button>
                   <button class="nav-tab" onclick="showUserTab('map')">🗺️ Bản đồ trạm</button>
@@ -684,62 +684,88 @@
                 <div id="battery-swap-tab" class="tab-content">
                   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
                     <div class="card">
-                      <h3>🔋 Đặt lịch đổi pin</h3>
-                      <form onsubmit="return bookBatterySwap(event)">
-                        <div class="form-group">
-                          <label>Chọn trạm</label>
-                          <select id="station-select" required onchange="loadStationPosts()">
-                            <option value="">Chọn trạm đổi pin</option>
-                            <option value="station1">Trạm Bùi Thị Xuân (8 pin sẵn sàng)</option>
-                            <option value="station2">Trạm Cầu Giấy (12 pin sẵn sàng)</option>
-                            <option value="station3">Trạm Thủ Đức (15 pin sẵn sàng)</option>
-                            <option value="station4">Trạm Hải Châu (6 pin sẵn sàng)</option>
-                          </select>
-                        </div>
+                      <h3>🔋 Đổi pin ngay</h3>
+                      <p class="muted">Chọn trạm và trụ để đổi pin tự động qua hệ thống IoT</p>
+                      
+                      <div class="form-group">
+                        <label>🏢 Chọn trạm đổi pin</label>
+                        <select id="station-select" required onchange="loadStationPosts()">
+                          <option value="">Chọn trạm đổi pin</option>
+                          <option value="station1">Trạm Bùi Thị Xuân (8 pin sẵn sàng)</option>
+                          <option value="station2">Trạm Cầu Giấy (12 pin sẵn sàng)</option>
+                          <option value="station3">Trạm Thủ Đức (15 pin sẵn sàng)</option>
+                          <option value="station4">Trạm Hải Châu (6 pin sẵn sàng)</option>
+                        </select>
+                      </div>
 
-                        <div class="form-group">
-                          <label>Chọn trụ đổi pin</label>
-                          <select id="post-select" required disabled>
-                            <option value="">Vui lòng chọn trạm trước</option>
-                          </select>
+                      <div class="form-group">
+                        <label>🔌 Chọn trụ đổi pin</label>
+                        <div id="post-grid" style="display: none;">
+                          <div class="post-grid" id="posts-container">
+                            <!-- Posts will be loaded here -->
+                          </div>
                         </div>
-
-                        <div class="form-group">
-                          <label>Loại pin</label>
-                          <select required>
-                            <option value="">Chọn loại pin</option>
-                            <option value="72v20ah">LiFePO4 72V 20Ah (+0đ)</option>
-                            <option value="72v32ah">LiFePO4 72V 32Ah (+50,000đ)</option>
-                            <option value="60v20ah">LiFePO4 60V 20Ah (-10,000đ)</option>
-                          </select>
+                        <div id="no-station" class="muted" style="text-align: center; padding: 20px;">
+                          Vui lòng chọn trạm để xem các trụ đổi pin
                         </div>
+                      </div>
 
-                        <div class="form-group">
-                          <label>Thời gian</label>
-                          <input type="datetime-local" required>
+                      <div class="form-group" id="selected-post-info" style="display: none;">
+                        <div style="background: rgba(79,140,255,0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(79,140,255,0.3);">
+                          <h4 style="margin: 0 0 8px 0; color: var(--brand);">📍 Trụ đã chọn</h4>
+                          <div id="post-details"></div>
                         </div>
+                      </div>
 
-                        <div class="form-group">
-                          <label>Ghi chú</label>
-                          <textarea placeholder="Thông tin thêm về xe, yêu cầu đặc biệt..." style="min-height: 80px;"></textarea>
+                      <div class="form-group">
+                        <label>💰 Phương thức thanh toán</label>
+                        <select id="payment-method" required>
+                          <option value="">Chọn phương thức</option>
+                          <option value="wallet">💳 Ví điện tử (Số dư: 156,000đ)</option>
+                          <option value="momo">📱 Ví MoMo</option>
+                          <option value="zalopay">💙 ZaloPay</option>
+                          <option value="vnpay">🏦 VNPay</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <div style="background: rgba(25,195,125,0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(25,195,125,0.3);">
+                          <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>💵 Chi phí đổi pin:</span>
+                            <span style="font-size: 20px; font-weight: 700; color: var(--ok);" id="swap-cost">89,000đ</span>
+                          </div>
                         </div>
+                      </div>
 
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Đặt lịch đổi pin</button>
-                      </form>
+                      <button type="button" class="btn btn-primary" style="width: 100%;" onclick="startBatterySwap()" id="swap-btn" disabled>
+                        🚀 Bắt đầu đổi pin
+                      </button>
                     </div>
 
                     <div class="card">
-                      <h3>📋 Lịch sử đổi pin</h3>
-                      <div class="table-filters" style="margin-bottom: 16px;">
-                        <select class="filter-select">
-                          <option value="all">Tất cả</option>
-                          <option value="success">Thành công</option>
-                          <option value="pending">Đang xử lý</option>
-                          <option value="cancelled">Đã hủy</option>
-                        </select>
+                      <h3>� Trạng thái đổi pin</h3>
+                      <div id="swap-status" style="text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⚡</div>
+                        <h4>Sẵn sàng đổi pin</h4>
+                        <p class="muted">Chọn trạm và trụ để bắt đầu</p>
                       </div>
-                      <div style="max-height: 400px; overflow-y: auto;">
-                        <table>
+
+                      <div id="swap-progress" style="display: none;">
+                        <div style="text-align: center; margin: 20px 0;">
+                          <div style="width: 80px; height: 80px; border: 4px solid rgba(79,140,255,0.3); border-top: 4px solid var(--brand); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                          <style>
+                            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                          </style>
+                        </div>
+                        <div id="progress-text" style="text-align: center;">
+                          <h4>Đang kết nối với trụ pin...</h4>
+                          <p class="muted">Vui lòng đợi trong giây lát</p>
+                        </div>
+                      </div>
+
+                      <h3 style="margin-top: 24px;">🕒 Lịch sử đổi pin gần đây</h3>
+                      <div style="max-height: 300px; overflow-y: auto;">
+                        <table style="font-size: 13px;">
                           <thead>
                             <tr>
                               <th>Ngày</th>
@@ -751,26 +777,20 @@
                           <tbody>
                             <tr>
                               <td>15/10 14:30</td>
-                              <td>BT Xuân/Trụ A2</td>
+                              <td>BT Xuân/A2</td>
                               <td>89,000đ</td>
                               <td><span class="status success">Thành công</span></td>
                             </tr>
                             <tr>
                               <td>12/10 09:15</td>
-                              <td>Cầu Giấy/Trụ B1</td>
+                              <td>Cầu Giấy/B1</td>
                               <td>89,000đ</td>
                               <td><span class="status success">Thành công</span></td>
                             </tr>
                             <tr>
                               <td>08/10 16:45</td>
-                              <td>Thủ Đức/Trụ C3</td>
+                              <td>Thủ Đức/C3</td>
                               <td>0đ (Premium)</td>
-                              <td><span class="status success">Thành công</span></td>
-                            </tr>
-                            <tr>
-                              <td>05/10 11:20</td>
-                              <td>Hải Châu/Trụ D2</td>
-                              <td>139,000đ</td>
                               <td><span class="status success">Thành công</span></td>
                             </tr>
                           </tbody>
@@ -1334,7 +1354,7 @@
             <p class="muted">${station.area}</p>
             <p>Pin sẵn sàng: <strong>${station.pins}</strong></p>
             <p>Trạng thái: <span class="status ${station.status === 'active' ? 'success' : 'danger'}">${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}</span></p>
-            <button class="btn btn-primary" onclick="showLogin()">Đặt lịch đổi pin</button>
+            <button class="btn btn-primary" onclick="showLogin()">Đổi pin ngay</button>
           `;
         });
       });
@@ -1403,12 +1423,6 @@
       scrollToId('contact');
     }
 
-    function bookBatterySwap(event) {
-      event.preventDefault();
-      showToast('Đặt lịch thành công! Chúng tôi sẽ xác nhận qua SMS.', 'success');
-      return false;
-    }
-
     function findNearestStation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -1452,50 +1466,247 @@
 
     function loadStationPosts() {
       const stationSelect = document.getElementById('station-select');
-      const postSelect = document.getElementById('post-select');
+      const postsContainer = document.getElementById('posts-container');
+      const postGrid = document.getElementById('post-grid');
+      const noStation = document.getElementById('no-station');
       const selectedStation = stationSelect.value;
       
-      postSelect.innerHTML = '<option value="">Chọn trụ đổi pin</option>';
-      
       if (selectedStation) {
-        postSelect.disabled = false;
+        postGrid.style.display = 'block';
+        noStation.style.display = 'none';
         
         // Demo data for different stations
         const stationPosts = {
           station1: [
-            { id: 'A1', status: 'available', name: 'Trụ A1' },
-            { id: 'A2', status: 'occupied', name: 'Trụ A2 (Đang sử dụng)' },
-            { id: 'A3', status: 'available', name: 'Trụ A3' },
-            { id: 'B1', status: 'maintenance', name: 'Trụ B1 (Bảo trì)' },
-            { id: 'B2', status: 'available', name: 'Trụ B2' }
+            { id: 'A1', status: 'available', name: 'Trụ A1', battery: '100%' },
+            { id: 'A2', status: 'occupied', name: 'Trụ A2', battery: '85%' },
+            { id: 'A3', status: 'available', name: 'Trụ A3', battery: '98%' },
+            { id: 'B1', status: 'maintenance', name: 'Trụ B1', battery: '0%' },
+            { id: 'B2', status: 'available', name: 'Trụ B2', battery: '100%' }
           ],
           station2: [
-            { id: 'C1', status: 'available', name: 'Trụ C1' },
-            { id: 'C2', status: 'available', name: 'Trụ C2' },
-            { id: 'D1', status: 'occupied', name: 'Trụ D1 (Đang sử dụng)' },
-            { id: 'D2', status: 'available', name: 'Trụ D2' }
+            { id: 'C1', status: 'available', name: 'Trụ C1', battery: '95%' },
+            { id: 'C2', status: 'available', name: 'Trụ C2', battery: '100%' },
+            { id: 'D1', status: 'occupied', name: 'Trụ D1', battery: '90%' },
+            { id: 'D2', status: 'available', name: 'Trụ D2', battery: '100%' },
+            { id: 'D3', status: 'available', name: 'Trụ D3', battery: '92%' }
           ],
           station3: [
-            { id: 'E1', status: 'available', name: 'Trụ E1' },
-            { id: 'E2', status: 'available', name: 'Trụ E2' },
-            { id: 'F1', status: 'available', name: 'Trụ F1' },
-            { id: 'F2', status: 'occupied', name: 'Trụ F2 (Đang sử dụng)' },
-            { id: 'F3', status: 'available', name: 'Trụ F3' }
+            { id: 'E1', status: 'available', name: 'Trụ E1', battery: '100%' },
+            { id: 'E2', status: 'available', name: 'Trụ E2', battery: '88%' },
+            { id: 'F1', status: 'available', name: 'Trụ F1', battery: '100%' },
+            { id: 'F2', status: 'occupied', name: 'Trụ F2', battery: '75%' },
+            { id: 'F3', status: 'available', name: 'Trụ F3', battery: '96%' }
+          ],
+          station4: [
+            { id: 'G1', status: 'available', name: 'Trụ G1', battery: '100%' },
+            { id: 'G2', status: 'maintenance', name: 'Trụ G2', battery: '0%' },
+            { id: 'H1', status: 'available', name: 'Trụ H1', battery: '94%' }
           ]
         };
         
         const posts = stationPosts[selectedStation] || [];
+        postsContainer.innerHTML = '';
+        
         posts.forEach(post => {
-          const option = document.createElement('option');
-          option.value = post.id;
-          option.textContent = post.name;
-          option.disabled = post.status !== 'available';
-          postSelect.appendChild(option);
+          const postElement = document.createElement('div');
+          postElement.className = `post-item ${post.status}`;
+          postElement.onclick = () => selectPost(post);
+          
+          let statusIcon, statusText, statusClass;
+          switch(post.status) {
+            case 'available':
+              statusIcon = '🟢';
+              statusText = 'Sẵn sàng';
+              statusClass = 'success';
+              break;
+            case 'occupied':
+              statusIcon = '🔴';
+              statusText = 'Đang sử dụng';
+              statusClass = 'danger';
+              break;
+            case 'maintenance':
+              statusIcon = '🟡';
+              statusText = 'Bảo trì';
+              statusClass = 'warning';
+              break;
+          }
+          
+          postElement.innerHTML = `
+            <div style="font-weight: 600; margin-bottom: 4px;">${post.name}</div>
+            <div style="font-size: 12px; margin-bottom: 4px;">${statusIcon} ${statusText}</div>
+            <div style="font-size: 11px; color: var(--muted);">🔋 ${post.battery}</div>
+          `;
+          
+          if (post.status !== 'available') {
+            postElement.style.cursor = 'not-allowed';
+            postElement.onclick = null;
+          }
+          
+          postsContainer.appendChild(postElement);
         });
       } else {
-        postSelect.disabled = true;
+        postGrid.style.display = 'none';
+        noStation.style.display = 'block';
+        hideSelectedPostInfo();
+      }
+      
+      updateSwapButton();
+    }
+
+    let selectedPost = null;
+    
+    function selectPost(post) {
+      if (post.status !== 'available') return;
+      
+      // Remove previous selection
+      document.querySelectorAll('.post-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+      
+      // Add selection to clicked post
+      event.target.classList.add('selected');
+      selectedPost = post;
+      
+      showSelectedPostInfo(post);
+      updateSwapButton();
+    }
+    
+    function showSelectedPostInfo(post) {
+      const selectedPostInfo = document.getElementById('selected-post-info');
+      const postDetails = document.getElementById('post-details');
+      
+      postDetails.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>${post.name}</strong><br>
+            <span class="muted">🔋 Pin: ${post.battery} • 🟢 Sẵn sàng</span>
+          </div>
+          <div style="font-size: 24px;">⚡</div>
+        </div>
+      `;
+      
+      selectedPostInfo.style.display = 'block';
+    }
+    
+    function hideSelectedPostInfo() {
+      document.getElementById('selected-post-info').style.display = 'none';
+      selectedPost = null;
+    }
+    
+    function updateSwapButton() {
+      const swapBtn = document.getElementById('swap-btn');
+      const stationSelect = document.getElementById('station-select');
+      const paymentMethod = document.getElementById('payment-method');
+      
+      const canSwap = stationSelect.value && selectedPost && paymentMethod.value;
+      
+      swapBtn.disabled = !canSwap;
+      
+      if (canSwap) {
+        swapBtn.textContent = '🚀 Bắt đầu đổi pin';
+        swapBtn.style.opacity = '1';
+      } else {
+        swapBtn.textContent = '🚀 Chọn trạm và trụ để tiếp tục';
+        swapBtn.style.opacity = '0.6';
       }
     }
+    
+    function startBatterySwap() {
+      if (!selectedPost) {
+        showToast('Vui lòng chọn trụ đổi pin', 'warning');
+        return;
+      }
+      
+      const stationName = document.getElementById('station-select').selectedOptions[0].text;
+      const paymentMethod = document.getElementById('payment-method').selectedOptions[0].text;
+      
+      // Show progress
+      document.getElementById('swap-status').style.display = 'none';
+      document.getElementById('swap-progress').style.display = 'block';
+      
+      // Simulate IoT process
+      simulateSwapProcess(stationName);
+    }
+    
+    function simulateSwapProcess(stationName) {
+      const progressText = document.getElementById('progress-text');
+      const steps = [
+        { text: 'Đang kết nối với trụ pin...', duration: 1500 },
+        { text: 'Xác thực thanh toán...', duration: 1000 },
+        { text: 'Gửi lệnh mở trụ pin...', duration: 1500 },
+        { text: 'Trụ pin đang mở...', duration: 2000 },
+        { text: 'Pin đã sẵn sàng để lấy!', duration: 1000 }
+      ];
+      
+      let currentStep = 0;
+      
+      function nextStep() {
+        if (currentStep < steps.length) {
+          const step = steps[currentStep];
+          progressText.innerHTML = `
+            <h4>${step.text}</h4>
+            <p class="muted">Bước ${currentStep + 1}/${steps.length}</p>
+          `;
+          
+          setTimeout(() => {
+            currentStep++;
+            if (currentStep < steps.length) {
+              nextStep();
+            } else {
+              completeSwap(stationName);
+            }
+          }, step.duration);
+        }
+      }
+      
+      nextStep();
+    }
+    
+    function completeSwap(stationName) {
+      // Hide progress
+      document.getElementById('swap-progress').style.display = 'none';
+      
+      // Show success
+      document.getElementById('swap-status').innerHTML = `
+        <div style="font-size: 48px; margin-bottom: 16px; color: var(--ok);">✅</div>
+        <h4 style="color: var(--ok);">Đổi pin thành công!</h4>
+        <p class="muted">Pin đã được lấy từ ${selectedPost.name}</p>
+        <p class="muted">Vui lòng đặt pin cũ vào trụ</p>
+        <button class="btn btn-primary" onclick="finishSwap()" style="margin-top: 12px;">Hoàn tất đổi pin</button>
+      `;
+      document.getElementById('swap-status').style.display = 'block';
+      
+      showToast('🎉 Pin mới đã sẵn sàng! Vui lòng lấy pin và đặt pin cũ vào trụ.', 'success');
+    }
+    
+    function finishSwap() {
+      // Reset form
+      document.getElementById('station-select').value = '';
+      document.getElementById('payment-method').value = '';
+      hideSelectedPostInfo();
+      document.getElementById('post-grid').style.display = 'none';
+      document.getElementById('no-station').style.display = 'block';
+      selectedPost = null;
+      
+      // Reset status
+      document.getElementById('swap-status').innerHTML = `
+        <div style="font-size: 48px; margin-bottom: 16px;">⚡</div>
+        <h4>Sẵn sàng đổi pin</h4>
+        <p class="muted">Chọn trạm và trụ để bắt đầu</p>
+      `;
+      
+      updateSwapButton();
+      showToast('Cảm ơn bạn đã sử dụng dịch vụ!', 'success');
+    }
+
+    // Update payment method change handler
+    document.addEventListener('DOMContentLoaded', function() {
+      const paymentSelect = document.getElementById('payment-method');
+      if (paymentSelect) {
+        paymentSelect.addEventListener('change', updateSwapButton);
+      }
+    });
 
     function filterPaymentHistory() {
       // Demo filter function - in real app would filter the table
@@ -1571,7 +1782,7 @@
               📍 ${station.area}<br>
               🔋 ${station.pins} pin sẵn sàng<br>
               📊 Trạng thái: ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}<br>
-              <button onclick="selectStationForBooking('${station.name}')" style="margin-top: 8px; padding: 4px 8px; background: #4f8cff; border: none; border-radius: 4px; color: white; cursor: pointer;">Đặt lịch tại đây</button>
+              <button onclick="selectStationForBooking('${station.name}')" style="margin-top: 8px; padding: 4px 8px; background: #4f8cff; border: none; border-radius: 4px; color: white; cursor: pointer;">Đổi pin tại đây</button>
             </div>
           `);
 
@@ -1589,7 +1800,7 @@
         <p><strong>🔋 Pin sẵn sàng:</strong> ${station.pins}</p>
         <p><strong>📊 Trạng thái:</strong> <span class="status ${station.status === 'active' ? 'success' : 'danger'}">${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}</span></p>
         <div style="margin-top: 12px;">
-          <button class="btn btn-primary" onclick="selectStationForBooking('${station.name}')" style="width: 100%;">Đặt lịch tại đây</button>
+          <button class="btn btn-primary" onclick="selectStationForBooking('${station.name}')" style="width: 100%;">Đổi pin tại đây</button>
         </div>
       `;
     }
@@ -1608,7 +1819,7 @@
         }
       }
       
-      showToast(`Đã chọn ${stationName} để đặt lịch`, 'success');
+      showToast(`Đã chọn ${stationName} để đổi pin`, 'success');
     }
 
     function findMyLocation() {
