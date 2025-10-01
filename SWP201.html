@@ -176,8 +176,8 @@
     .post-item.occupied{border-color:var(--danger);background:rgba(255,85,115,.1);color:var(--danger);cursor:not-allowed}
 
     /* Slot Grid */
-    .slot-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
-    .slot-item{padding:8px 4px;border:1px solid rgba(255,255,255,.1);border-radius:6px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02);font-size:12px}
+    .slot-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:8px}
+    .slot-item{padding:6px 2px;border:1px solid rgba(255,255,255,.1);border-radius:6px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02);font-size:11px}
     .slot-item:hover{border-color:var(--brand);background:rgba(79,140,255,.1)}
     .slot-item.selected{border-color:var(--brand);background:var(--brand);color:#061023}
     .slot-item.has-battery{border-color:var(--ok);background:rgba(25,195,125,.1);color:var(--ok)}
@@ -1486,7 +1486,7 @@
         postGrid.style.display = 'block';
         noStation.style.display = 'none';
         
-        // Demo data for different stations with 5 slots each
+        // Demo data for different stations with 10 slots each
         const stationPosts = {
           station1: [
             { 
@@ -1497,7 +1497,12 @@
                 { id: 2, status: 'has-battery', battery: '95%' },
                 { id: 3, status: 'empty', battery: '0%' },
                 { id: 4, status: 'charging', battery: '75%' },
-                { id: 5, status: 'has-battery', battery: '98%' }
+                { id: 5, status: 'charging', battery: '100%' },
+                { id: 6, status: 'has-battery', battery: '98%' },
+                { id: 7, status: 'empty', battery: '0%' },
+                { id: 8, status: 'charging', battery: '88%' },
+                { id: 9, status: 'has-battery', battery: '100%' },
+                { id: 10, status: 'charging', battery: '100%' }
               ]
             },
             { 
@@ -1506,20 +1511,30 @@
               slots: [
                 { id: 1, status: 'has-battery', battery: '100%' },
                 { id: 2, status: 'empty', battery: '0%' },
-                { id: 3, status: 'has-battery', battery: '92%' },
+                { id: 3, status: 'charging', battery: '92%' },
                 { id: 4, status: 'empty', battery: '0%' },
-                { id: 5, status: 'charging', battery: '85%' }
+                { id: 5, status: 'charging', battery: '85%' },
+                { id: 6, status: 'has-battery', battery: '96%' },
+                { id: 7, status: 'charging', battery: '100%' },
+                { id: 8, status: 'empty', battery: '0%' },
+                { id: 9, status: 'has-battery', battery: '100%' },
+                { id: 10, status: 'charging', battery: '67%' }
               ]
             },
             { 
               id: 'B1', 
               name: 'Trụ B1',
               slots: [
-                { id: 1, status: 'maintenance', battery: '0%' },
-                { id: 2, status: 'maintenance', battery: '0%' },
-                { id: 3, status: 'maintenance', battery: '0%' },
-                { id: 4, status: 'maintenance', battery: '0%' },
-                { id: 5, status: 'maintenance', battery: '0%' }
+                { id: 1, status: 'charging', battery: '45%' },
+                { id: 2, status: 'charging', battery: '100%' },
+                { id: 3, status: 'empty', battery: '0%' },
+                { id: 4, status: 'charging', battery: '68%' },
+                { id: 5, status: 'has-battery', battery: '100%' },
+                { id: 6, status: 'empty', battery: '0%' },
+                { id: 7, status: 'charging', battery: '100%' },
+                { id: 8, status: 'has-battery', battery: '94%' },
+                { id: 9, status: 'charging', battery: '72%' },
+                { id: 10, status: 'empty', battery: '0%' }
               ]
             }
           ],
@@ -1529,21 +1544,67 @@
               name: 'Trụ C1',
               slots: [
                 { id: 1, status: 'has-battery', battery: '100%' },
-                { id: 2, status: 'has-battery', battery: '88%' },
+                { id: 2, status: 'charging', battery: '88%' },
                 { id: 3, status: 'has-battery', battery: '96%' },
                 { id: 4, status: 'empty', battery: '0%' },
-                { id: 5, status: 'empty', battery: '0%' }
+                { id: 5, status: 'charging', battery: '100%' },
+                { id: 6, status: 'has-battery', battery: '100%' },
+                { id: 7, status: 'empty', battery: '0%' },
+                { id: 8, status: 'charging', battery: '54%' },
+                { id: 9, status: 'has-battery', battery: '92%' },
+                { id: 10, status: 'charging', battery: '100%' }
               ]
             },
             { 
               id: 'D1', 
               name: 'Trụ D1',
               slots: [
-                { id: 1, status: 'has-battery', battery: '100%' },
+                { id: 1, status: 'charging', battery: '100%' },
                 { id: 2, status: 'charging', battery: '65%' },
                 { id: 3, status: 'has-battery', battery: '100%' },
-                { id: 4, status: 'has-battery', battery: '94%' },
-                { id: 5, status: 'empty', battery: '0%' }
+                { id: 4, status: 'charging', battery: '94%' },
+                { id: 5, status: 'empty', battery: '0%' },
+                { id: 6, status: 'has-battery', battery: '98%' },
+                { id: 7, status: 'charging', battery: '100%' },
+                { id: 8, status: 'empty', battery: '0%' },
+                { id: 9, status: 'has-battery', battery: '100%' },
+                { id: 10, status: 'charging', battery: '79%' }
+              ]
+            }
+          ],
+          station3: [
+            { 
+              id: 'E1', 
+              name: 'Trụ E1',
+              slots: [
+                { id: 1, status: 'has-battery', battery: '100%' },
+                { id: 2, status: 'charging', battery: '78%' },
+                { id: 3, status: 'charging', battery: '100%' },
+                { id: 4, status: 'empty', battery: '0%' },
+                { id: 5, status: 'charging', battery: '56%' },
+                { id: 6, status: 'has-battery', battery: '95%' },
+                { id: 7, status: 'charging', battery: '100%' },
+                { id: 8, status: 'empty', battery: '0%' },
+                { id: 9, status: 'has-battery', battery: '100%' },
+                { id: 10, status: 'charging', battery: '83%' }
+              ]
+            }
+          ],
+          station4: [
+            { 
+              id: 'F1', 
+              name: 'Trụ F1',
+              slots: [
+                { id: 1, status: 'has-battery', battery: '100%' },
+                { id: 2, status: 'charging', battery: '100%' },
+                { id: 3, status: 'empty', battery: '0%' },
+                { id: 4, status: 'has-battery', battery: '97%' },
+                { id: 5, status: 'charging', battery: '62%' },
+                { id: 6, status: 'empty', battery: '0%' },
+                { id: 7, status: 'has-battery', battery: '100%' },
+                { id: 8, status: 'charging', battery: '100%' },
+                { id: 9, status: 'empty', battery: '0%' },
+                { id: 10, status: 'charging', battery: '91%' }
               ]
             }
           ]
@@ -1553,9 +1614,12 @@
         postsContainer.innerHTML = '';
         
         posts.forEach(post => {
-          const availableBatteries = post.slots.filter(slot => slot.status === 'has-battery').length;
+          const readyBatteries = post.slots.filter(slot => 
+            slot.status === 'has-battery' || 
+            (slot.status === 'charging' && slot.battery === '100%')
+          ).length;
           const emptySlots = post.slots.filter(slot => slot.status === 'empty').length;
-          const isAvailable = availableBatteries > 0 && emptySlots > 0;
+          const isAvailable = readyBatteries > 0 && emptySlots > 0;
           
           const postElement = document.createElement('div');
           postElement.className = `post-item ${isAvailable ? '' : 'occupied'}`;
@@ -1564,7 +1628,7 @@
           postElement.innerHTML = `
             <div style="font-weight: 600; margin-bottom: 4px;">${post.name}</div>
             <div style="font-size: 12px; margin-bottom: 4px;">
-              🔋 ${availableBatteries} pin sẵn sàng
+              🔋 ${readyBatteries} pin sẵn sàng
             </div>
             <div style="font-size: 11px; color: var(--muted);">
               � ${emptySlots} slot trống
@@ -1643,6 +1707,29 @@
             <div style="font-size: 10px;">${slot.battery}</div>
           `;
           availableSlots.appendChild(slotElement);
+        } else if (slot.status === 'charging') {
+          const slotElement = document.createElement('div');
+          if (slot.battery === '100%') {
+            // Charging complete - can be picked up
+            slotElement.className = 'slot-item charging';
+            slotElement.onclick = () => selectPickupSlot(slot);
+            slotElement.innerHTML = `
+              <div>Slot ${slot.id}</div>
+              <div style="font-size: 10px;">⚡${slot.battery}</div>
+              <div style="font-size: 9px; color: var(--ok);">Sẵn sàng</div>
+            `;
+          } else {
+            // Still charging - cannot be picked up
+            slotElement.className = 'slot-item charging';
+            slotElement.style.cursor = 'not-allowed';
+            slotElement.style.opacity = '0.6';
+            slotElement.innerHTML = `
+              <div>Slot ${slot.id}</div>
+              <div style="font-size: 10px;">⚡${slot.battery}</div>
+              <div style="font-size: 9px; color: var(--warn);">Đang sạc</div>
+            `;
+          }
+          availableSlots.appendChild(slotElement);
         } else if (slot.status === 'empty') {
           const slotElement = document.createElement('div');
           slotElement.className = 'slot-item empty';
@@ -1657,6 +1744,12 @@
     }
     
     function selectPickupSlot(slot) {
+      // Only allow selection if battery is ready
+      if (slot.status === 'charging' && slot.battery !== '100%') {
+        showToast(`Slot ${slot.id} đang sạc ${slot.battery}, vui lòng đợi đạt 100%`, 'warning');
+        return;
+      }
+      
       // Remove previous selections
       document.querySelectorAll('#available-slots .slot-item').forEach(item => {
         item.classList.remove('selected');
