@@ -517,7 +517,7 @@
           <button class="btn btn-primary" onclick="showLogin()">Truy cập hệ thống</button>
           <button class="btn" onclick="scrollToId('stations')">Xem bản đồ trạm</button>
           <!-- Debug button -->
-          <button class="btn" onclick="testBasicJS()" style="background: red; color: white;">🔍 Test JS</button>
+          <button class="btn" onclick="forceUnblockUI()" style="background: red; color: white; z-index: 99999; position: relative;">� Unblock UI</button>
         </div>
       </div>
     </section>
@@ -2144,6 +2144,42 @@
       alert('JavaScript is working! This means the issue is with the modal elements or CSS.');
       console.log('JavaScript execution is working fine');
       return true;
+    }
+
+    // Force clear all potential blocking elements
+    function forceUnblockUI() {
+      console.log('Force unblocking UI...');
+      
+      // Remove all modals completely
+      const allModals = document.querySelectorAll('.modal, .plan-selection-modal, .vehicle-selection-modal');
+      allModals.forEach(modal => {
+        modal.remove();
+        console.log('Removed modal element');
+      });
+      
+      // Find and remove high z-index elements
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(el => {
+        const style = window.getComputedStyle(el);
+        if (style.position === 'fixed' || style.position === 'absolute') {
+          if (parseInt(style.zIndex) > 50 || style.zIndex === 'auto') {
+            console.log('Removing potential blocker:', el.className, el.id);
+            el.style.display = 'none !important';
+            el.style.visibility = 'hidden !important';
+            el.style.pointerEvents = 'none !important';
+          }
+        }
+      });
+      
+      // Force enable pointer events on buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.style.pointerEvents = 'auto';
+        btn.style.zIndex = '9999';
+        btn.style.position = 'relative';
+      });
+      
+      alert('UI unblocking attempted - try clicking buttons now');
     }
 
     function closeModal(modalId) {
@@ -3853,15 +3889,32 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
         const modal = document.getElementById(modalId);
         if (modal) {
           modal.style.display = 'none';
+          modal.style.visibility = 'hidden';
+          modal.style.opacity = '0';
+          modal.style.pointerEvents = 'none';
           console.log(`Cleared modal: ${modalId}`);
         }
       });
 
       // Also remove any dynamic modals that might exist
-      const dynamicModals = document.querySelectorAll('.plan-selection-modal, .vehicle-selection-modal');
+      const dynamicModals = document.querySelectorAll('.plan-selection-modal, .vehicle-selection-modal, .modal');
       dynamicModals.forEach(modal => {
-        modal.remove();
-        console.log('Removed dynamic modal');
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+        console.log('Cleared dynamic modal');
+      });
+
+      // Check for invisible overlays blocking UI
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(el => {
+        const style = window.getComputedStyle(el);
+        if (style.position === 'fixed' && (style.zIndex > 100 || style.zIndex === 'auto')) {
+          console.log('Found potential blocking element:', el, 'z-index:', style.zIndex);
+          // Temporarily hide it
+          el.style.display = 'none';
+        }
       });
 
       console.log('Page initialization complete - UI should be clickable now');
