@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SWP201 - Hệ thống đổi pin xe điện thông minh</title>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+  
+  <!-- Internal CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+  
+  <style>
+    /* Additional specific styles that couldn't be moved to external CSS */
+    .hero { 
+      text-align: center; 
+      padding: 80px 0; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white; 
+    }
+    
+    .hero h1 { 
+      font-size: 3rem; 
+      margin-bottom: 16px; 
+      font-weight: 700; 
+    }
+    
+    .hero p { 
+      font-size: 1.2rem; 
+      margin-bottom: 32px; 
+      opacity: 0.9; 
+    }
+    
+    .features { 
+      padding: 80px 0; 
+      background: var(--surface); 
+    }
+    
+    .feature-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 32px; 
+      margin-top: 48px; 
+    }
+    
+    .feature { 
+      text-align: center; 
+      padding: 32px; 
+      background: var(--card-bg); 
+      border-radius: 12px; 
+      border: 1px solid var(--border); 
+    }
+    
+    .feature-icon { 
+      font-size: 3rem; 
+      margin-bottom: 16px; 
+      display: block; 
+    }
+    
+    .pricing { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 24px; 
+      margin: 32px 0; 
+    }
+    
+    .pricing .card { 
+      text-align: center; 
+      position: relative; 
+    }
+    
+    .price { 
+      font-size: 2rem; 
+      font-weight: 700; 
+      color: var(--primary); 
+      margin: 16px 0; 
+    }
+    
+    .chip { 
+      background: var(--primary); 
+      color: white; 
+      padding: 4px 8px; 
+      border-radius: 12px; 
+      font-size: 0.75rem; 
+      font-weight: 500; 
+    }
+    
+    ul.clean { 
+      list-style: none; 
+      text-align: left; 
+      margin: 24px 0; 
+    }
+    
+    ul.clean li { 
+      padding: 8px 0; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    
+    .tick { 
+      color: var(--success); 
+      font-weight: bold; 
+    }
+    
+    header { 
+      background: var(--surface); 
+      padding: 16px 0; 
+      border-bottom: 1px solid var(--border); 
+    }
+    
+    nav { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    
+    .logo { 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      color: var(--primary); 
+    }
+    
+    footer { 
+      background: var(--surface); 
+      padding: 48px 0; 
+      border-top: 1px solid var(--border); 
+      margin-top: 80px; 
+    }
+    
+    .footer-content { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+      gap: 32px; 
+    }
+    
+    .footer-section h3 { 
+      margin-bottom: 16px; 
+      color: var(--primary); 
+    }
+    
+    .footer-section a { 
+      color: var(--muted); 
+      text-decoration: none; 
+      display: block; 
+      margin-bottom: 8px; 
+    }
+    
+    .footer-section a:hover { 
+      color: var(--text); 
+    }
+    
+    .empty-state { 
+      text-align: center; 
+      padding: 48px 24px; 
+      color: var(--muted); 
+    }
+    
+    .empty-icon { 
+      font-size: 4rem; 
+      margin-bottom: 16px; 
+      opacity: 0.5; 
+    }
+    
+    .activity-list { 
+      margin-top: 16px; 
+    }
+    
+    .activity-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 12px 0; 
+      border-bottom: 1px solid var(--border); 
+    }
+    
+    .activity-item:last-child { 
+      border-bottom: none; 
+    }
+    
+    .activity-icon { 
+      font-size: 24px; 
+      width: 40px; 
+      text-align: center; 
+    }
+    
+    .activity-title { 
+      font-weight: 500; 
+    }
+    
+    .activity-time { 
+      font-size: 0.875rem; 
+      color: var(--muted); 
+    }
+    
+    .chart-placeholder { 
+      display: flex; 
+      align-items: end; 
+      gap: 8px; 
+      height: 120px; 
+      margin: 16px 0; 
+    }
+    
+    .chart-bar { 
+      flex: 1; 
+      background: var(--primary); 
+      border-radius: 4px 4px 0 0; 
+      min-height: 20px; 
+      display: flex; 
+      align-items: end; 
+      justify-content: center; 
+      color: white; 
+      font-size: 0.75rem; 
+      padding-bottom: 4px; 
+    }
+    
+    .current-plan { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 16px 0; 
+    }
+    
+    .plan-icon { 
+      font-size: 2rem; 
+    }
+    
+    .plan-name { 
+      font-weight: 600; 
+    }
+    
+    .plan-expires { 
+      font-size: 0.875rem; 
+      color: var(--muted); 
+    }
+    
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    
+    th, td { 
+      padding: 12px; 
+      text-align: left; 
+      border-bottom: 1px solid var(--border); 
+    }
+    
+    th { 
+      background: var(--surface); 
+      font-weight: 600; 
+    }
+    
+    .amount-positive { 
+      color: var(--success); 
+    }
+    
+    .amount-negative { 
+      color: var(--error); 
+    }
+    
+    .status { 
+      padding: 4px 8px; 
+      border-radius: 12px; 
+      font-size: 0.75rem; 
+      font-weight: 500; 
+    }
+    
+    .status.success { 
+      background: rgba(5, 150, 105, 0.1); 
+      color: var(--success); 
+    }
+    
+    .map-container { 
+      margin: 24px 0; 
+    }
+    
+    .map-info { 
+      margin-top: 24px; 
+    }
+    
+    .table-responsive { 
+      overflow-x: auto; 
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <nav class="container">
+      <div class="logo">⚡ SWP201</div>
+      <div>
+        <button class="btn btn-outline" onclick="authUI.showLoginModal()">Đăng nhập</button>
+        <button class="btn btn-primary" onclick="authUI.showRegisterModal()">Đăng ký</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h1>🔋 Đổi pin xe điện thông minh</h1>
+        <p>Giải pháp đổi pin nhanh chóng, tiện lợi và thân thiện với môi trường</p>
+        <button class="btn btn-primary" onclick="authUI.showRegisterModal()">Bắt đầu ngay</button>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2 style="text-align: center;">Tại sao chọn SWP201?</h2>
+        <div class="feature-grid">
+          <div class="feature">
+            <span class="feature-icon">⚡</span>
+            <h3>Nhanh chóng</h3>
+            <p>Đổi pin chỉ trong 3 phút, nhanh hơn 10 lần so với sạc thường</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">🌍</span>
+            <h3>Thân thiện môi trường</h3>
+            <p>Giảm thiểu thời gian chờ, tối ưu hóa sử dụng năng lượng sạch</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">📱</span>
+            <h3>Công nghệ IoT</h3>
+            <p>Hệ thống thông minh, theo dõi trạng thái pin real-time</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">💰</span>
+            <h3>Tiết kiệm chi phí</h3>
+            <p>Các gói dịch vụ linh hoạt, phù hợp mọi nhu cầu sử dụng</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="container" style="padding: 80px 0;">
+      <h2 style="text-align: center;">Gói dịch vụ</h2>
+      <div class="pricing">
+        <div class="card">
+          <h3>Cơ bản</h3>
+          <div class="price">89.000đ<small>/lượt</small></div>
+          <ul class="clean">
+            <li><span class="tick">✓</span> Thanh toán theo lượt</li>
+            <li><span class="tick">✓</span> Không cam kết dài hạn</li>
+            <li><span class="tick">✓</span> Phù hợp thỉnh thoảng</li>
+          </ul>
+          <button class="btn btn-primary" onclick="authUI.showRegisterModal()">Chọn gói</button>
+        </div>
+        
+        <div class="card featured">
+          <h3>Premium <span class="chip">Phổ biến</span></h3>
+          <div class="price">299.000đ<small>/tháng</small></div>
+          <ul class="clean">
+            <li><span class="tick">✓</span> 8 lượt đổi pin/tháng</li>
+            <li><span class="tick">✓</span> Ưu tiên tại trạm</li>
+            <li><span class="tick">✓</span> Hỗ trợ 24/7</li>
+          </ul>
+          <button class="btn btn-primary" onclick="authUI.showRegisterModal()">Chọn gói</button>
+        </div>
+        
+        <div class="card">
+          <h3>Enterprise</h3>
+          <div class="price">899.000đ<small>/tháng</small></div>
+          <ul class="clean">
+            <li><span class="tick">✓</span> Không giới hạn</li>
+            <li><span class="tick">✓</span> API tích hợp</li>
+            <li><span class="tick">✓</span> Quản lý đội xe</li>
+          </ul>
+          <button class="btn btn-primary" onclick="authUI.showRegisterModal()">Chọn gói</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>⚡ SWP201</h3>
+          <p>Hệ thống đổi pin xe điện thông minh hàng đầu Việt Nam</p>
+        </div>
+        <div class="footer-section">
+          <h3>Liên kết</h3>
+          <a href="#">Về chúng tôi</a>
+          <a href="#">Dịch vụ</a>
+          <a href="#">Bản đồ trạm</a>
+          <a href="#">Hỗ trợ</a>
+        </div>
+        <div class="footer-section">
+          <h3>Hỗ trợ</h3>
+          <a href="#">Câu hỏi thường gặp</a>
+          <a href="#">Hướng dẫn sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Góp ý</a>
+        </div>
+        <div class="footer-section">
+          <h3>Liên hệ</h3>
+          <p>📞 1900-SWP201</p>
+          <p>✉️ support@swp201.vn</p>
+          <p>📍 TP.HCM, Việt Nam</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Authentication Modal -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Đăng nhập / Đăng ký</h2>
+        <span class="close" onclick="authUI.hideAuthModals()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Tab Navigation -->
+        <div class="nav-tabs" style="margin-bottom: 24px;">
+          <button class="nav-tab active" onclick="authUI.showAuthTab('login')">Đăng nhập</button>
+          <button class="nav-tab" onclick="authUI.showAuthTab('register')">Đăng ký</button>
+          <button class="nav-tab" onclick="authUI.showAuthTab('forgot-password')">Quên mật khẩu</button>
+        </div>
+
+        <!-- Login Tab -->
+        <div id="login-tab" class="auth-tab">
+          <form id="login-form">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="email" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu</label>
+              <input type="password" id="password" required placeholder="Mật khẩu của bạn">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Đăng nhập</button>
+          </form>
+          <p style="margin-top: 16px; text-align: center; color: var(--muted);">
+            Demo: demo@user.com / 123456
+          </p>
+        </div>
+
+        <!-- Register Tab -->
+        <div id="register-tab" class="auth-tab" style="display: none;">
+          <form id="register-form">
+            <div class="form-group">
+              <label>Họ tên</label>
+              <input type="text" id="register-name" required placeholder="Họ và tên">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="register-email" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input type="tel" id="register-phone" required placeholder="0123456789">
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu</label>
+              <input type="password" id="register-password" required placeholder="Mật khẩu">
+            </div>
+            <div class="form-group">
+              <label>Xác nhận mật khẩu</label>
+              <input type="password" id="register-confirm-password" required placeholder="Nhập lại mật khẩu">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Đăng ký</button>
+          </form>
+        </div>
+
+        <!-- Forgot Password Tab -->
+        <div id="forgot-password-tab" class="auth-tab" style="display: none;">
+          <form id="forgot-password-form">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="forgot-email" required placeholder="Nhập email để khôi phục">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Gửi mã khôi phục</button>
+          </form>
+        </div>
+
+        <!-- Reset Password Tab -->
+        <div id="reset-password-tab" class="auth-tab" style="display: none;">
+          <form id="reset-password-form">
+            <input type="hidden" id="reset-email">
+            <div class="form-group">
+              <label>Mã xác nhận</label>
+              <input type="text" id="reset-code" required placeholder="Nhập mã từ email (Demo: 123456)">
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu mới</label>
+              <input type="password" id="reset-new-password" required placeholder="Mật khẩu mới">
+            </div>
+            <div class="form-group">
+              <label>Xác nhận mật khẩu mới</label>
+              <input type="password" id="reset-confirm-password" required placeholder="Nhập lại mật khẩu mới">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Đặt lại mật khẩu</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Battery Swap Process Modal -->
+  <div id="swap-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🔋 Đang thực hiện đổi pin</h2>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="loading-spinner" style="margin: 20px auto;"></div>
+          <div style="margin: 20px 0;">
+            <div style="background: var(--surface); border-radius: 8px; height: 8px; overflow: hidden;">
+              <div id="swap-progress" style="background: var(--primary); height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+          </div>
+          <p id="swap-status">Đang khởi tạo quá trình đổi pin...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include JavaScript Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  
+  <!-- Include Application JavaScript Modules -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/payment.js"></script>
+  <script src="assets/js/battery-swap.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+  
+  <!-- Include Component Templates -->
+  <script src="components/modals.js"></script>
+  
+  <!-- Application Initialization -->
+  <script>
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 SWP201 Application Started');
+      
+      // Check if user is already logged in
+      if (auth.isLoggedIn()) {
+        console.log('User already logged in:', auth.getCurrentUser());
+        // Auto show dashboard if already logged in
+        // dashboardManager.showDashboard();
+      }
+      
+      // Initialize map for later use
+      window.initMap = function() {
+        if (typeof L !== 'undefined' && document.getElementById('map')) {
+          const map = L.map('map').setView([10.7769, 106.7009], 11);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+          }).addTo(map);
+          
+          // Add station markers
+          const stations = API.getStationsData();
+          stations.forEach(station => {
+            const marker = L.marker(station.coordinates).addTo(map);
+            marker.bindPopup(`
+              <strong>${station.name}</strong><br>
+              ${station.address}<br>
+              <em>${station.posts} trụ đổi pin</em>
+            `);
+            
+            marker.on('click', function() {
+              updateSelectedStationInfo(station);
+              showToast(`Đã focus vào ${station.name}`, 'success');
+            });
+          });
+        }
+      };
+      
+      function updateSelectedStationInfo(station) {
+        const stationInfo = document.getElementById('station-info');
+        if (stationInfo) {
+          stationInfo.innerHTML = `
+            <div class="card">
+              <h4>${station.name}</h4>
+              <p><strong>Địa chỉ:</strong> ${station.address}</p>
+              <p><strong>Số trụ:</strong> ${station.posts} trụ đổi pin</p>
+              <p><strong>Trạng thái:</strong> 
+                <span class="status ${station.status === 'active' ? 'success' : 'warning'}">
+                  ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}
+                </span>
+              </p>
+              <button class="btn btn-primary" onclick="showUserTab('battery-swap')">
+                Đổi pin tại đây
+              </button>
+            </div>
+          `;
+        }
+      }
+      
+      // Setup form input formatting
+      document.addEventListener('input', function(e) {
+        // Auto format card number input
+        if (e.target.id === 'card-number') {
+          let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+          let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+          e.target.value = formattedValue;
+        }
+        
+        // Auto format card expiry input
+        if (e.target.id === 'card-expiry') {
+          let value = e.target.value.replace(/\D/g, '');
+          if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+          }
+          e.target.value = value;
+        }
+      });
+      
+      // Setup payment method selection
+      document.addEventListener('change', function(e) {
+        if (e.target.name === 'payment-method') {
+          document.querySelectorAll('.payment-method').forEach(method => {
+            method.classList.remove('active');
+          });
+          e.target.closest('.payment-method').classList.add('active');
+          
+          const creditCardForm = document.getElementById('credit-card-form');
+          if (creditCardForm) {
+            if (e.target.value === 'credit-card') {
+              creditCardForm.style.display = 'block';
+            } else {
+              creditCardForm.style.display = 'none';
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
