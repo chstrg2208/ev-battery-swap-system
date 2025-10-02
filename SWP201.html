@@ -2016,7 +2016,65 @@
     ];
 
     function initMap() {
-      map = L.map('map').setView([16.0678, 108.2208], 6);
+      try {
+        console.log('Creating map...');
+        
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+          throw new Error('Leaflet library not loaded');
+        }
+        
+        // Check if map container exists
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+          throw new Error('Map container not found');
+        }
+        
+        console.log('Map container found, creating Leaflet map...');
+        map = L.map('map').setView([16.0678, 108.2208], 6);
+        console.log('Leaflet map created');
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        console.log('Tile layer added');
+
+        stations.forEach(station => {
+          const color = station.status === 'active' ? 'green' : 'red';
+          const icon = L.divIcon({
+            html: `<div style="background: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+            iconSize: [20, 20],
+            className: 'custom-div-icon'
+          });
+
+          const marker = L.marker([station.lat, station.lng], { icon })
+            .addTo(map)
+            .bindPopup(`
+              <strong>${station.name}</strong><br>
+              ${station.area}<br>
+              Pin sẵn sàng: ${station.pins}<br>
+              Trạng thái: ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}
+            `);
+        });
+        
+        console.log('Map initialization completed successfully');
+      } catch (error) {
+        console.error('Error in initMap():', error);
+        // Show error message in map container
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+          mapContainer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 400px; background: #1a1a2e; color: white; text-align: center; border-radius: 8px;">
+              <div>
+                <h3>❌ Lỗi tải bản đồ</h3>
+                <p>Không thể tải Leaflet map: ${error.message}</p>
+                <button onclick="location.reload()" style="background: #4f8cff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">🔄 Refresh</button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
       
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -2051,26 +2109,63 @@
       });
     }
 
-    // Modal functions
+    // Modal functions with enhanced error handling
     function showLogin() {
       console.log('showLogin() called - opening login modal');
       try {
+        // Clear any existing modals first
+        const allModals = document.querySelectorAll('.modal');
+        allModals.forEach(modal => {
+          modal.style.display = 'none';
+        });
+        
         const loginModal = document.getElementById('loginModal');
         if (loginModal) {
           loginModal.style.display = 'block';
           console.log('Login modal opened successfully');
+          
+          // Focus on first input
+          const firstInput = loginModal.querySelector('input[type="email"]');
+          if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+          }
         } else {
           console.error('Login modal not found!');
+          alert('Lỗi: Không tìm thấy form đăng nhập. Vui lòng refresh trang.');
         }
-        closeModal('registerModal');
       } catch (error) {
         console.error('Error in showLogin():', error);
+        alert('Lỗi khi mở form đăng nhập: ' + error.message);
       }
     }
 
     function showRegister() {
-      document.getElementById('registerModal').style.display = 'block';
-      closeModal('loginModal');
+      console.log('showRegister() called - opening register modal');
+      try {
+        // Clear any existing modals first
+        const allModals = document.querySelectorAll('.modal');
+        allModals.forEach(modal => {
+          modal.style.display = 'none';
+        });
+        
+        const registerModal = document.getElementById('registerModal');
+        if (registerModal) {
+          registerModal.style.display = 'block';
+          console.log('Register modal opened successfully');
+          
+          // Focus on first input
+          const firstInput = registerModal.querySelector('input[type="text"]');
+          if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+          }
+        } else {
+          console.error('Register modal not found!');
+          alert('Lỗi: Không tìm thấy form đăng ký. Vui lòng refresh trang.');
+        }
+      } catch (error) {
+        console.error('Error in showRegister():', error);
+        alert('Lỗi khi mở form đăng ký: ' + error.message);
+      }
     }
 
     function closeModal(modalId) {
@@ -2138,9 +2233,34 @@
       }
     }
 
-    // Initialize
+    // Initialize with error handling
     window.addEventListener('load', () => {
-      initMap();
+      console.log('Window loaded, starting initialization...');
+      try {
+        console.log('Attempting to initialize map...');
+        initMap();
+        console.log('Map initialized successfully');
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        // Continue even if map fails
+      }
+      
+      try {
+        console.log('Testing DOM elements...');
+        const loginBtn = document.querySelector('button[onclick="showLogin()"]');
+        const loginModal = document.getElementById('loginModal');
+        console.log('Login button found:', !!loginBtn);
+        console.log('Login modal found:', !!loginModal);
+        
+        if (!loginBtn) {
+          console.error('Login button not found!');
+        }
+        if (!loginModal) {
+          console.error('Login modal not found!');
+        }
+      } catch (error) {
+        console.error('Error checking DOM elements:', error);
+      }
     });
 
     // Close modals when clicking outside
