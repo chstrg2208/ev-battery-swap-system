@@ -1808,14 +1808,40 @@
       // Initialize battery health if battery-health tab is selected
       if (tabName === 'battery-health') {
         setTimeout(() => {
-          if (window.batteryHealthSystem) {
-            const content = window.batteryHealthSystem.renderDashboard();
-            document.getElementById('batteryHealthContent').innerHTML = content;
-          } else {
-            // Initialize battery health system if not exists
-            window.batteryHealthSystem = new BatteryHealthSystem();
-            const content = window.batteryHealthSystem.renderDashboard();
-            document.getElementById('batteryHealthContent').innerHTML = content;
+          try {
+            console.log('Initializing Battery Health System...');
+            if (window.batteryHealthSystem) {
+              console.log('Using existing battery health system');
+              const content = window.batteryHealthSystem.renderDashboard();
+              document.getElementById('batteryHealthContent').innerHTML = content;
+            } else {
+              console.log('Creating new battery health system');
+              // Check if BatteryHealthSystem class exists
+              if (typeof BatteryHealthSystem !== 'undefined') {
+                window.batteryHealthSystem = new BatteryHealthSystem();
+                const content = window.batteryHealthSystem.renderDashboard();
+                document.getElementById('batteryHealthContent').innerHTML = content;
+                console.log('Battery health system initialized successfully');
+              } else {
+                console.error('BatteryHealthSystem class not found');
+                document.getElementById('batteryHealthContent').innerHTML = `
+                  <div style="text-align: center; padding: 40px; color: var(--danger);">
+                    <h3>❌ Lỗi tải Battery Health System</h3>
+                    <p>Không thể khởi tạo hệ thống quản lý pin. Vui lòng refresh trang.</p>
+                    <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh Trang</button>
+                  </div>
+                `;
+              }
+            }
+          } catch (error) {
+            console.error('Error initializing battery health:', error);
+            document.getElementById('batteryHealthContent').innerHTML = `
+              <div style="text-align: center; padding: 40px; color: var(--danger);">
+                <h3>❌ Lỗi: ${error.message}</h3>
+                <p>Vui lòng kiểm tra console để xem chi tiết lỗi.</p>
+                <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh Trang</button>
+              </div>
+            `;
           }
         }, 100);
       }
@@ -3312,6 +3338,9 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
         }
       }
 
+      // Debug: Log that BatteryHealthSystem class is defined
+      console.log('BatteryHealthSystem class defined:', typeof BatteryHealthSystem);
+
       // Payment method selection
       document.addEventListener('change', function(e) {
         if (e.target.name === 'payment-method') {
@@ -3328,6 +3357,19 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
           }
         }
       });
+      
+      // Pre-initialize BatteryHealthSystem for faster loading
+      console.log('Pre-initializing BatteryHealthSystem...');
+      try {
+        if (typeof BatteryHealthSystem !== 'undefined') {
+          window.batteryHealthSystem = new BatteryHealthSystem();
+          console.log('BatteryHealthSystem pre-initialized successfully');
+        } else {
+          console.warn('BatteryHealthSystem class not available yet');
+        }
+      } catch (error) {
+        console.error('Error pre-initializing BatteryHealthSystem:', error);
+      }
     });
   </script>
 </body>
