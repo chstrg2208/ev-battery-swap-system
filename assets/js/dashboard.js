@@ -74,6 +74,7 @@ class DashboardManager {
           <div class="nav-tabs">
             <button class="nav-tab active" onclick="showUserTab('overview')">📊 Tổng quan</button>
             <button class="nav-tab" onclick="showUserTab('battery-swap')">🔋 Đổi pin</button>
+            <button class="nav-tab" onclick="showUserTab('battery-health')">💊 Tình trạng pin</button>
             <button class="nav-tab" onclick="showUserTab('history')">📋 Lịch sử</button>
             <button class="nav-tab" onclick="showUserTab('plans')">📦 Gói dịch vụ</button>
             <button class="nav-tab" onclick="showUserTab('map')">🗺️ Bản đồ</button>
@@ -83,6 +84,7 @@ class DashboardManager {
         <div class="dashboard-content">
           ${this.getUserOverviewTab()}
           ${this.getUserBatterySwapTab()}
+          ${this.getUserBatteryHealthTab()}
           ${this.getUserHistoryTab()}
           ${this.getUserPlansTab()}
           ${this.getUserMapTab()}
@@ -220,6 +222,19 @@ class DashboardManager {
           <div class="empty-icon">🏢</div>
           <h3>Chọn trạm đổi pin</h3>
           <p>Vui lòng chọn trạm để xem các trụ đổi pin có sẵn</p>
+        </div>
+      </div>
+    `;
+  }
+
+  getUserBatteryHealthTab() {
+    return `
+      <div id="battery-health-tab" class="tab-content">
+        <div id="batteryHealthContent">
+          <div class="loading-message">
+            <div class="loading-spinner">🔄</div>
+            <p>Đang tải thông tin pin...</p>
+          </div>
         </div>
       </div>
     `;
@@ -568,6 +583,21 @@ function showUserTab(tabName) {
   if (tabName === 'map') {
     setTimeout(() => {
       initMap();
+    }, 100);
+  }
+  
+  // Special handling for battery health tab
+  if (tabName === 'battery-health') {
+    setTimeout(() => {
+      if (window.batteryHealthSystem) {
+        const content = window.batteryHealthSystem.renderDashboard();
+        document.getElementById('batteryHealthContent').innerHTML = content;
+      } else {
+        // Initialize battery health system if not exists
+        window.batteryHealthSystem = new BatteryHealthSystem();
+        const content = window.batteryHealthSystem.renderDashboard();
+        document.getElementById('batteryHealthContent').innerHTML = content;
+      }
     }, 100);
   }
 }
