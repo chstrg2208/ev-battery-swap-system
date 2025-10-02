@@ -516,6 +516,8 @@
         <div class="hero-actions">
           <button class="btn btn-primary" onclick="showLogin()">Truy cập hệ thống</button>
           <button class="btn" onclick="scrollToId('stations')">Xem bản đồ trạm</button>
+          <!-- Debug button -->
+          <button class="btn" onclick="alert('Button clicked! UI is working')" style="background: red; color: white;">🔍 Test Click</button>
         </div>
       </div>
     </section>
@@ -2051,8 +2053,19 @@
 
     // Modal functions
     function showLogin() {
-      document.getElementById('loginModal').style.display = 'block';
-      closeModal('registerModal');
+      console.log('showLogin() called - opening login modal');
+      try {
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) {
+          loginModal.style.display = 'block';
+          console.log('Login modal opened successfully');
+        } else {
+          console.error('Login modal not found!');
+        }
+        closeModal('registerModal');
+      } catch (error) {
+        console.error('Error in showLogin():', error);
+      }
     }
 
     function showRegister() {
@@ -3734,6 +3747,26 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
       } catch (error) {
         console.error('Error pre-initializing BatteryHealthSystem:', error);
       }
+
+      // Clear all modals on page load to ensure UI is not blocked
+      console.log('Clearing all modals on page load...');
+      const modalIds = ['loginModal', 'registerModal', 'planSelectionModal', 'vehicleSelectionModal', 'paymentModal', 'contractModal'];
+      modalIds.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.style.display = 'none';
+          console.log(`Cleared modal: ${modalId}`);
+        }
+      });
+
+      // Also remove any dynamic modals that might exist
+      const dynamicModals = document.querySelectorAll('.plan-selection-modal, .vehicle-selection-modal');
+      dynamicModals.forEach(modal => {
+        modal.remove();
+        console.log('Removed dynamic modal');
+      });
+
+      console.log('Page initialization complete - UI should be clickable now');
     });
   </script>
 </body>
