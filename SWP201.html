@@ -879,8 +879,14 @@
       showDashboard() {
         if (!this.currentUser) return;
 
-        // Check if BatteryHealthSystem is available before showing vehicle selection
-        if (this.currentUser.role === 'user' && !this.currentUser.selectedVehicle) {
+        if (!this.currentUser) return;
+
+        // Always show vehicle selection for users (reset selectedVehicle)
+        if (this.currentUser.role === 'user') {
+          // Reset selectedVehicle to force vehicle selection every time
+          this.currentUser.selectedVehicle = null;
+          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+          
           // Ensure BatteryHealthSystem is initialized before showing vehicle selection
           if (typeof BatteryHealthSystem !== 'undefined') {
             this.showVehicleSelection();
@@ -1704,31 +1710,52 @@
         try {
           if (window.batteryHealthSystem) {
             userVehicles = Object.values(window.batteryHealthSystem.userBatteries);
+            console.log('Got vehicles from existing system:', userVehicles);
           } else {
             // Create BatteryHealthSystem instance if not exists
             console.log('Creating new BatteryHealthSystem instance...');
             window.batteryHealthSystem = new BatteryHealthSystem();
             userVehicles = Object.values(window.batteryHealthSystem.userBatteries);
+            console.log('Got vehicles from new system:', userVehicles);
           }
+          
+          // Ensure all vehicles have required properties
+          userVehicles = userVehicles.map(vehicle => ({
+            id: vehicle.id || 'UNKNOWN',
+            name: vehicle.name || 'Xe Máy Điện',
+            icon: vehicle.icon || '🏍️',
+            batteryCapacity: vehicle.batteryCapacity || 2.0,
+            currentCharge: vehicle.currentCharge || 75,
+            health: vehicle.health || 90
+          }));
+          
         } catch (error) {
           console.error('Error getting vehicles from BatteryHealthSystem:', error);
           // Fallback to default vehicles if there's an error
           userVehicles = [
             {
-              id: 'VFKA2001',
+              id: 'BIKE001',
               name: 'VinFast Klara A2',
-              icon: '🏍️',
-              batteryCapacity: 1.5,
+              icon: '🛵',
+              batteryCapacity: 2.5,
               currentCharge: 85,
               health: 95
             },
             {
-              id: 'LUDO001',
-              name: 'VinFast Ludo',
+              id: 'BIKE002',
+              name: 'VinFast Ludo', 
               icon: '🛴',
-              batteryCapacity: 1.3,
+              batteryCapacity: 1.8,
               currentCharge: 92,
               health: 98
+            },
+            {
+              id: 'BIKE003',
+              name: 'Honda PCX Electric',
+              icon: '🏍️',
+              batteryCapacity: 1.3,
+              currentCharge: 78,
+              health: 91
             }
           ];
         }
@@ -1796,6 +1823,22 @@
             window.batteryHealthSystem = new BatteryHealthSystem();
             userVehicles = Object.values(window.batteryHealthSystem.userBatteries);
           }
+          
+          // Ensure all vehicles have required properties (same as in showVehicleSelection)
+          userVehicles = userVehicles.map(vehicle => ({
+            id: vehicle.id || 'UNKNOWN',
+            name: vehicle.name || 'Xe Máy Điện',
+            icon: vehicle.icon || '🏍️',
+            batteryCapacity: vehicle.batteryCapacity || 2.0,
+            currentCharge: vehicle.currentCharge || 75,
+            health: vehicle.health || 90,
+            type: vehicle.type || 'scooter',
+            batteryId: vehicle.batteryId || 'BAT_DEFAULT',
+            cycleCount: vehicle.cycleCount || 100,
+            manufactureDate: vehicle.manufactureDate || '2024-01-01',
+            lastChecked: vehicle.lastChecked || new Date().toISOString()
+          }));
+          
         } catch (error) {
           console.error('Error accessing BatteryHealthSystem in selectVehicleAndContinue:', error);
           return;
