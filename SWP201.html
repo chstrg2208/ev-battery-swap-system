@@ -879,11 +879,15 @@
       showDashboard() {
         if (!this.currentUser) return;
 
+        // Temporarily disable vehicle selection for debugging
+        // TODO: Re-enable after fixing initialization order
+        /*
         // For users, show vehicle selection first if no vehicle selected
         if (this.currentUser.role === 'user' && !this.currentUser.selectedVehicle) {
           this.showVehicleSelection();
           return;
         }
+        */
 
         document.querySelector('main').style.display = 'none';
         document.querySelector('header').style.display = 'none';
