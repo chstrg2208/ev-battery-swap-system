@@ -2940,7 +2940,7 @@
         }
 
         renderBatteryHealthDashboard() {
-          return '
+          return `
             <div class="battery-health-dashboard">
               <div class="dashboard-header">
                 <h2>🔋 Quản Lý Pin Xe Điện</h2>
@@ -2952,7 +2952,7 @@
               <div class="vehicle-selection">
                 <h3>Chọn Xe Của Bạn</h3>
                 <div class="vehicle-grid">
-                  ${Object.values(this.userBatteries).map(vehicle => '
+                  ${Object.values(this.userBatteries).map(vehicle => `
                     <div class="vehicle-card ${this.currentVehicle?.id === vehicle.id ? 'selected' : ''}">
                       <div class="vehicle-info">
                         <h4>${vehicle.name}</h4>
@@ -2975,13 +2975,13 @@
                         Chi Tiết
                       </button>
                     </div>
-                  ').join('')}
+                  `).join('')}
                 </div>
               </div>
 
               ${this.currentVehicle ? this.renderDetailedView() : ''}
             </div>
-          ';
+          `;
         }
 
         renderDetailedView() {
@@ -2989,7 +2989,7 @@
           const history = this.healthHistory[vehicle.id] || [];
           const latestHistory = history.slice(-30);
 
-          return '
+          return `
             <div class="detailed-battery-view">
               <div class="vehicle-header">
                 <h3>📊 ${vehicle.name} - Chi Tiết Pin</h3>
@@ -3083,7 +3083,7 @@
               <div class="recommendations-section">
                 <h4>💡 Khuyến Nghị</h4>
                 <div class="recommendations-grid">
-                  ${this.generateRecommendations(vehicle).map(rec => '
+                  ${this.generateRecommendations(vehicle).map(rec => `
                     <div class="recommendation-card ${rec.type}">
                       <div class="rec-icon">${rec.icon}</div>
                       <div class="rec-content">
@@ -3091,7 +3091,7 @@
                         <p>${rec.description}</p>
                       </div>
                     </div>
-                  ').join('')}
+                  `).join('')}
                 </div>
               </div>
 
@@ -3101,7 +3101,7 @@
                 </button>
               </div>
             </div>
-          ';
+          `;
         }
 
         getHealthClass(health) {
@@ -3129,7 +3129,7 @@
           const usableCapacity = vehicle.batteryCapacity * vehicle.health / 100;
           const currentEnergy = usableCapacity * vehicle.currentCharge / 100;
           const range = Math.floor(currentEnergy * efficiency);
-          return '${range} km';
+          return `${range} km`;
         }
 
         calculateBatteryAge(manufactureDate) {
@@ -3139,7 +3139,7 @@
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           const years = Math.floor(diffDays / 365);
           const months = Math.floor((diffDays % 365) / 30);
-          return '${years} năm ${months} tháng';
+          return `${years} năm ${months} tháng`;
         }
 
         renderHealthChart(history) {
@@ -3149,7 +3149,7 @@
           const minHealth = Math.min(...history.map(h => h.health));
           const range = maxHealth - minHealth || 1;
 
-          return '
+          return `
             <div class="simple-chart">
               <div class="chart-y-axis">
                 <span>${Math.ceil(maxHealth)}%</span>
@@ -3165,13 +3165,13 @@
                     points="${history.map((point, index) => {
                       const x = (index / (history.length - 1)) * 380 + 10;
                       const y = 190 - ((point.health - minHealth) / range) * 180;
-                      return '${x},${y}';
+                      return `${x},${y}`;
                     }).join(' ')}"
                   />
                   ${history.map((point, index) => {
                     const x = (index / (history.length - 1)) * 380 + 10;
                     const y = 190 - ((point.health - minHealth) / range) * 180;
-                    return '<circle cx="${x}" cy="${y}" r="3" fill="#4CAF50"/>';
+                    return `<circle cx="${x}" cy="${y}" r="3" fill="#4CAF50"/>`;
                   }).join('')}
                 </svg>
               </div>
@@ -3181,7 +3181,7 @@
                 <span>${history[history.length - 1].date}</span>
               </div>
             </div>
-          ';
+          `;
         }
 
         generateRecommendations(vehicle) {
@@ -3258,7 +3258,7 @@
           
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'battery-report-${this.currentVehicle.id}-${new Date().toISOString().split('T')[0]}.txt';
+          a.download = `battery-report-${this.currentVehicle.id}-${new Date().toISOString().split('T')[0]}.txt`;
           a.click();
           
           URL.revokeObjectURL(url);
@@ -3268,7 +3268,7 @@
         generateHealthReport(vehicle) {
           const history = this.healthHistory[vehicle.id] || [];
           
-          return '
+          return `
 BÁO CÁO TÌNH TRẠNG PIN XE ĐIỆN
 =====================================
 
@@ -3290,16 +3290,16 @@ Thông tin sản xuất:
 
 Lịch sử độ chai pin (30 điểm gần nhất):
 ${history.slice(-30).map(h => 
-  '${h.date}: ${h.health}% (${h.chargeLevel}% sạc, ${h.temperature}°C)'
-).join('\\n')}
+  `${h.date}: ${h.health}% (${h.chargeLevel}% sạc, ${h.temperature}°C)`
+).join('\n')}
 
 Khuyến nghị:
 ${this.generateRecommendations(vehicle).map(r => 
-  '- ${r.title}: ${r.description}'
-).join('\\n')}
+  `- ${r.title}: ${r.description}`
+).join('\n')}
 
 Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
-          '.trim();
+          `.trim();
         }
 
         renderDashboard() {
