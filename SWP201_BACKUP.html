@@ -483,6 +483,197 @@
       .table-filters{flex-direction:column;align-items:stretch}
       .dashboard-nav{flex-direction:column;gap:16px;text-align:center}
     }
+    
+    /* Payment Sub-Tabs */
+    .payment-container { padding: 20px 0; }
+    .payment-sub-nav {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .payment-sub-tab {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    .payment-sub-tab.active {
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+    }
+    .payment-sub-content {
+      display: none;
+      padding: 20px 0;
+    }
+    .payment-sub-content.active {
+      display: block;
+    }
+    
+    /* Payment Methods */
+    .payment-method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .payment-method {
+      background: var(--card);
+      border: 2px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .payment-method:hover {
+      border-color: var(--brand);
+    }
+    .payment-method.selected {
+      border-color: var(--brand);
+      background: rgba(79,140,255,.1);
+    }
+    .method-icon {
+      font-size: 24px;
+    }
+    .method-info h6 {
+      margin: 0 0 4px 0;
+      color: var(--text);
+    }
+    .method-info p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .payment-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    /* Auto Pay Styles */
+    .autopay-toggle {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      background: var(--card);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+    input:checked + .slider {
+      background-color: var(--brand);
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .slider.round {
+      border-radius: 34px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
+    .autopay-settings {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .setting-group {
+      margin-bottom: 20px;
+    }
+    .setting-group h5 {
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .autopay-method-selection {
+      display: flex;
+      gap: 15px;
+    }
+    .autopay-method {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      background: rgba(255,255,255,.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .autopay-method:hover {
+      background: rgba(255,255,255,.1);
+    }
+    .notification-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .autopay-record {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: var(--card);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .record-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .record-date {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .record-amount {
+      color: var(--muted);
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -516,8 +707,6 @@
         <div class="hero-actions">
           <button class="btn btn-primary" onclick="showLogin()">Truy cập hệ thống</button>
           <button class="btn" onclick="scrollToId('stations')">Xem bản đồ trạm</button>
-          <!-- Debug button -->
-          <button class="btn" onclick="forceUnblockUI()" style="background: red; color: white; z-index: 99999; position: relative;">� Unblock UI</button>
         </div>
       </div>
     </section>
@@ -532,7 +721,7 @@
             <p class="muted">Theo dõi lịch sử đổi pin, thanh toán, tìm trạm gần nhất và đặt lịch online.</p>
           </div>
           <div class="card">
-            <div class="icon">👨‍�</div>
+            <div class="icon">👨‍ </div>
             <h3>Dashboard nhân viên</h3>
             <p class="muted">Quản lý trạm, theo dõi tình trạng pin, xử lý yêu cầu khách hàng.</p>
           </div>
@@ -542,7 +731,7 @@
             <p class="muted">Thống kê toàn hệ thống, quản lý người dùng, cấu hình và báo cáo.</p>
           </div>
           <div class="card">
-            <div class="icon">�️</div>
+            <div class="icon"> ️</div>
             <h3>Bản đồ tương tác</h3>
             <p class="muted">Tìm trạm theo vị trí, xem tình trạng real-time, điều hướng GPS.</p>
           </div>
@@ -913,18 +1102,24 @@
       showDashboard() {
         if (!this.currentUser) return;
 
-        // Always show plan selection for users (reset plan and vehicle)
+        // For users, check if they need to select plan/vehicle first
         if (this.currentUser.role === 'user') {
-          // Reset plan and vehicle to force selection every time
-          this.currentUser.selectedPlan = null;
-          this.currentUser.selectedVehicle = null;
-          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+          // Only show plan selection if no plan is selected
+          if (!this.currentUser.selectedPlan) {
+            this.showPlanSelection();
+            return;
+          }
           
-          // Show plan selection first
-          this.showPlanSelection();
-          return;
+          // Only show vehicle selection if no vehicle is selected
+          if (!this.currentUser.selectedVehicle) {
+            this.showVehicleSelection();
+            return;
+          }
+          
+          // Both plan and vehicle are selected, proceed to dashboard
         }
 
+        // Hide main content
         document.querySelector('main').style.display = 'none';
         document.querySelector('header').style.display = 'none';
         document.querySelector('footer').style.display = 'none';
@@ -932,12 +1127,25 @@
         const role = this.currentUser.role;
         let dashboardId = role + 'Dashboard';
         
+        // Create dashboard if it doesn't exist
         if (!document.getElementById(dashboardId)) {
+          console.log('Creating dashboard for role:', role);
           this.createDashboard(role);
         }
 
+        // Hide all dashboards first
         document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
-        document.getElementById(dashboardId).classList.add('active');
+        
+        // Show the correct dashboard
+        const targetDashboard = document.getElementById(dashboardId);
+        if (targetDashboard) {
+          targetDashboard.classList.add('active');
+          console.log('Dashboard activated:', dashboardId);
+          showToast(`Chào mừng ${this.currentUser.name}!`, 'success');
+        } else {
+          console.error('Dashboard not found:', dashboardId);
+          showToast('Lỗi: Không thể tải dashboard', 'error');
+        }
       }
 
       showLandingPage() {
@@ -1003,7 +1211,7 @@
                   <button class="nav-tab active" onclick="showUserTab('overview')">📊 Tổng quan</button>
                   <button class="nav-tab" onclick="showUserTab('battery-swap')">🔋 Đổi pin ngay</button>
                   <button class="nav-tab" onclick="showUserTab('battery-health')">💊 Tình trạng pin</button>
-                  <button class="nav-tab" onclick="showUserTab('payment-history')">💳 Lịch sử thanh toán</button>
+                  <button class="nav-tab" onclick="showUserTab('payment-history')">💳 Thanh toán</button>
                   <button class="nav-tab" onclick="showUserTab('plans')">📦 Gói dịch vụ</button>
                   <button class="nav-tab" onclick="showUserTab('map')">🗺️ Bản đồ trạm</button>
                 </div>
@@ -1134,7 +1342,7 @@
                         <div style="background: rgba(25,195,125,0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(25,195,125,0.3);">
                           <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                              <span>� Gói Premium:</span><br>
+                              <span>  Gói Premium:</span><br>
                               <span class="muted">Còn lại 4/8 lượt tháng này</span>
                             </div>
                             <span style="font-size: 20px; font-weight: 700; color: var(--ok);">MIỄN PHÍ</span>
@@ -1148,7 +1356,7 @@
                     </div>
 
                     <div class="card">
-                      <h3>� Trạng thái đổi pin</h3>
+                      <h3>  Trạng thái đổi pin</h3>
                       <div id="swap-status" style="text-align: center; padding: 20px;">
                         <div style="font-size: 48px; margin-bottom: 16px;">⚡</div>
                         <h4>Sẵn sàng đổi pin</h4>
@@ -1215,89 +1423,263 @@
                   </div>
                 </div>
 
-                <!-- Payment History Tab -->
+                <!-- Payment Tab -->
                 <div id="payment-history-tab" class="tab-content">
-                  <div class="data-table">
-                    <div class="table-header">
-                      <h3>💳 Lịch sử thanh toán</h3>
-                      <div class="table-filters">
-                        <select class="filter-select" onchange="filterPaymentHistory()">
-                          <option value="all">Tất cả giao dịch</option>
-                          <option value="battery-swap">Đổi pin</option>
-                          <option value="plan-purchase">Mua gói</option>
-                          <option value="top-up">Nạp tiền</option>
-                          <option value="refund">Hoàn tiền</option>
-                        </select>
-                        <select class="filter-select" onchange="filterPaymentHistory()">
-                          <option value="all">Tất cả phương thức</option>
-                          <option value="credit-card">Thẻ tín dụng</option>
-                          <option value="momo">Ví MoMo</option>
-                          <option value="zalopay">ZaloPay</option>
-                          <option value="bank-transfer">Chuyển khoản</option>
-                        </select>
-                        <input type="date" class="filter-input" onchange="filterPaymentHistory()">
+                  <div class="payment-container">
+                    <h3>💳 Quản Lý Thanh Toán</h3>
+                    
+                    <!-- Payment Sub-Navigation -->
+                    <div class="payment-sub-nav">
+                      <button class="payment-sub-tab active" onclick="showPaymentSubTab('history')">📜 Lịch sử Payment</button>
+                      <button class="payment-sub-tab" onclick="showPaymentSubTab('payment')">💰 Payment</button>
+                      <button class="payment-sub-tab" onclick="showPaymentSubTab('autopay')">🔄 Set Autopay</button>
+                    </div>
+
+                    <!-- Payment History Sub-Tab -->
+                    <div id="payment-history-subtab" class="payment-sub-content active">
+                      <div class="data-table">
+                        <div class="table-header">
+                          <h4>� Lịch sử giao dịch</h4>
+                          <div class="table-filters">
+                            <select class="filter-select" onchange="filterPaymentHistory()">
+                              <option value="all">Tất cả giao dịch</option>
+                              <option value="battery-swap">Đổi pin</option>
+                              <option value="plan-purchase">Mua gói</option>
+                              <option value="top-up">Nạp tiền</option>
+                              <option value="refund">Hoàn tiền</option>
+                            </select>
+                            <select class="filter-select" onchange="filterPaymentHistory()">
+                              <option value="all">Tất cả phương thức</option>
+                              <option value="credit-card">Thẻ tín dụng</option>
+                              <option value="momo">Ví MoMo</option>
+                              <option value="zalopay">ZaloPay</option>
+                              <option value="bank-transfer">Chuyển khoản</option>
+                            </select>
+                            <input type="date" class="filter-input" onchange="filterPaymentHistory()">
+                          </div>
+                        </div>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Mã GD</th>
+                              <th>Thời gian</th>
+                              <th>Loại giao dịch</th>
+                              <th>Số tiền</th>
+                              <th>Phương thức</th>
+                              <th>Trạng thái</th>
+                              <th>Thao tác</th>
+                            </tr>
+                          </thead>
+                          <tbody id="payment-history-table">
+                            <tr>
+                              <td>#PAY001</td>
+                              <td>15/10/2025 14:35</td>
+                              <td>Đổi pin</td>
+                              <td>89,000đ</td>
+                              <td>Ví MoMo</td>
+                              <td><span class="status success">Thành công</span></td>
+                              <td><button class="action-btn" onclick="viewPaymentDetail('PAY001')">Chi tiết</button></td>
+                            </tr>
+                            <tr>
+                              <td>#PAY002</td>
+                              <td>14/10/2025 10:20</td>
+                              <td>Nạp tiền</td>
+                              <td>500,000đ</td>
+                              <td>Chuyển khoản</td>
+                              <td><span class="status success">Thành công</span></td>
+                              <td><button class="action-btn" onclick="viewPaymentDetail('PAY002')">Chi tiết</button></td>
+                            </tr>
+                            <tr>
+                              <td>#PAY003</td>
+                              <td>12/10/2025 09:20</td>
+                              <td>Đổi pin</td>
+                              <td>89,000đ</td>
+                              <td>ZaloPay</td>
+                              <td><span class="status success">Thành công</span></td>
+                              <td><button class="action-btn" onclick="viewPaymentDetail('PAY003')">Chi tiết</button></td>
+                            </tr>
+                            <tr>
+                              <td>#PAY004</td>
+                              <td>10/10/2025 16:50</td>
+                              <td>Mua gói Premium</td>
+                              <td id="plan-payment-amount">299,000đ</td>
+                              <td>Thẻ tín dụng</td>
+                              <td><span class="status success">Thành công</span></td>
+                              <td><button class="action-btn" onclick="viewPaymentDetail('PAY004')">Chi tiết</button></td>
+                            </tr>
+                            <tr>
+                              <td>#PAY005</td>
+                              <td>08/10/2025 16:50</td>
+                              <td>Đổi pin</td>
+                              <td>0đ</td>
+                              <td>Gói Premium</td>
+                              <td><span class="status success">Thành công</span></td>
+                              <td><button class="action-btn" onclick="viewPaymentDetail('PAY005')">Chi tiết</button></td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Mã GD</th>
-                          <th>Thời gian</th>
-                          <th>Loại giao dịch</th>
-                          <th>Số tiền</th>
-                          <th>Phương thức</th>
-                          <th>Trạng thái</th>
-                          <th>Thao tác</th>
-                        </tr>
-                      </thead>
-                      <tbody id="payment-history-table">
-                        <tr>
-                          <td>#PAY001</td>
-                          <td>15/10/2025 14:35</td>
-                          <td>Đổi pin</td>
-                          <td>89,000đ</td>
-                          <td>Ví MoMo</td>
-                          <td><span class="status success">Thành công</span></td>
-                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY001')">Chi tiết</button></td>
-                        </tr>
-                        <tr>
-                          <td>#PAY002</td>
-                          <td>14/10/2025 10:20</td>
-                          <td>Nạp tiền</td>
-                          <td>500,000đ</td>
-                          <td>Chuyển khoản</td>
-                          <td><span class="status success">Thành công</span></td>
-                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY002')">Chi tiết</button></td>
-                        </tr>
-                        <tr>
-                          <td>#PAY003</td>
-                          <td>12/10/2025 09:20</td>
-                          <td>Đổi pin</td>
-                          <td>89,000đ</td>
-                          <td>ZaloPay</td>
-                          <td><span class="status success">Thành công</span></td>
-                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY003')">Chi tiết</button></td>
-                        </tr>
-                        <tr>
-                          <td>#PAY004</td>
-                          <td>10/10/2025 16:50</td>
-                          <td>Mua gói Premium</td>
-                          <td>299,000đ</td>
-                          <td>Thẻ tín dụng</td>
-                          <td><span class="status success">Thành công</span></td>
-                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY004')">Chi tiết</button></td>
-                        </tr>
-                        <tr>
-                          <td>#PAY005</td>
-                          <td>08/10/2025 16:50</td>
-                          <td>Đổi pin</td>
-                          <td>0đ</td>
-                          <td>Gói Premium</td>
-                          <td><span class="status success">Thành công</span></td>
-                          <td><button class="action-btn" onclick="viewPaymentDetail('PAY005')">Chi tiết</button></td>
-                        </tr>
-                      </tbody>
-                    </table>
+
+                    <!-- Payment Sub-Tab -->
+                    <div id="payment-subtab" class="payment-sub-content">
+                      <div class="payment-section">
+                        <h4>💰 Thanh toán dựa trên gói</h4>
+                        <div class="current-plan-payment">
+                          <div class="plan-payment-card">
+                            <div class="plan-info">
+                              <h5 id="current-plan-name">Premium Plan</h5>
+                              <p id="current-plan-price">499,000 VNĐ/tháng</p>
+                              <p class="plan-features" id="current-plan-features">5 lần đổi pin/ngày • Ưu tiên hỗ trợ • Xe máy điện cao cấp</p>
+                            </div>
+                            <div class="payment-status">
+                              <span class="status success">Đã thanh toán</span>
+                              <p class="next-payment">Kỳ tiếp theo: <strong>01/11/2025</strong></p>
+                            </div>
+                          </div>
+                          
+                          <div class="payment-methods">
+                            <h5>Phương thức thanh toán</h5>
+                            <div class="payment-method-grid">
+                              <div class="payment-method" onclick="selectPaymentMethod('momo')">
+                                <div class="method-icon">📱</div>
+                                <div class="method-info">
+                                  <h6>Ví MoMo</h6>
+                                  <p>Thanh toán nhanh chóng</p>
+                                </div>
+                                <input type="radio" name="payment-method" value="momo">
+                              </div>
+                              
+                              <div class="payment-method" onclick="selectPaymentMethod('zalopay')">
+                                <div class="method-icon">💳</div>
+                                <div class="method-info">
+                                  <h6>ZaloPay</h6>
+                                  <p>Ví điện tử an toàn</p>
+                                </div>
+                                <input type="radio" name="payment-method" value="zalopay">
+                              </div>
+                              
+                              <div class="payment-method" onclick="selectPaymentMethod('credit-card')">
+                                <div class="method-icon">💎</div>
+                                <div class="method-info">
+                                  <h6>Thẻ tín dụng</h6>
+                                  <p>Visa, MasterCard</p>
+                                </div>
+                                <input type="radio" name="payment-method" value="credit-card">
+                              </div>
+                              
+                              <div class="payment-method" onclick="selectPaymentMethod('bank-transfer')">
+                                <div class="method-icon">🏦</div>
+                                <div class="method-info">
+                                  <h6>Chuyển khoản</h6>
+                                  <p>Ngân hàng trực tuyến</p>
+                                </div>
+                                <input type="radio" name="payment-method" value="bank-transfer">
+                              </div>
+                            </div>
+                            
+                            <div class="payment-actions">
+                              <button class="btn btn-primary" onclick="processPayment()">💰 Thanh toán ngay</button>
+                              <button class="btn" onclick="showPaymentSubTab('autopay')">🔄 Thiết lập tự động</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Auto Pay Sub-Tab -->
+                    <div id="autopay-subtab" class="payment-sub-content">
+                      <div class="autopay-section">
+                        <h4>🔄 Thiết lập thanh toán tự động</h4>
+                        
+                        <div class="autopay-status">
+                          <div class="autopay-toggle">
+                            <label class="switch">
+                              <input type="checkbox" id="autopay-enabled" onchange="toggleAutoPay()">
+                              <span class="slider round"></span>
+                            </label>
+                            <div class="autopay-info">
+                              <h5>Thanh toán tự động</h5>
+                              <p id="autopay-status-text">Tắt - Bạn sẽ thanh toán thủ công mỗi tháng</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="autopay-settings" id="autopay-settings" style="display: none;">
+                          <div class="setting-group">
+                            <h5>📅 Ngày thanh toán</h5>
+                            <select id="autopay-day" onchange="updateAutoPaySettings()">
+                              <option value="1">Ngày 1 mỗi tháng</option>
+                              <option value="15">Ngày 15 mỗi tháng</option>
+                              <option value="end">Cuối tháng</option>
+                            </select>
+                          </div>
+
+                          <div class="setting-group">
+                            <h5>💳 Phương thức thanh toán mặc định</h5>
+                            <div class="autopay-method-selection">
+                              <div class="autopay-method" onclick="selectAutoPayMethod('momo')">
+                                <input type="radio" name="autopay-method" value="momo" checked>
+                                <div class="method-icon">📱</div>
+                                <span>Ví MoMo</span>
+                              </div>
+                              <div class="autopay-method" onclick="selectAutoPayMethod('credit-card')">
+                                <input type="radio" name="autopay-method" value="credit-card">
+                                <div class="method-icon">💎</div>
+                                <span>Thẻ tín dụng</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="setting-group">
+                            <h5>📧 Thông báo</h5>
+                            <div class="notification-settings">
+                              <label class="checkbox-label">
+                                <input type="checkbox" checked> Email thông báo trước 3 ngày
+                              </label>
+                              <label class="checkbox-label">
+                                <input type="checkbox" checked> SMS thông báo khi thanh toán thành công
+                              </label>
+                              <label class="checkbox-label">
+                                <input type="checkbox"> Thông báo khi thanh toán thất bại
+                              </label>
+                            </div>
+                          </div>
+
+                          <div class="autopay-actions">
+                            <button class="btn btn-primary" onclick="saveAutoPaySettings()">💾 Lưu cài đặt</button>
+                            <button class="btn btn-secondary" onclick="testAutoPay()">🧪 Test thanh toán</button>
+                          </div>
+                        </div>
+
+                        <div class="autopay-history">
+                          <h5>📊 Lịch sử thanh toán tự động</h5>
+                          <div class="autopay-history-list">
+                            <div class="autopay-record">
+                              <div class="record-info">
+                                <span class="record-date">01/10/2025</span>
+                                <span class="record-amount">499,000đ</span>
+                              </div>
+                              <span class="status success">Thành công</span>
+                            </div>
+                            <div class="autopay-record">
+                              <div class="record-info">
+                                <span class="record-date">01/09/2025</span>
+                                <span class="record-amount">499,000đ</span>
+                              </div>
+                              <span class="status success">Thành công</span>
+                            </div>
+                            <div class="autopay-record">
+                              <div class="record-info">
+                                <span class="record-date">01/08/2025</span>
+                                <span class="record-amount">299,000đ</span>
+                              </div>
+                              <span class="status success">Thành công</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1826,10 +2208,11 @@
       }
 
       selectVehicleAndContinue() {
-        if (!this.selectedVehicleId) return;
-
-      selectVehicleAndContinue() {
-        if (!this.selectedVehicleId) return;
+        if (!this.selectedVehicleId) {
+          console.error('No vehicle selected');
+          showToast('Vui lòng chọn một xe trước khi tiếp tục', 'warning');
+          return;
+        }
 
         // Get vehicles from selected plan (same logic as showVehicleSelection)
         let userVehicles = [];
@@ -1852,6 +2235,7 @@
           }));
         } else {
           console.error('No plan selected or plan has no vehicles');
+          showToast('Lỗi: Không có gói dịch vụ hoặc xe nào được chọn', 'error');
           return;
         }
 
@@ -1861,12 +2245,18 @@
           this.currentUser.selectedVehicle = selectedVehicle;
           localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
 
+          console.log('Vehicle selected successfully:', selectedVehicle.name);
+          showToast(`Đã chọn xe ${selectedVehicle.name}`, 'success');
+
           // Remove modal
           const modal = document.getElementById('vehicleSelectionModal');
           if (modal) modal.remove();
 
           // Continue to dashboard
           this.showDashboard();
+        } else {
+          console.error('Selected vehicle not found');
+          showToast('Lỗi: Không tìm thấy xe đã chọn', 'error');
         }
       }
 
@@ -2075,115 +2465,54 @@
         }
       }
     }
-      
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
 
-      stations.forEach(station => {
-        const color = station.status === 'active' ? 'green' : 'red';
-        const icon = L.divIcon({
-          html: `<div style="background: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
-          iconSize: [20, 20],
-          className: 'custom-div-icon'
-        });
-
-        const marker = L.marker([station.lat, station.lng], { icon })
-          .addTo(map)
-          .bindPopup(`
-            <strong>${station.name}</strong><br>
-            ${station.area}<br>
-            Pin sẵn sàng: ${station.pins}<br>
-            Trạng thái: ${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}
-          `);
-
-        marker.on('click', () => {
-          document.getElementById('selected-station').innerHTML = `
-            <h3>${station.name}</h3>
-            <p class="muted">${station.area}</p>
-            <p>Pin sẵn sàng: <strong>${station.pins}</strong></p>
-            <p>Trạng thái: <span class="status ${station.status === 'active' ? 'success' : 'danger'}">${station.status === 'active' ? 'Hoạt động' : 'Bảo trì'}</span></p>
-            <button class="btn btn-primary" onclick="showLogin()">Đổi pin ngay</button>
-          `;
-        });
-      });
-    }
-
-    // Simple emergency showLogin function
+    // Fixed showLogin function
     function showLogin() {
-      alert('showLogin function called successfully!');
-      console.log('showLogin() called - testing basic functionality');
+      console.log('showLogin() called');
       
-      // Simple approach - just try to show the modal
+      // Close any existing modals first
+      closeModal('registerModal');
+      
       const modal = document.getElementById('loginModal');
       if (modal) {
         modal.style.display = 'block';
-        console.log('Modal display set to block');
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+        console.log('Login modal opened successfully');
       } else {
-        alert('Modal not found - this is the problem!');
         console.error('loginModal element not found');
+        showToast('Lỗi: Không thể mở modal đăng nhập', 'error');
       }
     }
 
     function showRegister() {
-      alert('showRegister function called successfully!');
-      console.log('showRegister() called - testing basic functionality');
+      console.log('showRegister() called');
+      
+      // Close any existing modals first
+      closeModal('loginModal');
       
       const modal = document.getElementById('registerModal');
       if (modal) {
         modal.style.display = 'block';
-        console.log('Register modal display set to block');
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+        console.log('Register modal opened successfully');
       } else {
-        alert('Register Modal not found!');
         console.error('registerModal element not found');
+        showToast('Lỗi: Không thể mở modal đăng ký', 'error');
       }
     }
 
-    // Test function for debugging
-    function testBasicJS() {
-      alert('JavaScript is working! This means the issue is with the modal elements or CSS.');
-      console.log('JavaScript execution is working fine');
-      return true;
-    }
-
-    // Force clear all potential blocking elements
-    function forceUnblockUI() {
-      console.log('Force unblocking UI...');
-      
-      // Remove all modals completely
-      const allModals = document.querySelectorAll('.modal, .plan-selection-modal, .vehicle-selection-modal');
-      allModals.forEach(modal => {
-        modal.remove();
-        console.log('Removed modal element');
-      });
-      
-      // Find and remove high z-index elements
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(el => {
-        const style = window.getComputedStyle(el);
-        if (style.position === 'fixed' || style.position === 'absolute') {
-          if (parseInt(style.zIndex) > 50 || style.zIndex === 'auto') {
-            console.log('Removing potential blocker:', el.className, el.id);
-            el.style.display = 'none !important';
-            el.style.visibility = 'hidden !important';
-            el.style.pointerEvents = 'none !important';
-          }
-        }
-      });
-      
-      // Force enable pointer events on buttons
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(btn => {
-        btn.style.pointerEvents = 'auto';
-        btn.style.zIndex = '9999';
-        btn.style.position = 'relative';
-      });
-      
-      alert('UI unblocking attempted - try clicking buttons now');
-    }
-
     function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+      }
     }
 
     function quickLogin(role, username, password) {
@@ -2498,7 +2827,7 @@
               🔋 ${readyBatteries} pin sẵn sàng
             </div>
             <div style="font-size: 11px; color: var(--muted);">
-              � ${emptySlots} slot trống
+                ${emptySlots} slot trống
             </div>
           `;
           
@@ -2558,7 +2887,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <strong>${post.name}</strong><br>
-            <span class="muted">� Đã chọn trụ này</span>
+            <span class="muted">  Đã chọn trụ này</span>
           </div>
           <div style="font-size: 24px;">⚡</div>
         </div>
@@ -3102,18 +3431,36 @@
     }
 
     function closePaymentModal() {
-      document.getElementById('payment-modal').style.display = 'none';
-      document.getElementById('payment-step-1').style.display = 'block';
-      document.getElementById('payment-step-2').style.display = 'none';
-      document.getElementById('payment-step-3').style.display = 'none';
-      document.getElementById('payment-btn').style.display = 'block';
+      const modal = document.getElementById('payment-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+      }
+      
+      const step1 = document.getElementById('payment-step-1');
+      const step2 = document.getElementById('payment-step-2');
+      const step3 = document.getElementById('payment-step-3');
+      const paymentBtn = document.getElementById('payment-btn');
+      
+      if (step1) step1.style.display = 'block';
+      if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'none';
+      if (paymentBtn) paymentBtn.style.display = 'block';
       
       // Reset form
-      document.getElementById('card-number').value = '';
-      document.getElementById('card-expiry').value = '';
-      document.getElementById('card-cvv').value = '';
-      document.getElementById('card-holder').value = '';
-      document.getElementById('agree-terms').checked = false;
+      const cardNumber = document.getElementById('card-number');
+      const cardExpiry = document.getElementById('card-expiry');
+      const cardCvv = document.getElementById('card-cvv');
+      const cardHolder = document.getElementById('card-holder');
+      const agreeTerms = document.getElementById('agree-terms');
+      
+      if (cardNumber) cardNumber.value = '';
+      if (cardExpiry) cardExpiry.value = '';
+      if (cardCvv) cardCvv.value = '';
+      if (cardHolder) cardHolder.value = '';
+      if (agreeTerms) agreeTerms.checked = false;
     }
 
     function processPayment() {
@@ -3198,7 +3545,7 @@
             <div class="contract-section">
               <h3>BÊN SỬ DỤNG DỊCH VỤ (Bên B)</h3>
               <p><strong>${user.name}</strong></p>
-              <p>Email: ${user.email}</p>
+              <p>Email: ${user.username}</p>
               <p>Số điện thoại: ${user.phone || 'Chưa cập nhật'}</p>
               <p>Địa chỉ: ${user.address || 'Chưa cập nhật'}</p>
             </div>
@@ -3276,7 +3623,7 @@
                   <div class="digital-signature">
                     <div class="signature-stamp">
                       ĐÃ KÝ ĐIỆN TỬ<br>
-                      <small>${user.email}</small><br>
+                      <small>${user.username}</small><br>
                       <small>${contractDate}</small>
                     </div>
                   </div>
@@ -3298,7 +3645,13 @@
     }
 
     function closeContractModal() {
-      document.getElementById('contract-modal').style.display = 'none';
+      const modal = document.getElementById('contract-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+      }
     }
 
     function downloadContract() {
@@ -3884,7 +4237,7 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
 
       // Clear all modals on page load to ensure UI is not blocked
       console.log('Clearing all modals on page load...');
-      const modalIds = ['loginModal', 'registerModal', 'planSelectionModal', 'vehicleSelectionModal', 'paymentModal', 'contractModal'];
+      const modalIds = ['loginModal', 'registerModal', 'payment-modal', 'contract-modal'];
       modalIds.forEach(modalId => {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -3897,28 +4250,162 @@ Báo cáo tạo lúc: ${new Date().toLocaleString('vi-VN')}
       });
 
       // Also remove any dynamic modals that might exist
-      const dynamicModals = document.querySelectorAll('.plan-selection-modal, .vehicle-selection-modal, .modal');
+      const dynamicModals = document.querySelectorAll('.plan-selection-modal, .vehicle-selection-modal');
       dynamicModals.forEach(modal => {
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        modal.style.pointerEvents = 'none';
-        console.log('Cleared dynamic modal');
+        modal.remove();
+        console.log('Removed dynamic modal');
       });
 
-      // Check for invisible overlays blocking UI
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(el => {
-        const style = window.getComputedStyle(el);
-        if (style.position === 'fixed' && (style.zIndex > 100 || style.zIndex === 'auto')) {
-          console.log('Found potential blocking element:', el, 'z-index:', style.zIndex);
-          // Temporarily hide it
-          el.style.display = 'none';
-        }
-      });
+      // Ensure main content is visible and interactive
+      const mainContent = document.querySelector('main');
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      
+      if (mainContent) {
+        mainContent.style.display = 'block';
+        mainContent.style.pointerEvents = 'auto';
+      }
+      if (header) {
+        header.style.display = 'block';
+        header.style.pointerEvents = 'auto';
+      }
+      if (footer) {
+        footer.style.display = 'block';
+        footer.style.pointerEvents = 'auto';
+      }
 
       console.log('Page initialization complete - UI should be clickable now');
     });
+
+    // Payment Sub-Tab Functions
+    function showPaymentSubTab(tabName) {
+      // Remove active class from all sub-tabs and contents
+      document.querySelectorAll('.payment-sub-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.payment-sub-content').forEach(content => content.classList.remove('active'));
+      
+      // Add active class to selected tab and content
+      event.target.classList.add('active');
+      document.getElementById(`${tabName}-subtab`).classList.add('active');
+      
+      // Update current plan info when showing payment tab
+      if (tabName === 'payment' && auth.currentUser && auth.currentUser.selectedPlan) {
+        updateCurrentPlanInfo();
+      }
+    }
+
+    function updateCurrentPlanInfo() {
+      const plan = auth.currentUser.selectedPlan;
+      if (plan) {
+        document.getElementById('current-plan-name').textContent = plan.name;
+        document.getElementById('current-plan-price').textContent = plan.price;
+        document.getElementById('current-plan-features').textContent = plan.features.join(' • ');
+        document.getElementById('plan-payment-amount').textContent = plan.price.split('/')[0];
+      }
+    }
+
+    function selectPaymentMethod(method) {
+      // Remove selected class from all methods
+      document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
+      
+      // Add selected class to clicked method
+      event.currentTarget.classList.add('selected');
+      
+      // Update radio button
+      document.querySelector(`input[name="payment-method"][value="${method}"]`).checked = true;
+    }
+
+    function processPayment() {
+      const selectedMethod = document.querySelector('input[name="payment-method"]:checked');
+      if (!selectedMethod) {
+        showToast('Vui lòng chọn phương thức thanh toán', 'error');
+        return;
+      }
+      
+      showToast('Đang xử lý thanh toán...', 'info');
+      
+      // Simulate payment processing
+      setTimeout(() => {
+        showToast('Thanh toán thành công!', 'success');
+        
+        // Add to payment history
+        const newRow = `
+          <tr>
+            <td>#PAY00${Date.now().toString().slice(-3)}</td>
+            <td>${new Date().toLocaleString('vi-VN')}</td>
+            <td>Thanh toán gói ${auth.currentUser.selectedPlan.name}</td>
+            <td>${auth.currentUser.selectedPlan.price.split('/')[0]}</td>
+            <td>${getMethodName(selectedMethod.value)}</td>
+            <td><span class="status success">Thành công</span></td>
+            <td><button class="action-btn" onclick="viewPaymentDetail('PAY00${Date.now().toString().slice(-3)}')">Chi tiết</button></td>
+          </tr>
+        `;
+        document.getElementById('payment-history-table').insertAdjacentHTML('afterbegin', newRow);
+      }, 2000);
+    }
+
+    function getMethodName(value) {
+      const names = {
+        'momo': 'Ví MoMo',
+        'zalopay': 'ZaloPay', 
+        'credit-card': 'Thẻ tín dụng',
+        'bank-transfer': 'Chuyển khoản'
+      };
+      return names[value] || value;
+    }
+
+    function toggleAutoPay() {
+      const checkbox = document.getElementById('autopay-enabled');
+      const settings = document.getElementById('autopay-settings');
+      const statusText = document.getElementById('autopay-status-text');
+      
+      if (checkbox.checked) {
+        settings.style.display = 'block';
+        statusText.textContent = 'Bật - Thanh toán tự động mỗi tháng';
+        showToast('Đã bật thanh toán tự động', 'success');
+      } else {
+        settings.style.display = 'none';
+        statusText.textContent = 'Tắt - Bạn sẽ thanh toán thủ công mỗi tháng';
+        showToast('Đã tắt thanh toán tự động', 'info');
+      }
+    }
+
+    function selectAutoPayMethod(method) {
+      document.querySelector(`input[name="autopay-method"][value="${method}"]`).checked = true;
+      
+      // Visual feedback
+      document.querySelectorAll('.autopay-method').forEach(el => el.style.background = 'rgba(255,255,255,.05)');
+      event.currentTarget.style.background = 'rgba(79,140,255,.2)';
+    }
+
+    function updateAutoPaySettings() {
+      const day = document.getElementById('autopay-day').value;
+      showToast(`Đã cập nhật ngày thanh toán: ${day === 'end' ? 'Cuối tháng' : 'Ngày ' + day}`, 'info');
+    }
+
+    function saveAutoPaySettings() {
+      const enabled = document.getElementById('autopay-enabled').checked;
+      const day = document.getElementById('autopay-day').value;
+      const method = document.querySelector('input[name="autopay-method"]:checked').value;
+      
+      // Save to localStorage
+      const autoPaySettings = {
+        enabled,
+        day,
+        method,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem('autoPaySettings', JSON.stringify(autoPaySettings));
+      
+      showToast('Đã lưu cài đặt thanh toán tự động!', 'success');
+    }
+
+    function testAutoPay() {
+      showToast('Đang test thanh toán tự động...', 'info');
+      
+      setTimeout(() => {
+        showToast('Test thành công! Hệ thống hoạt động bình thường.', 'success');
+      }, 1500);
+    }
   </script>
 </body>
 </html>
