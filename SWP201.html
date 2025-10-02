@@ -862,15 +862,21 @@
     class AuthSystem {
       constructor() {
         this.currentUser = null;
+        this.selectedPlanId = null;
+        this.selectedPlan = null;
+        this.selectedVehicleId = null;
         this.init();
       }
 
       init() {
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-          this.currentUser = JSON.parse(savedUser);
-          this.showDashboard();
-        }
+        // Disable auto-login to prevent plan selection modal on page load
+        // User must manually click login button
+        
+        // const savedUser = localStorage.getItem('currentUser');
+        // if (savedUser) {
+        //   this.currentUser = JSON.parse(savedUser);
+        //   this.showDashboard();
+        // }
       }
 
       login(username, password, role) {
