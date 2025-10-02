@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="SWP201 - Hệ thống đổi pin xe điện thông minh - Quản lý người dùng, trạm, thanh toán với bản đồ tương tác" />
-  <title>SWP201 - Hệ Thống Đổi Pin Xe Điện</title>
+  <meta name="description" content="SWP201 - Hệ thống đổi pin xe máy điện thông minh - Quản lý người dùng, trạm, thanh toán với bản đồ tương tác" />
+  <title>SWP201 - Hệ Thống Đổi Pin Xe Máy Điện</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
   <style>
     :root{
@@ -411,6 +411,22 @@
     .loading-message{text-align:center;padding:60px 20px;color:var(--muted)}
     .loading-spinner{font-size:2rem;margin-bottom:15px;animation:spin 2s linear infinite}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* Vehicle Selection Modal */
+    .vehicle-selection-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .vehicle-selection-content{background:var(--card);border-radius:var(--radius);padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto}
+    .vehicle-selection-header{text-align:center;margin-bottom:30px}
+    .vehicle-selection-header h2{color:var(--text);margin-bottom:10px}
+    .vehicle-selection-header p{color:var(--muted);margin-bottom:0}
+    .vehicles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:20px}
+    .vehicle-option{background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:20px;cursor:pointer;transition:all .3s ease;text-align:center}
+    .vehicle-option:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:var(--shadow)}
+    .vehicle-option.selected{border-color:var(--brand);background:rgba(79,140,255,.1)}
+    .vehicle-icon{font-size:3rem;margin-bottom:15px;display:block}
+    .vehicle-name{font-size:1.2rem;font-weight:600;color:var(--text);margin-bottom:8px}
+    .vehicle-details{color:var(--muted);font-size:.9rem;line-height:1.4}
+    .vehicle-battery{margin-top:12px;padding:8px 12px;background:rgba(76,175,80,.1);border-radius:6px;color:#4CAF50;font-weight:500}
+    .modal-actions{display:flex;gap:15px;justify-content:center;margin-top:25px}
     
     /* Responsive for User Dashboard */
     @media (max-width:768px){
@@ -863,6 +879,12 @@
       showDashboard() {
         if (!this.currentUser) return;
 
+        // For users, show vehicle selection first if no vehicle selected
+        if (this.currentUser.role === 'user' && !this.currentUser.selectedVehicle) {
+          this.showVehicleSelection();
+          return;
+        }
+
         document.querySelector('main').style.display = 'none';
         document.querySelector('header').style.display = 'none';
         document.querySelector('footer').style.display = 'none';
@@ -915,7 +937,18 @@
                     <div class="user-avatar">${this.currentUser.name.charAt(0)}</div>
                     <div>
                       <div>${this.currentUser.name}</div>
-                      <div class="muted">Người dùng</div>
+                      <div class="muted">
+                        ${this.currentUser.selectedVehicle ? 
+                          `${this.currentUser.selectedVehicle.icon} ${this.currentUser.selectedVehicle.name}` : 
+                          'Người dùng'
+                        }
+                      </div>
+                    </div>
+                    <div class="vehicle-quick-info" style="margin: 0 15px; text-align: right;">
+                      ${this.currentUser.selectedVehicle ? `
+                        <div style="color: var(--brand); font-weight: 600;">${this.currentUser.selectedVehicle.currentCharge}%</div>
+                        <div style="color: var(--muted); font-size: 0.8rem;">Pin hiện tại</div>
+                      ` : ''}
                     </div>
                     <button class="logout-btn" onclick="auth.logout()">Đăng xuất</button>
                   </div>
@@ -1649,6 +1682,102 @@
             </div>
           </div>
         `;
+      }
+
+      showVehicleSelection() {
+        // Hide other content
+        document.querySelector('main').style.display = 'none';
+        document.querySelector('header').style.display = 'none';
+        document.querySelector('footer').style.display = 'none';
+
+        // Remove existing vehicle selection modal if any
+        const existing = document.getElementById('vehicleSelectionModal');
+        if (existing) existing.remove();
+
+        // Get user vehicles from BatteryHealthSystem
+        let userVehicles = [];
+        if (window.batteryHealthSystem) {
+          userVehicles = Object.values(window.batteryHealthSystem.userBatteries);
+        } else {
+          // Create temporary instance to get vehicles
+          const tempSystem = new BatteryHealthSystem();
+          userVehicles = Object.values(tempSystem.userBatteries);
+        }
+
+        // Create vehicle selection modal
+        const modal = document.createElement('div');
+        modal.id = 'vehicleSelectionModal';
+        modal.className = 'vehicle-selection-modal';
+        modal.innerHTML = `
+          <div class="vehicle-selection-content">
+            <div class="vehicle-selection-header">
+              <h2>🏍️ Chọn Xe Máy Điện</h2>
+              <p>Chọn xe máy điện để vào dashboard quản lý</p>
+            </div>
+            <div class="vehicles-grid">
+              ${userVehicles.map(vehicle => `
+                <div class="vehicle-option" data-vehicle-id="${vehicle.id}">
+                  <span class="vehicle-icon">${vehicle.icon}</span>
+                  <div class="vehicle-name">${vehicle.name}</div>
+                  <div class="vehicle-details">
+                    Pin: ${vehicle.batteryCapacity} kWh<br>
+                    Mã: ${vehicle.id}
+                  </div>
+                  <div class="vehicle-battery">
+                    ${vehicle.currentCharge}% pin - ${vehicle.health}% health
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-primary" onclick="auth.selectVehicleAndContinue()" disabled id="continueBtn">
+                Tiếp tục vào Dashboard
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add click handlers for vehicle selection
+        modal.querySelectorAll('.vehicle-option').forEach(option => {
+          option.addEventListener('click', () => {
+            // Remove selected class from all options
+            modal.querySelectorAll('.vehicle-option').forEach(opt => opt.classList.remove('selected'));
+            // Add selected class to clicked option
+            option.classList.add('selected');
+            // Enable continue button
+            document.getElementById('continueBtn').disabled = false;
+            // Store selected vehicle id
+            this.selectedVehicleId = option.dataset.vehicleId;
+          });
+        });
+      }
+
+      selectVehicleAndContinue() {
+        if (!this.selectedVehicleId) return;
+
+        // Find selected vehicle
+        let userVehicles = [];
+        if (window.batteryHealthSystem) {
+          userVehicles = Object.values(window.batteryHealthSystem.userBatteries);
+        } else {
+          const tempSystem = new BatteryHealthSystem();
+          userVehicles = Object.values(tempSystem.userBatteries);
+        }
+
+        const selectedVehicle = userVehicles.find(v => v.id === this.selectedVehicleId);
+        if (selectedVehicle) {
+          // Store selected vehicle in current user
+          this.currentUser.selectedVehicle = selectedVehicle;
+          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+
+          // Remove modal
+          document.getElementById('vehicleSelectionModal').remove();
+
+          // Continue to dashboard
+          this.showDashboard();
+        }
       }
     }
 
@@ -2851,37 +2980,43 @@
           if (Object.keys(this.userBatteries).length === 0) {
             const sampleVehicles = [
               {
-                id: 'VEH001',
-                name: 'VinFast VF8',
+                id: 'BIKE001',
+                name: 'VinFast Klara A2',
+                type: 'scooter',
                 batteryId: 'BAT001',
-                batteryCapacity: 87.7,
-                currentCharge: 75,
-                health: 92,
-                cycleCount: 245,
-                manufactureDate: '2023-06-15',
-                lastChecked: new Date().toISOString()
-              },
-              {
-                id: 'VEH002', 
-                name: 'VinFast VF9',
-                batteryId: 'BAT002',
-                batteryCapacity: 123,
-                currentCharge: 45,
-                health: 88,
-                cycleCount: 412,
-                manufactureDate: '2023-03-22',
-                lastChecked: new Date().toISOString()
-              },
-              {
-                id: 'VEH003',
-                name: 'Tesla Model 3',
-                batteryId: 'BAT003',
-                batteryCapacity: 75,
-                currentCharge: 89,
-                health: 95,
+                batteryCapacity: 2.5, // kWh
+                currentCharge: 85,
+                health: 94,
                 cycleCount: 156,
-                manufactureDate: '2024-01-10',
-                lastChecked: new Date().toISOString()
+                manufactureDate: '2024-02-15',
+                lastChecked: new Date().toISOString(),
+                icon: '🛵'
+              },
+              {
+                id: 'BIKE002', 
+                name: 'VinFast Ludo',
+                type: 'scooter',
+                batteryId: 'BAT002',
+                batteryCapacity: 1.8, // kWh
+                currentCharge: 62,
+                health: 89,
+                cycleCount: 203,
+                manufactureDate: '2023-11-08',
+                lastChecked: new Date().toISOString(),
+                icon: '🛴'
+              },
+              {
+                id: 'BIKE003',
+                name: 'Honda PCX Electric',
+                type: 'scooter',
+                batteryId: 'BAT003',
+                batteryCapacity: 1.3, // kWh
+                currentCharge: 78,
+                health: 91,
+                cycleCount: 124,
+                manufactureDate: '2024-05-20',
+                lastChecked: new Date().toISOString(),
+                icon: '🏍️'
               }
             ];
 
@@ -2966,46 +3101,57 @@
         }
 
         renderBatteryHealthDashboard() {
+          // Auto-select vehicle from current user
+          const currentUser = auth?.currentUser;
+          if (currentUser?.selectedVehicle && !this.currentVehicle) {
+            const vehicleId = currentUser.selectedVehicle.id;
+            this.currentVehicle = this.userBatteries[vehicleId] || currentUser.selectedVehicle;
+          }
+
           return `
             <div class="battery-health-dashboard">
               <div class="dashboard-header">
-                <h2>🔋 Quản Lý Pin Xe Điện</h2>
+                <h2>🔋 Quản Lý Pin Xe Máy Điện</h2>
                 <button class="btn btn-secondary refresh-data-btn">
                   🔄 Cập Nhật Dữ Liệu
                 </button>
               </div>
 
-              <div class="vehicle-selection">
-                <h3>Chọn Xe Của Bạn</h3>
-                <div class="vehicle-grid">
-                  ${Object.values(this.userBatteries).map(vehicle => `
-                    <div class="vehicle-card ${this.currentVehicle?.id === vehicle.id ? 'selected' : ''}">
-                      <div class="vehicle-info">
-                        <h4>${vehicle.name}</h4>
-                        <p>ID: ${vehicle.id}</p>
-                        <div class="battery-preview">
-                          <div class="charge-level">
-                            <span class="charge-percent">${vehicle.currentCharge}%</span>
-                            <div class="charge-bar">
-                              <div class="charge-fill" style="width: ${vehicle.currentCharge}%"></div>
-                            </div>
-                          </div>
-                          <div class="health-indicator">
-                            <span class="health-percent ${this.getHealthClass(vehicle.health)}">
-                              ${vehicle.health}% Health
-                            </span>
+              ${this.currentVehicle ? this.renderDetailedView() : this.renderVehicleSelection()}
+            </div>
+          `;
+        }
+
+        renderVehicleSelection() {
+          return `
+            <div class="vehicle-selection">
+              <h3>Chọn Xe Máy Điện</h3>
+              <div class="vehicle-grid">
+                ${Object.values(this.userBatteries).map(vehicle => `
+                  <div class="vehicle-card">
+                    <div class="vehicle-info">
+                      <h4>${vehicle.icon} ${vehicle.name}</h4>
+                      <p>ID: ${vehicle.id}</p>
+                      <div class="battery-preview">
+                        <div class="charge-level">
+                          <span class="charge-percent">${vehicle.currentCharge}%</span>
+                          <div class="charge-bar">
+                            <div class="charge-fill" style="width: ${vehicle.currentCharge}%"></div>
                           </div>
                         </div>
+                        <div class="health-indicator">
+                          <span class="health-percent ${this.getHealthClass(vehicle.health)}">
+                            ${vehicle.health}% Health
+                          </span>
+                        </div>
                       </div>
-                      <button class="btn btn-primary select-vehicle-btn" data-vehicle-id="${vehicle.id}">
-                        Chi Tiết
-                      </button>
                     </div>
-                  `).join('')}
-                </div>
+                    <button class="btn btn-primary select-vehicle-btn" data-vehicle-id="${vehicle.id}">
+                      Chi Tiết
+                    </button>
+                  </div>
+                `).join('')}
               </div>
-
-              ${this.currentVehicle ? this.renderDetailedView() : ''}
             </div>
           `;
         }
