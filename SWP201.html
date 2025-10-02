@@ -517,7 +517,7 @@
           <button class="btn btn-primary" onclick="showLogin()">Truy cập hệ thống</button>
           <button class="btn" onclick="scrollToId('stations')">Xem bản đồ trạm</button>
           <!-- Debug button -->
-          <button class="btn" onclick="alert('Button clicked! UI is working')" style="background: red; color: white;">🔍 Test Click</button>
+          <button class="btn" onclick="testBasicJS()" style="background: red; color: white;">🔍 Test JS</button>
         </div>
       </div>
     </section>
@@ -2109,63 +2109,41 @@
       });
     }
 
-    // Modal functions with enhanced error handling
+    // Simple emergency showLogin function
     function showLogin() {
-      console.log('showLogin() called - opening login modal');
-      try {
-        // Clear any existing modals first
-        const allModals = document.querySelectorAll('.modal');
-        allModals.forEach(modal => {
-          modal.style.display = 'none';
-        });
-        
-        const loginModal = document.getElementById('loginModal');
-        if (loginModal) {
-          loginModal.style.display = 'block';
-          console.log('Login modal opened successfully');
-          
-          // Focus on first input
-          const firstInput = loginModal.querySelector('input[type="email"]');
-          if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-          }
-        } else {
-          console.error('Login modal not found!');
-          alert('Lỗi: Không tìm thấy form đăng nhập. Vui lòng refresh trang.');
-        }
-      } catch (error) {
-        console.error('Error in showLogin():', error);
-        alert('Lỗi khi mở form đăng nhập: ' + error.message);
+      alert('showLogin function called successfully!');
+      console.log('showLogin() called - testing basic functionality');
+      
+      // Simple approach - just try to show the modal
+      const modal = document.getElementById('loginModal');
+      if (modal) {
+        modal.style.display = 'block';
+        console.log('Modal display set to block');
+      } else {
+        alert('Modal not found - this is the problem!');
+        console.error('loginModal element not found');
       }
     }
 
     function showRegister() {
-      console.log('showRegister() called - opening register modal');
-      try {
-        // Clear any existing modals first
-        const allModals = document.querySelectorAll('.modal');
-        allModals.forEach(modal => {
-          modal.style.display = 'none';
-        });
-        
-        const registerModal = document.getElementById('registerModal');
-        if (registerModal) {
-          registerModal.style.display = 'block';
-          console.log('Register modal opened successfully');
-          
-          // Focus on first input
-          const firstInput = registerModal.querySelector('input[type="text"]');
-          if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-          }
-        } else {
-          console.error('Register modal not found!');
-          alert('Lỗi: Không tìm thấy form đăng ký. Vui lòng refresh trang.');
-        }
-      } catch (error) {
-        console.error('Error in showRegister():', error);
-        alert('Lỗi khi mở form đăng ký: ' + error.message);
+      alert('showRegister function called successfully!');
+      console.log('showRegister() called - testing basic functionality');
+      
+      const modal = document.getElementById('registerModal');
+      if (modal) {
+        modal.style.display = 'block';
+        console.log('Register modal display set to block');
+      } else {
+        alert('Register Modal not found!');
+        console.error('registerModal element not found');
       }
+    }
+
+    // Test function for debugging
+    function testBasicJS() {
+      alert('JavaScript is working! This means the issue is with the modal elements or CSS.');
+      console.log('JavaScript execution is working fine');
+      return true;
     }
 
     function closeModal(modalId) {
