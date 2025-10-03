@@ -1,0 +1,1 @@
+//đồng bộ tất cả routes
