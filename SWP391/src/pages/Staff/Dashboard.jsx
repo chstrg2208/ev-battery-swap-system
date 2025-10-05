@@ -14,7 +14,7 @@ const StaffDashboard = () => {
       description: 'CRUD trạm sạc: thêm, sửa, xóa, xem chi tiết thông tin trạm',
       icon: '🏢',
       color: '#19c37d',
-      route: '/station-management'
+      route: 'station-management'
     },
     {
       id: 'battery-inventory',
