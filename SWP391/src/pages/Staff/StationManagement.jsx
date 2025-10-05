@@ -1,99 +1,23 @@
 // Staff Station Management
 // CRUD operations for battery swap stations with detailed features
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useStationStore from '../../store/stationSlice';
 
 const StaffStationManagement = () => {
-  const [stations, setStations] = useState([
-    {
-      id: 1,
-      name: "Trạm đổi pin Quận 1",
-      address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
-      status: "Hoạt động",
-      totalSlots: 20,
-      availableSlots: 15,
-      phone: "028-1234-5678",
-      manager: "Nguyễn Văn A",
-      capacity: "20 slots",
-      todayTransactions: 45,
-      totalBatteries: 18,
-      availableBatteries: 15,
-      chargingBatteries: 3,
-      maintenanceBatteries: 0,
-      lastMaintenance: "2024-01-10",
-      nextMaintenance: "2024-02-10",
-      operatingHours: "24/7",
-      services: ["Đổi pin", "Sạc nhanh", "Bảo trì"],
-      rating: 4.8,
-      totalTransactions: 1250
-    },
-    {
-      id: 2,
-      name: "Trạm đổi pin Quận 3",
-      address: "456 Lê Văn Sỹ, Quận 3, TP.HCM",
-      status: "Bảo trì",
-      totalSlots: 15,
-      availableSlots: 0,
-      phone: "028-2345-6789",
-      manager: "Trần Thị B",
-      capacity: "15 slots",
-      todayTransactions: 0,
-      totalBatteries: 12,
-      availableBatteries: 0,
-      chargingBatteries: 8,
-      maintenanceBatteries: 4,
-      lastMaintenance: "2024-01-15",
-      nextMaintenance: "2024-01-20",
-      operatingHours: "Tạm ngưng",
-      services: ["Đổi pin", "Sạc nhanh"],
-      rating: 4.5,
-      totalTransactions: 890
-    },
-    {
-      id: 3,
-      name: "Trạm đổi pin Quận 7",
-      address: "789 Nguyễn Thị Thập, Quận 7, TP.HCM",
-      status: "Hoạt động",
-      totalSlots: 25,
-      availableSlots: 18,
-      phone: "028-3456-7890",
-      manager: "Lê Văn C",
-      capacity: "25 slots",
-      todayTransactions: 67,
-      totalBatteries: 22,
-      availableBatteries: 18,
-      chargingBatteries: 4,
-      maintenanceBatteries: 0,
-      lastMaintenance: "2024-01-08",
-      nextMaintenance: "2024-02-08",
-      operatingHours: "6:00 - 22:00",
-      services: ["Đổi pin", "Sạc nhanh", "Bảo trì", "Hỗ trợ 24/7"],
-      rating: 4.9,
-      totalTransactions: 2100
-    },
-    {
-      id: 4,
-      name: "Trạm đổi pin Quận 10",
-      address: "321 Cách Mạng Tháng 8, Quận 10, TP.HCM",
-      status: "Hoạt động",
-      totalSlots: 18,
-      availableSlots: 12,
-      phone: "028-4567-8901",
-      manager: "Phạm Thị D",
-      capacity: "18 slots",
-      todayTransactions: 34,
-      totalBatteries: 16,
-      availableBatteries: 12,
-      chargingBatteries: 3,
-      maintenanceBatteries: 1,
-      lastMaintenance: "2024-01-12",
-      nextMaintenance: "2024-02-12",
-      operatingHours: "5:30 - 23:30",
-      services: ["Đổi pin", "Sạc nhanh"],
-      rating: 4.6,
-      totalTransactions: 1560
-    }
-  ]);
+  // Zustand store
+  const { 
+    stations, 
+    stationStats, 
+    isLoading, 
+    error, 
+    fetchStations, 
+    createStation, 
+    updateStation, 
+    deleteStation, 
+    fetchStationStats,
+    clearError 
+  } = useStationStore();
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -110,47 +34,45 @@ const StaffStationManagement = () => {
   });
 
   // User role simulation (in real app, this would come from auth context)
-  const currentUserRole = 'staff'; // 'staff', 'manager', 'admin'
-  const canEditStations = ['manager', 'admin'].includes(currentUserRole);
+  const currentUserRole = 'staff'; // 'user', 'staff', 'admin'
+  const canEditStations = ['admin'].includes(currentUserRole);
   const canDeleteStations = ['admin'].includes(currentUserRole);
   const canAddStations = ['admin'].includes(currentUserRole);
 
-  const handleAddStation = () => {
-    const newStation = {
-      id: stations.length + 1,
-      ...editingStation,
-      status: "Hoạt động",
-      availableSlots: editingStation.totalSlots,
-      todayTransactions: 0,
-      totalBatteries: editingStation.totalSlots,
-      availableBatteries: editingStation.totalSlots,
-      chargingBatteries: 0,
-      maintenanceBatteries: 0,
-      lastMaintenance: new Date().toISOString().split('T')[0],
-      nextMaintenance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      rating: 0,
-      totalTransactions: 0,
-      capacity: `${editingStation.totalSlots} slots`
-    };
-    setStations([...stations, newStation]);
-    setShowAddModal(false);
-    setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+  // Load data on component mount
+  useEffect(() => {
+    fetchStations();
+    fetchStationStats();
+  }, [fetchStations, fetchStationStats]);
+
+  const handleAddStation = async () => {
+    const result = await createStation(editingStation);
+    if (result) {
+      setShowAddModal(false);
+      setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+      // Refresh stats after adding
+      fetchStationStats();
+    }
   };
 
-  const handleEditStation = () => {
-    setStations(stations.map(station => 
-      station.id === selectedStation.id 
-        ? { ...station, ...editingStation, availableSlots: editingStation.totalSlots, capacity: `${editingStation.totalSlots} slots` }
-        : station
-    ));
-    setShowEditModal(false);
-    setSelectedStation(null);
-    setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+  const handleEditStation = async () => {
+    const result = await updateStation(selectedStation.id, editingStation);
+    if (result) {
+      setShowEditModal(false);
+      setSelectedStation(null);
+      setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+      // Refresh stats after updating
+      fetchStationStats();
+    }
   };
 
-  const handleDeleteStation = (stationId) => {
+  const handleDeleteStation = async (stationId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa trạm này? Hành động này không thể hoàn tác.')) {
-      setStations(stations.filter(station => station.id !== stationId));
+      const result = await deleteStation(stationId);
+      if (result) {
+        // Refresh stats after deleting
+        fetchStationStats();
+      }
     }
   };
 
@@ -189,20 +111,15 @@ const StaffStationManagement = () => {
     return '#ff4757';
   };
 
-  // Statistics
-  const getStationStats = () => {
-    const stats = {
-      total: stations.length,
-      active: stations.filter(s => s.status === 'Hoạt động').length,
-      maintenance: stations.filter(s => s.status === 'Bảo trì').length,
-      totalTransactions: stations.reduce((sum, s) => sum + s.todayTransactions, 0),
-      totalBatteries: stations.reduce((sum, s) => sum + s.totalBatteries, 0),
-      availableBatteries: stations.reduce((sum, s) => sum + s.availableBatteries, 0)
-    };
-    return stats;
+  // Use stats from store or calculate from stations
+  const stats = stationStats || {
+    total: stations.length,
+    active: stations.filter(s => s.status === 'Hoạt động').length,
+    maintenance: stations.filter(s => s.status === 'Bảo trì').length,
+    totalTransactions: stations.reduce((sum, s) => sum + s.todayTransactions, 0),
+    totalBatteries: stations.reduce((sum, s) => sum + s.totalBatteries, 0),
+    availableBatteries: stations.reduce((sum, s) => sum + s.availableBatteries, 0)
   };
-
-  const stats = getStationStats();
 
   return (
     <div className="staff-station-management" style={{ padding: '20px', background: '#1a202c', minHeight: '100vh', color: 'white' }}>
@@ -210,6 +127,50 @@ const StaffStationManagement = () => {
         <h1 style={{ color: '#FFFFFF', marginBottom: '10px', fontSize: '28px' }}>🏢 Quản lý trạm đổi pin</h1>
         <p style={{ color: '#E0E0E0', fontSize: '16px' }}>Quản lý thông tin các trạm đổi pin trong hệ thống</p>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div style={{
+          background: 'rgba(255, 71, 87, 0.1)',
+          border: '1px solid #ff4757',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px',
+          color: '#ff4757',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>⚠️ {error}</span>
+          <button 
+            onClick={clearError}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#ff4757',
+              cursor: 'pointer',
+              fontSize: '18px'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '40px',
+          background: 'rgba(26, 32, 44, 0.8)',
+          borderRadius: '12px',
+          marginBottom: '20px'
+        }}>
+          <div style={{ color: '#6ab7ff', fontSize: '18px' }}>⏳ Đang tải dữ liệu...</div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="stats-cards" style={{ 
@@ -347,7 +308,7 @@ const StaffStationManagement = () => {
             fontSize: '14px',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            ⚠️ Chỉ Admin/Manager mới có thể thêm trạm mới
+            ⚠️ Chỉ Admin mới có thể thêm trạm mới
           </div>
         )}
       </div>
@@ -478,6 +439,491 @@ const StaffStationManagement = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Add Station Modal */}
+      {showAddModal && (
+        <div className="modal" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'rgba(26, 32, 44, 0.95)',
+            borderRadius: '12px',
+            padding: '30px',
+            width: '600px',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div className="modal-header" style={{ marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#FFFFFF' }}>➕ Thêm trạm mới</h3>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handleAddStation(); }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Tên trạm *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStation.name}
+                    onChange={(e) => setEditingStation({...editingStation, name: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập tên trạm"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Số điện thoại *
+                  </label>
+                  <input
+                    type="tel"
+                    value={editingStation.phone}
+                    onChange={(e) => setEditingStation({...editingStation, phone: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập số điện thoại"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Địa chỉ *
+                </label>
+                <textarea
+                  value={editingStation.address}
+                  onChange={(e) => setEditingStation({...editingStation, address: e.target.value})}
+                  required
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Nhập địa chỉ chi tiết"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Người quản lý *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStation.manager}
+                    onChange={(e) => setEditingStation({...editingStation, manager: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập tên người quản lý"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Tổng số slot *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={editingStation.totalSlots}
+                    onChange={(e) => setEditingStation({...editingStation, totalSlots: parseInt(e.target.value)})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập số slot"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Giờ hoạt động *
+                </label>
+                <input
+                  type="text"
+                  value={editingStation.operatingHours}
+                  onChange={(e) => setEditingStation({...editingStation, operatingHours: e.target.value})}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px'
+                  }}
+                  placeholder="VD: 6:00 - 22:00 hoặc 24/7"
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '10px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Dịch vụ có sẵn
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  {['Đổi pin', 'Sạc nhanh', 'Bảo trì', 'Hỗ trợ 24/7'].map(service => (
+                    <label key={service} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      color: '#E0E0E0', 
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={editingStation.services.includes(service)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditingStation({...editingStation, services: [...editingStation.services, service]});
+                          } else {
+                            setEditingStation({...editingStation, services: editingStation.services.filter(s => s !== service)});
+                          }
+                        }}
+                        style={{ marginRight: '8px' }}
+                      />
+                      {service}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#E0E0E0',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  style={{
+                    background: 'linear-gradient(135deg, #6ab7ff, #4a90e2)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(106, 183, 255, 0.3)'
+                  }}
+                >
+                  Thêm trạm
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Station Modal */}
+      {showEditModal && selectedStation && (
+        <div className="modal" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'rgba(26, 32, 44, 0.95)',
+            borderRadius: '12px',
+            padding: '30px',
+            width: '600px',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div className="modal-header" style={{ marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#FFFFFF' }}>✏️ Sửa thông tin trạm: {selectedStation.name}</h3>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handleEditStation(); }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Tên trạm *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStation.name}
+                    onChange={(e) => setEditingStation({...editingStation, name: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập tên trạm"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Số điện thoại *
+                  </label>
+                  <input
+                    type="tel"
+                    value={editingStation.phone}
+                    onChange={(e) => setEditingStation({...editingStation, phone: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập số điện thoại"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Địa chỉ *
+                </label>
+                <textarea
+                  value={editingStation.address}
+                  onChange={(e) => setEditingStation({...editingStation, address: e.target.value})}
+                  required
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Nhập địa chỉ chi tiết"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Người quản lý *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStation.manager}
+                    onChange={(e) => setEditingStation({...editingStation, manager: e.target.value})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập tên người quản lý"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                    Tổng số slot *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={editingStation.totalSlots}
+                    onChange={(e) => setEditingStation({...editingStation, totalSlots: parseInt(e.target.value)})}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px'
+                    }}
+                    placeholder="Nhập số slot"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Giờ hoạt động *
+                </label>
+                <input
+                  type="text"
+                  value={editingStation.operatingHours}
+                  onChange={(e) => setEditingStation({...editingStation, operatingHours: e.target.value})}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px'
+                  }}
+                  placeholder="VD: 6:00 - 22:00 hoặc 24/7"
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#FFFFFF', marginBottom: '10px', fontSize: '14px', fontWeight: 'bold' }}>
+                  Dịch vụ có sẵn
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  {['Đổi pin', 'Sạc nhanh', 'Bảo trì', 'Hỗ trợ 24/7'].map(service => (
+                    <label key={service} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      color: '#E0E0E0', 
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={editingStation.services.includes(service)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditingStation({...editingStation, services: [...editingStation.services, service]});
+                          } else {
+                            setEditingStation({...editingStation, services: editingStation.services.filter(s => s !== service)});
+                          }
+                        }}
+                        style={{ marginRight: '8px' }}
+                      />
+                      {service}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedStation(null);
+                    setEditingStation({ name: '', address: '', phone: '', manager: '', totalSlots: 0, operatingHours: '', services: [] });
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#E0E0E0',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  style={{
+                    background: 'linear-gradient(135deg, #ffa500, #ff8c00)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(255, 165, 0, 0.3)'
+                  }}
+                >
+                  Cập nhật
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Detail Station Modal */}
       {showDetailModal && selectedStation && (
