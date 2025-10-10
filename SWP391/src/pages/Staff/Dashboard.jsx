@@ -9,14 +9,6 @@ const StaffDashboard = () => {
 
   const staffFeatures = [
     {
-      id: 'station-management',
-      title: 'Quản lý trạm',
-      description: 'CRUD trạm sạc: thêm, sửa, xóa, xem chi tiết thông tin trạm',
-      icon: '🏢',
-      color: '#19c37d',
-      route: 'station-management'
-    },
-    {
       id: 'battery-inventory',
       title: 'Quản lý kho pin',
       description: 'Theo dõi và cập nhật trạng thái pin (đang dùng, sạc, hỏng)',
@@ -42,7 +34,8 @@ const StaffDashboard = () => {
     },
     {
       id: 'swap-confirm',
-      title: 'Xác nhận đổi pin',
+      title: '                          Quản lý yêu cầu đổi pin ✨
+',
       description: 'Process and confirm battery swap requests',
       icon: '✅',
       color: '#19c37d',
