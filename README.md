@@ -1,4 +1,4 @@
-# ⚡ EV Battery Swap System - Frontend
+# ⚡ EV Battery Swap System 
 
 > Hệ thống quản lý đổi pin xe điện thông minh với React + Vite + Zustand
 
