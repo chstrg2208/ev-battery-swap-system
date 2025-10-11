@@ -6,28 +6,26 @@ import { swapService } from '../../../assets/js/services';
 import '../../../assets/css/battery-swap.css';
 
 // Hooks
-import { useSwapData } from './hooks/useSwapData';
-import { useSwapSteps } from './hooks/useSwapSteps';
+import { useSwapData, useSwapSteps } from './hooks';
 
 // Components
-import SwapProgressBar from './components/SwapProgressBar';
-import StationSelector from './components/StationSelector';
-import TowerSelector from './components/TowerSelector';
-import NewBatterySelector from './components/NewBatterySelector';
-import EmptySlotSelector from './components/EmptySlotSelector';
-import SwapConfirmation from './components/SwapConfirmation';
-import PlaceOldBattery from './components/PlaceOldBattery';
-import TakeNewBattery from './components/TakeNewBattery';
-import ConfirmAndSave from './components/ConfirmAndSave';
-import SwapSuccess from './components/SwapSuccess';
-import QRCodeModal from './components/QRCodeModal';
-import StaffAssistanceModal from './components/StaffAssistanceModal';
+import {
+  SwapProgressBar,
+  StationSelector,
+  TowerSelector,
+  NewBatterySelector,
+  EmptySlotSelector,
+  SwapConfirmation,
+  PlaceOldBattery,
+  TakeNewBattery,
+  ConfirmAndSave,
+  SwapSuccess,
+  QRCodeModal,
+  StaffAssistanceModal
+} from './components';
 
 // Utils
-import {
-  getBatteryLevel,
-  createAssistanceData
-} from './utils/swapHelpers';
+import { getBatteryLevel, createAssistanceData } from './utils';
 
 const SwapBatteryContainer = () => {
   const { currentUser } = useAuth();
