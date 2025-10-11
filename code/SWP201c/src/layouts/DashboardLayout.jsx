@@ -1,5 +1,5 @@
 // Dashboard Layout với Sidebar và Header
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,6 +18,7 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
       { icon: '📋', label: 'Hợp đồng', path: '/driver/contracts' },
       { icon: '💳', label: 'Thanh toán', path: '/driver/payments' },
       { icon: '❓', label: 'Hỗ trợ', path: '/driver/support' },
+      { icon: '⚙️', label: 'Cài đặt', path: '/driver/settings' },
     ],
     staff: [
       { icon: '🏠', label: 'Trang chủ', path: '/staff/dashboard' },
@@ -36,25 +37,6 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
       { icon: '📋', label: 'Hợp đồng', path: '/admin/contracts' },
       { icon: '📊', label: 'Báo cáo', path: '/admin/reports' },
     ],
-  };
-
-  const handleMenuClick = (path) => {
-    // Nếu là trang đổi pin, kiểm tra có xe đã chọn không
-    if (path === '/driver/swap-battery') {
-      try {
-        const savedVehicle = sessionStorage.getItem('selectedVehicle');
-        if (savedVehicle) {
-          const selectedVehicle = JSON.parse(savedVehicle);
-          console.log('🚗 Menu: Found selected vehicle in session:', selectedVehicle);
-          navigate(path, { state: { selectedVehicle } });
-          return;
-        }
-      } catch (error) {
-        console.error('❌ Error reading selected vehicle from session:', error);
-      }
-      console.log('🚗 Menu: No selected vehicle found, navigating without state');
-    }
-    navigate(path);
   };
 
   const isActive = (path) => {
@@ -134,10 +116,14 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
           {menuItems[role]?.map((item, index) => {
             const active = isActive(item.path);
             return (
-              <div
+              <button
                 key={index}
-                onClick={() => handleMenuClick(item.path)}
+                onClick={() => {
+                  console.log('🖱️ BUTTON Click:', item.label, '→', item.path);
+                  navigate(item.path);
+                }}
                 style={{
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -148,6 +134,8 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
                   transition: 'all 0.2s',
                   background: active ? `${getRoleColor()}33` : 'transparent',
                   borderLeft: active ? `3px solid ${getRoleColor()}` : '3px solid transparent',
+                  border: 'none',
+                  textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = `${getRoleColor()}22`;
@@ -164,7 +152,7 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
                 }}>
                   {item.label}
                 </span>
-              </div>
+              </button>
             );
           })}
         </div>

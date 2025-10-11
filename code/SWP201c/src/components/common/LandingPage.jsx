@@ -6,7 +6,7 @@ const LandingPage = () => {
   const { setShowLoginModal, setShowRegisterModal } = useAuth();
 
   return (
-    <div id="landing">
+    <div id="landing" style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0b1020 0%, #0e1430 100%)' }}>
       <header>
         <div className="container">
           <nav className="nav">

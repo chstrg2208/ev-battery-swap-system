@@ -398,6 +398,35 @@ class SwapService {
     try {
       console.log('SwapService: Request staff assistance', assistanceData);
       
+      // NOTE: Backend does not have /api/swaps/request-assistance endpoint yet
+      // Using MOCK mode until backend API is implemented
+      const MOCK_MODE = true; // Keep true - backend endpoint not available
+      
+      if (MOCK_MODE) {
+        console.log('⚠️ MOCK MODE: Simulating staff assistance request (Backend API not available)');
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Mock successful response
+        return {
+          success: true,
+          data: {
+            requestId: `ASSIST_${Date.now().toString().slice(-8)}`,
+            status: 'pending',
+            priority: assistanceData.currentBatteryLevel <= 10 ? 'urgent' : 
+                     assistanceData.currentBatteryLevel <= 20 ? 'high' : 'normal',
+            estimatedResponseTime: '5-10 phút',
+            message: 'Yêu cầu hỗ trợ đã được gửi đến nhân viên trạm',
+            requestTime: new Date().toISOString(),
+            stationName: assistanceData.stationName,
+            vehiclePlate: assistanceData.vehiclePlate
+          },
+          message: 'Yêu cầu hỗ trợ từ nhân viên đã được gửi thành công'
+        };
+      }
+      
+      // Real API call (when backend endpoint is ready)
       const response = await apiUtils.post('/api/swaps/request-assistance', assistanceData);
       
       if (response.success) {

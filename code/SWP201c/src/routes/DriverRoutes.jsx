@@ -14,6 +14,7 @@ import DriverStationsMap from '../pages/Driver/StationsMap';
 import DriverSwapBattery from '../pages/Driver/SwapBattery';
 import DriverPayments from '../pages/Driver/Payments';
 import DriverSupport from '../pages/Driver/Support';
+import DriverSettings from '../pages/Driver/Settings';
 
 const DriverRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const DriverRoutes = () => {
       <Route path="/swap-battery" element={<DriverSwapBattery />} />
       <Route path="/payments" element={<DriverPayments />} />
       <Route path="/support" element={<DriverSupport />} />
+      <Route path="/settings" element={<DriverSettings />} />
       <Route path="/" element={<DriverDashboard />} />
     </Routes>
   );

@@ -6,8 +6,8 @@ import './App.css';
 
 // Context Providers
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { SwapProvider, useSwap } from './context/SwapContext';
-import { AppProvider, useApp } from './context/AppContext';
+import { SwapProvider } from './context/SwapContext';
+import { AppProvider } from './context/AppContext';
 
 // Components
 import LandingPage from './components/common/LandingPage';
@@ -41,82 +41,85 @@ L.Icon.Default.mergeOptions({
 
 // Main App Content (uses context)
 function AppContent() {
-  const { currentView, currentUser } = useAuth();
+  const { currentUser } = useAuth();
 
   return (
     <div className="App">
       <Suspense fallback={<LoadingFallback />}>
-        {currentView === 'landing' ? (
-          <LandingPage />
-        ) : (
-          // Dashboard with routing and role protection
-          <Routes>
-            {/* Driver Routes - Only accessible by drivers */}
-            <Route path="/driver/dashboard" element={
-              <DriverRoute><DriverDashboard /></DriverRoute>
-            } />
-            <Route path="/driver/swap-battery" element={
-              <DriverRoute><DriverSwapBattery /></DriverRoute>
-            } />
-            <Route path="/driver/vehicles" element={
-              <DriverRoute><DriverVehicles /></DriverRoute>
-            } />
-            <Route path="/driver/stations-map" element={
-              <DriverRoute><DriverStationsMap /></DriverRoute>
-            } />
-            <Route path="/driver/subscriptions" element={
-              <DriverRoute><DriverSubscriptions /></DriverRoute>
-            } />
-            <Route path="/driver/contracts" element={
-              <DriverRoute><DriverContracts /></DriverRoute>
-            } />
-            <Route path="/driver/payments" element={
-              <DriverRoute><DriverPayments /></DriverRoute>
-            } />
-            <Route path="/driver/support" element={
-              <DriverRoute><DriverSupport /></DriverRoute>
-            } />
-            <Route path="/driver/profile" element={
-              <DriverRoute><DriverProfile /></DriverRoute>
-            } />
-            
-            {/* Staff Routes - Only accessible by staff */}
-            <Route path="/staff/dashboard" element={
-              <StaffRoute><StaffDashboard /></StaffRoute>
-            } />
-            <Route path="/staff/*" element={
-              <StaffRoute><StaffDashboard /></StaffRoute>
-            } />
-            
-            {/* Admin Routes - Only accessible by admin */}
-            <Route path="/admin/dashboard" element={
-              <AdminRoute><AdminDashboard /></AdminRoute>
-            } />
-            <Route path="/admin/*" element={
-              <AdminRoute><AdminDashboard /></AdminRoute>
-            } />
-            
-            {/* Default redirect based on user role */}
-            <Route path="/" element={
-              currentUser ? (
-                currentUser.role === 'driver' ? <Navigate to="/driver/dashboard" replace /> :
-                currentUser.role === 'staff' ? <Navigate to="/staff/dashboard" replace /> :
-                currentUser.role === 'admin' ? <Navigate to="/admin/dashboard" replace /> :
-                <Navigate to="/driver/dashboard" replace />
-              ) : <LandingPage />
-            } />
-            
-            {/* Fallback for any unmatched routes */}
-            <Route path="*" element={
-              currentUser ? (
-                currentUser.role === 'driver' ? <Navigate to="/driver/dashboard" replace /> :
-                currentUser.role === 'staff' ? <Navigate to="/staff/dashboard" replace /> :
-                currentUser.role === 'admin' ? <Navigate to="/admin/dashboard" replace /> :
-                <Navigate to="/driver/dashboard" replace />
-              ) : <Navigate to="/" replace />
-            } />
-          </Routes>
-        )}
+        <Routes>
+          {/* Driver Routes - Only accessible by drivers */}
+          <Route path="/driver/dashboard" element={
+            <DriverRoute><DriverDashboard /></DriverRoute>
+          } />
+          <Route path="/driver/swap-battery" element={
+            <DriverRoute><DriverSwapBattery /></DriverRoute>
+          } />
+          <Route path="/driver/vehicles" element={
+            <DriverRoute><DriverVehicles /></DriverRoute>
+          } />
+          <Route path="/driver/stations-map" element={
+            <DriverRoute><DriverStationsMap /></DriverRoute>
+          } />
+          <Route path="/driver/subscriptions" element={
+            <DriverRoute><DriverSubscriptions /></DriverRoute>
+          } />
+          <Route path="/driver/contracts" element={
+            <DriverRoute><DriverContracts /></DriverRoute>
+          } />
+          <Route path="/driver/payments" element={
+            <DriverRoute><DriverPayments /></DriverRoute>
+          } />
+          <Route path="/driver/support" element={
+            <DriverRoute><DriverSupport /></DriverRoute>
+          } />
+          <Route path="/driver/profile" element={
+            <DriverRoute><DriverProfile /></DriverRoute>
+          } />
+          
+          {/* Staff Routes - Only accessible by staff */}
+          <Route path="/staff/dashboard" element={
+            <StaffRoute><StaffDashboard /></StaffRoute>
+          } />
+          <Route path="/staff/*" element={
+            <StaffRoute><StaffDashboard /></StaffRoute>
+          } />
+          
+          {/* Admin Routes - Only accessible by admin */}
+          <Route path="/admin/dashboard" element={
+            <AdminRoute><AdminDashboard /></AdminRoute>
+          } />
+          <Route path="/admin/*" element={
+            <AdminRoute><AdminDashboard /></AdminRoute>
+          } />
+          
+          {/* Landing Page Route */}
+          <Route path="/" element={
+            currentUser ? (
+              <Navigate to={
+                currentUser.role === 'driver' ? '/driver/dashboard' :
+                currentUser.role === 'staff' ? '/staff/dashboard' :
+                currentUser.role === 'admin' ? '/admin/dashboard' :
+                '/driver/dashboard'
+              } replace />
+            ) : (
+              <LandingPage />
+            )
+          } />
+          
+          {/* Fallback for any unmatched routes */}
+          <Route path="*" element={
+            currentUser ? (
+              <Navigate to={
+                currentUser.role === 'driver' ? '/driver/dashboard' :
+                currentUser.role === 'staff' ? '/staff/dashboard' :
+                currentUser.role === 'admin' ? '/admin/dashboard' :
+                '/driver/dashboard'
+              } replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } />
+        </Routes>
         
         {/* Modals */}
         <LoginModal />
