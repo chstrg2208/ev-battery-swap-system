@@ -17,7 +17,7 @@ import {
   VehicleManagement,
   PaymentHistory,
   DebugInfo
-} from './DashboardComponents';
+} from './Dashboard/components';
 
 const DriverDashboard = () => {
   const location = useLocation();
