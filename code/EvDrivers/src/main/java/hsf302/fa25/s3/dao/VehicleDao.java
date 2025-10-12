@@ -46,17 +46,17 @@ public class VehicleDao {
                 
                 VehicleBatteryInfo v = new VehicleBatteryInfo();
                 v.setVehicleId(rs.getInt("vehicle_id"));
+                v.setUserId(userId); // Set userId from parameter
                 v.setPlateNumber(rs.getString("plate_number"));
                 v.setVehicleModel(rs.getString("vehicle_model"));
                 v.setVinNumber(rs.getString("vin_number"));
                 v.setBatteryType(rs.getString("battery_type"));
                 v.setCompatibleBatteryTypes(rs.getString("compatible_battery_types"));
                 v.setCreatedAt(null); // No created_at column in Vehicles table
-                Integer batteryId = rs.getObject("battery_id", Integer.class);
-                v.setBatteryId(batteryId); // current_battery_id từ database
+                v.setBatteryId(rs.getObject("battery_id", Integer.class)); // Handle null properly
                 v.setBatteryModel(rs.getString("battery_model"));
                 v.setHealth(rs.getDouble("health"));
-                v.setCurrentOdometer(rs.getDouble("current_odometer")); // 🔥 Thêm dòng này
+                v.setCurrentOdometer(rs.getDouble("current_odometer"));
 
                 list.add(v);
                 System.out.println("✅ VehicleDao: Added vehicle: " + v.getPlateNumber());
@@ -109,7 +109,7 @@ public class VehicleDao {
                 v.setVinNumber(rs.getString("vin_number"));
                 v.setBatteryType(rs.getString("battery_type"));
                 v.setCompatibleBatteryTypes(rs.getString("compatible_battery_types"));
-                v.setBatteryId(rs.getInt("battery_id"));
+                v.setBatteryId(rs.getObject("battery_id", Integer.class));
                 v.setBatteryModel(rs.getString("battery_model"));
                 v.setHealth(rs.getDouble("health"));
                 v.setCurrentOdometer(rs.getDouble("current_odometer"));
@@ -160,7 +160,7 @@ public class VehicleDao {
                 v.setVinNumber(rs.getString("vin_number"));
                 v.setBatteryType(rs.getString("battery_type"));
                 v.setCompatibleBatteryTypes(rs.getString("compatible_battery_types"));
-                v.setBatteryId(rs.getInt("battery_id"));
+                v.setBatteryId(rs.getObject("battery_id", Integer.class));
                 v.setBatteryModel(rs.getString("battery_model"));
                 v.setHealth(rs.getDouble("health"));
                 v.setCurrentOdometer(rs.getDouble("current_odometer"));
@@ -304,7 +304,7 @@ public class VehicleDao {
                 v.setVinNumber(rs.getString("vin_number"));
                 v.setBatteryType(rs.getString("battery_type"));
                 v.setCompatibleBatteryTypes(rs.getString("compatible_battery_types"));
-                v.setBatteryId(rs.getInt("battery_id"));
+                v.setBatteryId(rs.getObject("battery_id", Integer.class));
                 v.setBatteryModel(rs.getString("battery_model"));
                 v.setHealth(rs.getDouble("health"));
                 v.setCurrentOdometer(rs.getDouble("current_odometer"));
