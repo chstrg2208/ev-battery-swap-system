@@ -481,4 +481,336 @@ public class BatteryController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
+    // ==================== STAFF BATTERY MANAGEMENT CRUD APIs ====================
+
+    @GetMapping
+    public ResponseEntity<?> getAllBatteries(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long stationId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "50") int size) {
+        try {
+            List<Battery> batteries;
+            
+            if (status != null && !status.isEmpty()) {
+                batteries = batteryDao.getBatteriesByStatus(status);
+            } else {
+                batteries = batteryDao.getAllBatteries();
+            }
+            
+            // Filter by station if provided
+            if (stationId != null) {
+                batteries = batteries.stream()
+                    .filter(b -> {
+                        // Check if battery belongs to the station through slot/tower relationship
+                        try {
+                            String checkSql = """
+                                SELECT COUNT(*) FROM Batteries b
+                                INNER JOIN Slots sl ON b.slot_id = sl.slot_id
+                                INNER JOIN Towers t ON sl.tower_id = t.tower_id
+                                WHERE b.battery_id = ? AND t.station_id = ?
+                            """;
+                            try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection();
+                                 java.sql.PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                                ps.setInt(1, b.getBatteryId());
+                                ps.setLong(2, stationId);
+                                java.sql.ResultSet rs = ps.executeQuery();
+                                if (rs.next()) {
+                                    return rs.getInt(1) > 0;
+                                }
+                            }
+                        } catch (Exception e) {
+                            return false;
+                        }
+                        return false;
+                    }).toList();
+            }
+            
+            // Apply pagination
+            int start = page * size;
+            int end = Math.min(start + size, batteries.size());
+            List<Battery> paginatedBatteries = batteries.subList(start, end);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", paginatedBatteries);
+            response.put("total", batteries.size());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalPages", (batteries.size() + size - 1) / size);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching batteries: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBatteryById(@PathVariable Long id) {
+        try {
+            Battery battery = batteryDao.getBatteryById(id.intValue());
+            
+            Map<String, Object> response = new HashMap<>();
+            if (battery != null) {
+                response.put("success", true);
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createBattery(@RequestBody Battery battery) {
+        try {
+            // Validate required fields
+            if (battery.getModel() == null || battery.getModel().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Model is required");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            if (battery.getCapacity() <= 0) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Capacity must be greater than 0");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            // Set defaults
+            if (battery.getStateOfHealth() == 0) {
+                battery.setStateOfHealth(100.0); // New battery starts at 100%
+            }
+            if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
+                battery.setStatus("AVAILABLE");
+            }
+            if (battery.getCycleCount() == 0) {
+                battery.setCycleCount(0); // New battery starts at 0 cycles
+            }
+            
+            boolean created = batteryDao.createBattery(battery);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (created) {
+                response.put("success", true);
+                response.put("message", "Battery created successfully");
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to create battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.status(201).body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error creating battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBattery(@PathVariable Long id, @RequestBody Battery battery) {
+        try {
+            // Check if battery exists
+            Battery existingBattery = batteryDao.getBatteryById(id.intValue());
+            if (existingBattery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            // Set the ID for update
+            battery.setBatteryId(id.intValue());
+            
+            // Validate fields
+            if (battery.getModel() == null || battery.getModel().trim().isEmpty()) {
+                battery.setModel(existingBattery.getModel());
+            }
+            if (battery.getCapacity() <= 0) {
+                battery.setCapacity(existingBattery.getCapacity());
+            }
+            if (battery.getStateOfHealth() < 0 || battery.getStateOfHealth() > 100) {
+                battery.setStateOfHealth(existingBattery.getStateOfHealth());
+            }
+            if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
+                battery.setStatus(existingBattery.getStatus());
+            }
+            
+            boolean updated = batteryDao.updateBattery(battery);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Battery updated successfully");
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to update battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error updating battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBattery(@PathVariable Long id) {
+        try {
+            // Check if battery exists
+            Battery existingBattery = batteryDao.getBatteryById(id.intValue());
+            if (existingBattery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            // Check if battery is currently in use
+            if ("IN_USE".equals(existingBattery.getStatus())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Cannot delete battery that is currently in use");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            boolean deleted = batteryDao.deleteBattery(id.intValue());
+            
+            Map<String, Object> response = new HashMap<>();
+            if (deleted) {
+                response.put("success", true);
+                response.put("message", "Battery deleted successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to delete battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error deleting battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getBatteryStatistics() {
+        try {
+            Map<String, Integer> stats = batteryDao.getBatteryStatistics();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", stats);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching battery statistics: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PutMapping("/bulk")
+    public ResponseEntity<?> bulkUpdateBatteries(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> batteryUpdates = (List<Map<String, Object>>) request.get("batteries");
+            
+            if (batteryUpdates == null || batteryUpdates.isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "No batteries provided for update");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            int successCount = 0;
+            int failCount = 0;
+            List<String> errors = new ArrayList<>();
+            
+            for (Map<String, Object> batteryData : batteryUpdates) {
+                try {
+                    Integer id = (Integer) batteryData.get("batteryId");
+                    if (id == null) {
+                        failCount++;
+                        errors.add("Battery ID missing");
+                        continue;
+                    }
+                    
+                    Battery existingBattery = batteryDao.getBatteryById(id);
+                    if (existingBattery == null) {
+                        failCount++;
+                        errors.add("Battery " + id + " not found");
+                        continue;
+                    }
+                    
+                    // Update fields if provided
+                    if (batteryData.containsKey("status")) {
+                        existingBattery.setStatus((String) batteryData.get("status"));
+                    }
+                    if (batteryData.containsKey("stateOfHealth")) {
+                        Double health = Double.valueOf(batteryData.get("stateOfHealth").toString());
+                        if (health >= 0 && health <= 100) {
+                            existingBattery.setStateOfHealth(health);
+                        }
+                    }
+                    if (batteryData.containsKey("cycleCount")) {
+                        Integer cycles = (Integer) batteryData.get("cycleCount");
+                        if (cycles >= 0) {
+                            existingBattery.setCycleCount(cycles);
+                        }
+                    }
+                    
+                    if (batteryDao.updateBattery(existingBattery)) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        errors.add("Failed to update battery " + id);
+                    }
+                } catch (Exception e) {
+                    failCount++;
+                    errors.add("Error updating battery: " + e.getMessage());
+                }
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", successCount > 0);
+            response.put("message", String.format("Bulk update completed. Success: %d, Failed: %d", successCount, failCount));
+            response.put("successCount", successCount);
+            response.put("failCount", failCount);
+            if (!errors.isEmpty()) {
+                response.put("errors", errors);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error in bulk update: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }

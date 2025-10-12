@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class ConnectDB {
 
     private static final String URL =
-            "jdbc:sqlserver://localhost:1433;"
+            "jdbc:sqlserver://localhost\\MSSQL2022;"
                     + "databaseName=ev_battery_swap;"
                     + "encrypt=true;"
                     + "trustServerCertificate=true;"
