@@ -1,6 +1,6 @@
 // Staff/BatteryInventory/BatteryInventoryContainer.jsx
 import React from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useBatteryData, useBatteryFilters, useBatteryUpdate } from './hooks';
 import {
   InventoryHeader,

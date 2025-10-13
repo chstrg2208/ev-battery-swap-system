@@ -2,7 +2,7 @@
 // Hook for fetching and managing contracts data
 
 import { useState, useEffect, useCallback } from 'react';
-import { contractService } from '../../../assets/js/services/contractService';
+import contractService from '../../../../assets/js/services/contractService';
 
 export const useContractsData = () => {
   const [contracts, setContracts] = useState([]);

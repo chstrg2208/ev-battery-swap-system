@@ -1,6 +1,6 @@
 // Driver/Payments/hooks/usePaymentProcess.js
 import { useState } from 'react';
-import paymentService from '../../../assets/js/services/paymentService';
+import paymentService from '../../../../assets/js/services/paymentService';
 
 /**
  * Custom hook for processing payments

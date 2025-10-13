@@ -2,7 +2,7 @@
 // Hook for handling station booking
 
 import { useState } from 'react';
-import stationService from '../../../assets/js/services/stationService';
+import stationService from '../../../../assets/js/services/stationService';
 import { createBookingRequest } from '../utils';
 
 export const useStationBooking = (onSuccess) => {

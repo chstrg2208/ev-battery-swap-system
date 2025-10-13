@@ -2,7 +2,7 @@
 // Custom hook for fetching and managing users data
 
 import { useState, useEffect } from 'react';
-import userService from '../../../assets/js/services/userService';
+import userService from '../../../../assets/js/services/userService';
 
 export const useUsersData = () => {
   const [users, setUsers] = useState([]);

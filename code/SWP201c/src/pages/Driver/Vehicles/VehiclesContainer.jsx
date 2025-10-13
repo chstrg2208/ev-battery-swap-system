@@ -1,6 +1,6 @@
 // Driver/Vehicles/VehiclesContainer.jsx
 import React from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useVehiclesData, useVehicleModals, useVehicleForm } from './hooks';
 import { findVehicleContract } from './utils';
 import {

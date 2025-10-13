@@ -2,7 +2,7 @@
 // Custom hook for fetching dashboard statistics
 
 import { useState, useEffect } from 'react';
-import reportService from '../../../assets/js/services/reportService';
+import reportService from '../../../../assets/js/services/reportService';
 import { getDateRange } from '../utils';
 
 export const useDashboardData = () => {

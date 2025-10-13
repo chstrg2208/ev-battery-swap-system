@@ -1,7 +1,7 @@
 // Driver/StationsMap/index.jsx
 // Container component for StationsMap page - orchestrates stations display and booking
 
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useStationsData, useStationBooking, useStationSelection } from './hooks';
 import { getStationsStats } from './utils';
 import {

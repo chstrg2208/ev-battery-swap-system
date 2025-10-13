@@ -1,8 +1,8 @@
 // Driver/Subscriptions/index.jsx
 // Container component for Subscriptions page - orchestrates data and UI
 
-import { useAuth } from '../../context/AuthContext';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import { useAuth } from '../../../context/AuthContext';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useSubscriptionsData, useSubscribe } from './hooks';
 import {
   SubscriptionsHeader,

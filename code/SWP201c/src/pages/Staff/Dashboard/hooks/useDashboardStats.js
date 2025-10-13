@@ -1,6 +1,6 @@
 // Staff/Dashboard/hooks/useDashboardStats.js
 import { useState, useEffect } from 'react';
-import reportService from '../../../assets/js/services/reportService';
+import reportService from '../../../../assets/js/services/reportService';
 import { getTodayDate, processDashboardStats } from '../utils';
 
 /**

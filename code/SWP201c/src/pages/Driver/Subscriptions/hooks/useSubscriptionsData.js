@@ -2,7 +2,7 @@
 // Hook for fetching plans and user subscriptions
 
 import { useState, useEffect, useCallback } from 'react';
-import contractService from '../../../assets/js/services/contractService';
+import contractService from '../../../../assets/js/services/contractService';
 import { validateUser, findActiveSubscription, formatSubscription } from '../utils';
 
 export const useSubscriptionsData = (currentUser) => {

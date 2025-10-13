@@ -1,6 +1,6 @@
 // Staff/BatteryInventory/hooks/useBatteryData.js
 import { useState, useEffect } from 'react';
-import batteryService from '../../../assets/js/services/batteryService';
+import batteryService from '../../../../assets/js/services/batteryService';
 
 /**
  * Custom hook for fetching battery inventory data
