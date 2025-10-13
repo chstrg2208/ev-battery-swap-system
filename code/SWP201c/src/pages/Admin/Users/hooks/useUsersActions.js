@@ -2,7 +2,7 @@
 // Custom hook for user CRUD operations
 
 import { useState } from 'react';
-import userService from '../../../assets/js/services/userService';
+import userService from '../../../../assets/js/services/userService';
 
 export const useUsersActions = (onSuccess) => {
   const [actionLoading, setActionLoading] = useState(false);

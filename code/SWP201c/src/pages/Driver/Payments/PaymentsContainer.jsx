@@ -1,6 +1,6 @@
 // Driver/Payments/PaymentsContainer.jsx
 import React, { useState } from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { usePaymentsData, usePaymentModal, usePaymentProcess } from './hooks';
 import { formatDate, formatCurrency, getStatusStyle } from './utils';
 import {

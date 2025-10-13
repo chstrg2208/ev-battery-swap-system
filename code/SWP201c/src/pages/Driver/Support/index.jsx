@@ -2,8 +2,8 @@
 // Container component for Support page - orchestrates tabs and forms
 
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import { useAuth } from '../../../context/AuthContext';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useSupportForm, useSupportSubmit } from './hooks';
 import { formatIssueReport } from './utils';
 import {

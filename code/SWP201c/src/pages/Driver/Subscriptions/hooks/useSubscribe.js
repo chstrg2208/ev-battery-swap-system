@@ -2,7 +2,7 @@
 // Hook for handling subscription/unsubscription actions
 
 import { useState } from 'react';
-import contractService from '../../../assets/js/services/contractService';
+import contractService from '../../../../assets/js/services/contractService';
 import {
   getUserId,
   createSubscriptionRequest,

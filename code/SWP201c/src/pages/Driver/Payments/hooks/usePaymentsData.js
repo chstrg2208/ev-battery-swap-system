@@ -1,7 +1,7 @@
 // Driver/Payments/hooks/usePaymentsData.js
 import { useState, useEffect } from 'react';
-import paymentService from '../../../assets/js/services/paymentService';
-import authService from '../../../assets/js/services/authService';
+import paymentService from '../../../../assets/js/services/paymentService';
+import authService from '../../../../assets/js/services/authService';
 import { getUserId } from '../utils';
 
 /**

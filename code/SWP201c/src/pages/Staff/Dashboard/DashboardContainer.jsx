@@ -1,7 +1,7 @@
 // Staff/Dashboard/DashboardContainer.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useDashboardStats } from './hooks';
 import { getStaffFeatures, getRecentActivities, getStatCards } from './utils';
 import {

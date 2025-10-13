@@ -1,7 +1,7 @@
 // Driver/Contracts/index.jsx
 // Container component for Contracts page - orchestrates data and UI
 
-import DashboardLayout from '../../layouts/DashboardLayout';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useContractsData, useContractModal } from './hooks';
 import {
   ContractsHeader,

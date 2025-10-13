@@ -2,7 +2,7 @@
 // Hook for fetching stations data
 
 import { useState, useEffect, useCallback } from 'react';
-import stationService from '../../../assets/js/services/stationService';
+import stationService from '../../../../assets/js/services/stationService';
 
 export const useStationsData = () => {
   const [stations, setStations] = useState([]);
