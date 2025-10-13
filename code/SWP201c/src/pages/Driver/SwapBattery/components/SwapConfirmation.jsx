@@ -19,8 +19,14 @@ const SwapConfirmation = ({
   // Get new battery level from selected slot
   const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
   
-  console.log('🔋 SwapConfirmation - New battery level:', newBatteryLevel, 'from slot:', selectedNewBatterySlot);
-  console.log('🔋 Empty slot:', selectedEmptySlot);
+  console.log('🔋 SwapConfirmation DEBUG:');
+  console.log('  - selectedVehicle:', selectedVehicle);
+  console.log('  - vehicle.health:', selectedVehicle?.health);
+  console.log('  - vehicle.batteryLevel:', selectedVehicle?.batteryLevel);
+  console.log('  - currentBatteryLevel (fallback):', currentBatteryLevel);
+  console.log('  - Final batteryLevel:', batteryLevel);
+  console.log('  - New battery level:', newBatteryLevel, 'from slot:', selectedNewBatterySlot);
+  console.log('  - Empty slot:', selectedEmptySlot);
 
   return (
     <div>

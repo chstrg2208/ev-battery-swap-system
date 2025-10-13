@@ -86,6 +86,12 @@ const SwapBatteryContainer = () => {
     const vehicleFromNavigation = location.state?.selectedVehicle;
     if (vehicleFromNavigation) {
       console.log('🚗 Received selected vehicle from Dashboard:', vehicleFromNavigation);
+      console.log('📋 Vehicle contract info:', {
+        contract_id: vehicleFromNavigation.contract_id,
+        contractId: vehicleFromNavigation.contractId,
+        subscriptionId: vehicleFromNavigation.subscriptionId,
+        subscription_id: vehicleFromNavigation.subscription_id
+      });
       setSelectedVehicle(vehicleFromNavigation);
       
       // Get battery level with priority: health > batteryLevel > 50
@@ -354,7 +360,9 @@ const SwapBatteryContainer = () => {
             selectedNewBatterySlot={selectedNewBatterySlot}
             selectedEmptySlot={selectedEmptySlot}
             selectedVehicle={selectedVehicle}
+            userContract={userContract}
             currentBatteryLevel={currentBatteryLevel}
+            onError={(errorMsg) => setError(errorMsg)}
             onComplete={() => {
               const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
               
@@ -388,7 +396,6 @@ const SwapBatteryContainer = () => {
               });
               setCurrentStep(9);
             }}
-            onError={(error) => setError(error)}
           />
         );
 

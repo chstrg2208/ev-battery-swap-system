@@ -265,6 +265,36 @@ class VehicleService {
     const efficiency = efficiencyMap[vehicleType] || 30;
     return Math.round(batteryCapacity * efficiency);
   }
+
+  // Update vehicle battery level after swap
+  async updateVehicleBattery(vehicleId, newBatteryLevel) {
+    try {
+      console.log('VehicleService: Update vehicle battery', vehicleId, newBatteryLevel);
+      
+      const response = await apiUtils.put(`/api/vehicles/${vehicleId}/battery`, {
+        batteryLevel: newBatteryLevel,
+        health: newBatteryLevel
+      });
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Cập nhật pin xe thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật pin xe');
+      }
+    } catch (error) {
+      console.error('Update vehicle battery error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi cập nhật pin xe',
+        error: errorInfo
+      };
+    }
+  }
 }
 
 export default new VehicleService();

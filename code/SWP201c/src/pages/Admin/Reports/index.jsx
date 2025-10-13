@@ -28,7 +28,7 @@ const Reports = () => {
   // Loading state
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout role="admin">
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -57,7 +57,7 @@ const Reports = () => {
   // Error state
   if (error) {
     return (
-      <DashboardLayout>
+      <DashboardLayout role="admin">
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -86,7 +86,7 @@ const Reports = () => {
   // Empty data state
   if (isReportDataEmpty(reportData)) {
     return (
-      <DashboardLayout>
+      <DashboardLayout role="admin">
         <ReportsHeader 
           dateRange={dateRange}
           onDateRangeChange={handleDateRangeChange}
@@ -135,7 +135,7 @@ const Reports = () => {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout role="admin">
       <style>
         {`
           @keyframes spin {

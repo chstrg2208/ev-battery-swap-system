@@ -68,7 +68,7 @@ const AdminStations = () => {
   // Loading state
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout role="admin">
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -97,7 +97,7 @@ const AdminStations = () => {
   // Error state
   if (error) {
     return (
-      <DashboardLayout>
+      <DashboardLayout role="admin">
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -124,7 +124,7 @@ const AdminStations = () => {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout role="admin">
       <style>
         {`
           @keyframes spin {

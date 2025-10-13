@@ -68,6 +68,15 @@ export const useSwapData = (currentUser) => {
             const activeContract = contracts.find(c => c.status === 'active') || contracts[0];
             setUserContract(activeContract);
             console.log('📄 Loaded contract:', activeContract);
+            console.log('📋 Contract IDs:', {
+              contract_id: activeContract?.contract_id,
+              contractId: activeContract?.id,
+              subscriptionId: activeContract?.subscription_id
+            });
+            console.log('🔑 All contract keys:', activeContract ? Object.keys(activeContract) : 'No contract');
+            console.log('📦 Full contract object:', JSON.stringify(activeContract, null, 2));
+          } else {
+            console.warn('⚠️ No contracts found in response');
           }
         } catch (contractError) {
           console.warn('⚠️ Could not fetch contract:', contractError);
