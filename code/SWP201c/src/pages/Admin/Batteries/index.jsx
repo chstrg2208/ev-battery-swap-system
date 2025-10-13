@@ -91,6 +91,9 @@ const AdminBatteries = () => {
     );
   }
 
+  // Thêm log để kiểm tra render trong AdminBatteries
+  console.log('🔍 AdminBatteries: Rendering with props:', { batteries, loading, error });
+
   // Main render
   return (
     <DashboardLayout role="admin">

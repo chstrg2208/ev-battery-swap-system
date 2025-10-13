@@ -1,5 +1,5 @@
 // Dashboard Layout với Sidebar và Header
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,6 +7,7 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, handleLogout } = useAuth();
+  const [currentView, setCurrentView] = useState(location.pathname); // Trạng thái cho view hiện tại
 
   const menuItems = {
     driver: [
@@ -58,6 +59,13 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
       default: return 'Driver';
     }
   };
+
+  // Thêm log để kiểm tra giá trị role và children
+  console.log('🔍 DashboardLayout: role =', role);
+  console.log('🔍 DashboardLayout: children =', children);
+
+  // Thêm log chi tiết để kiểm tra render
+  console.log('🔍 DashboardLayout: Rendering children with props:', children.props);
 
   return (
     <div style={{
@@ -120,6 +128,7 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
                 key={index}
                 onClick={() => {
                   console.log('🖱️ BUTTON Click:', item.label, '→', item.path);
+                  setCurrentView(item.path); // Cập nhật currentView
                   navigate(item.path);
                 }}
                 style={{
@@ -134,7 +143,9 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
                   transition: 'all 0.2s',
                   background: active ? `${getRoleColor()}33` : 'transparent',
                   borderLeft: active ? `3px solid ${getRoleColor()}` : '3px solid transparent',
-                  border: 'none',
+                  borderTop: 'none',
+                  borderRight: 'none',
+                  borderBottom: 'none',
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {

@@ -22,6 +22,9 @@ export const AuthProvider = ({ children }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [currentView, setCurrentView] = useState('landing');
 
+  // Thêm log để kiểm tra giá trị currentView
+  console.log('🔍 AuthContext: currentView =', currentView);
+
   const handleLogin = async (email, password) => {
     console.log('🔐 AuthContext: Starting login process for:', email);
     setIsLoggingIn(true);

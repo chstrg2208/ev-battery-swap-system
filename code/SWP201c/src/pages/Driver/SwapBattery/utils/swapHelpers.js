@@ -3,9 +3,20 @@
 /**
  * Get battery level from vehicle object (handles different property names)
  */
-export const getBatteryLevel = (vehicle, fallback = 15) => {
+export const getBatteryLevel = (vehicle, fallback = 50) => {
   if (!vehicle) return fallback;
-  return vehicle.batteryLevel || vehicle.battery_level || fallback;
+  
+  // Try different property names - prioritize health as it comes from API
+  const level = vehicle.health || vehicle.batteryLevel || vehicle.battery_level;
+  
+  // If we got a valid number, return it
+  if (typeof level === 'number' && level >= 0 && level <= 100) {
+    return level;
+  }
+  
+  // Otherwise return fallback (changed from 15 to 50 for better UX)
+  console.warn('⚠️ Could not find valid battery level in vehicle:', vehicle);
+  return fallback;
 };
 
 /**

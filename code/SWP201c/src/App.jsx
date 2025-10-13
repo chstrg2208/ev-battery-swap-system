@@ -30,6 +30,12 @@ import DriverProfile from './pages/Driver/Profile';
 // Staff & Admin Dashboards
 import StaffDashboard from './pages/Staff/Dashboard';
 import AdminDashboard from './pages/Admin/Dashboard';
+import AdminUsers from './pages/Admin/Users';
+import AdminStations from './pages/Admin/Stations';
+import AdminBatteries from './pages/Admin/Batteries';
+import AdminSubscriptions from './pages/Admin/Subscriptions';
+import AdminContracts from './pages/Admin/Contracts';
+import AdminReports from './pages/Admin/Reports';
 
 // Fix default markers for React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -84,14 +90,29 @@ function AppContent() {
             <StaffRoute><StaffDashboard /></StaffRoute>
           } />
           
-          {/* Admin Routes - Only accessible by admin */}
+          {/* Admin Routes - explicit routes (like driver) */}
           <Route path="/admin/dashboard" element={
             <AdminRoute><AdminDashboard /></AdminRoute>
           } />
-          <Route path="/admin/*" element={
-            <AdminRoute><AdminDashboard /></AdminRoute>
+          <Route path="/admin/users" element={
+            <AdminRoute><AdminUsers /></AdminRoute>
           } />
-          
+          <Route path="/admin/stations" element={
+            <AdminRoute><AdminStations /></AdminRoute>
+          } />
+          <Route path="/admin/batteries" element={
+            <AdminRoute><AdminBatteries /></AdminRoute>
+          } />
+          <Route path="/admin/subscriptions" element={
+            <AdminRoute><AdminSubscriptions /></AdminRoute>
+          } />
+          <Route path="/admin/contracts" element={
+            <AdminRoute><AdminContracts /></AdminRoute>
+          } />
+          <Route path="/admin/reports" element={
+            <AdminRoute><AdminReports /></AdminRoute>
+          } />
+
           {/* Landing Page Route */}
           <Route path="/" element={
             currentUser ? (

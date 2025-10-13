@@ -2,7 +2,7 @@
 // Custom hook for fetching battery data from API
 
 import { useState, useEffect } from 'react';
-import batteryService from '../../../../assets/js/services/batteryService';
+import adminService from '../../../../assets/js/services/adminService';
 
 export const useBatteriesData = () => {
   const [batteries, setBatteries] = useState([]);
@@ -13,17 +13,17 @@ export const useBatteriesData = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const result = await batteryService.getAllBatteries();
-      
+
+      const result = await adminService.getDrivers();
+
       if (result.success) {
         setBatteries(result.data);
       } else {
         setError(result.message);
       }
     } catch (err) {
-      setError('Không thể tải dữ liệu pin');
-      console.error('Error fetching batteries:', err);
+      setError('Không thể tải dữ liệu tài xế');
+      console.error('Error fetching drivers:', err);
     } finally {
       setLoading(false);
     }

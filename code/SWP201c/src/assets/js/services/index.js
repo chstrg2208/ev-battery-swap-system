@@ -11,6 +11,7 @@ import userService from './userService.js';
 import vehicleService from './vehicleService.js';
 import notificationService from './notificationService.js';
 import swapService from './swapService.js';
+import adminService from './adminService.js';
 
 // Export all services
 export {
@@ -23,7 +24,8 @@ export {
   userService,
   vehicleService,
   notificationService,
-  swapService
+  swapService,
+  adminService
 };
 
 // Default export as object for convenience
@@ -37,5 +39,6 @@ export default {
   user: userService,
   vehicle: vehicleService,
   notification: notificationService,
-  swap: swapService
+  swap: swapService,
+  admin: adminService
 };

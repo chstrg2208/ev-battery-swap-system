@@ -34,7 +34,7 @@ const SwapBatteryContainer = () => {
 
   // Selected vehicle state
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [currentBatteryLevel, setCurrentBatteryLevel] = useState(15);
+  const [currentBatteryLevel, setCurrentBatteryLevel] = useState(50); // Changed from 15 to 50 for better default
 
   // Modal states
   const [showQRPopup, setShowQRPopup] = useState(false);
@@ -87,9 +87,15 @@ const SwapBatteryContainer = () => {
     if (vehicleFromNavigation) {
       console.log('🚗 Received selected vehicle from Dashboard:', vehicleFromNavigation);
       setSelectedVehicle(vehicleFromNavigation);
-      const batteryLevel = getBatteryLevel(vehicleFromNavigation, 15);
-      console.log('🔋 Setting battery level from vehicle:', batteryLevel);
+      
+      // Get battery level with priority: health > batteryLevel > 50
+      const batteryLevel = getBatteryLevel(vehicleFromNavigation, 50);
+      console.log('🔋 Setting battery level from vehicle:', batteryLevel, 
+                  '(health:', vehicleFromNavigation.health, 
+                  'batteryLevel:', vehicleFromNavigation.batteryLevel, ')');
       setCurrentBatteryLevel(batteryLevel);
+    } else {
+      console.warn('⚠️ No vehicle received from navigation, using default battery level');
     }
 
     fetchInitialData(vehicleFromNavigation);

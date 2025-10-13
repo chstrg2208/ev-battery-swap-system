@@ -16,14 +16,20 @@ import AdminReports from '../pages/Admin/Reports';
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="/dashboard" element={<AdminDashboard />} />
-      <Route path="/users" element={<AdminUsers />} />
-      <Route path="/stations" element={<AdminStations />} />
-      <Route path="/batteries" element={<AdminBatteries />} />
-      <Route path="/subscriptions" element={<AdminSubscriptions />} />
-      <Route path="/contracts" element={<AdminContracts />} />
-      <Route path="/reports" element={<AdminReports />} />
-      <Route path="/" element={<AdminDashboard />} />
+      {/* index => /admin */}
+      <Route index element={<AdminDashboard />} />
+
+      {/* child routes (relative) => /admin/dashboard, /admin/users, ... */}
+      <Route path="dashboard" element={<AdminDashboard />} />
+      <Route path="users" element={<AdminUsers />} />
+      <Route path="stations" element={<AdminStations />} />
+      <Route path="batteries" element={<AdminBatteries />} />
+      <Route path="subscriptions" element={<AdminSubscriptions />} />
+      <Route path="contracts" element={<AdminContracts />} />
+      <Route path="reports" element={<AdminReports />} />
+
+      {/* fallback */}
+      <Route path="*" element={<AdminDashboard />} />
     </Routes>
   );
 };
