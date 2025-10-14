@@ -11,7 +11,7 @@ export const getStaffFeatures = () => [
     description: 'Theo dõi và cập nhật trạng thái pin (đang dùng, sạc, hỏng)',
     icon: '🔋',
     color: '#6ab7ff',
-    route: '/battery-inventory'
+    route: '/staff/battery-inventory'
   },
   {
     id: 'transaction-management',
@@ -19,7 +19,7 @@ export const getStaffFeatures = () => [
     description: 'Hiển thị danh sách toàn bộ lịch sử đổi pin và thanh toán',
     icon: '💳',
     color: '#ffa500',
-    route: '/transaction-management'
+    route: '/staff/transaction-management'
   },
   {
     id: 'battery-stock',
@@ -27,7 +27,7 @@ export const getStaffFeatures = () => [
     description: 'Monitor and manage battery inventory',
     icon: '📦',
     color: '#9c88ff',
-    route: '/battery-stock'
+    route: '/staff/battery-stock'
   },
   {
     id: 'swap-confirm',
@@ -35,7 +35,7 @@ export const getStaffFeatures = () => [
     description: 'Process and confirm battery swap requests',
     icon: '✅',
     color: '#19c37d',
-    route: '/swap-confirm'
+    route: '/staff/swap-confirm'
   },
   {
     id: 'issues',
@@ -43,7 +43,7 @@ export const getStaffFeatures = () => [
     description: 'Quản lý các vấn đề kỹ thuật',
     icon: '🔧',
     color: '#ff4757',
-    route: '/issues'
+    route: '/staff/issues'
   },
   {
     id: 'reports',
@@ -51,7 +51,7 @@ export const getStaffFeatures = () => [
     description: 'Báo cáo hoạt động trạm',
     icon: '📊',
     color: '#6c757d',
-    route: '/reports'
+    route: '/staff/reports'
   }
 ];
 

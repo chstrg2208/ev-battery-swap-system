@@ -6,6 +6,8 @@ import { Routes, Route } from 'react-router-dom';
 
 // Staff Components
 import StaffDashboard from '../pages/Staff/Dashboard';
+import StaffBatteryInventory from '../pages/Staff/BatteryInventory';
+import StaffTransactionManagement from '../pages/Staff/TransactionManagement';
 import StaffStationManagement from '../pages/Staff/StationManagement';
 import StaffBatteryStock from '../pages/Staff/BatteryStock';
 import StaffSwapConfirm from '../pages/Staff/SwapConfirm';
@@ -16,6 +18,8 @@ const StaffRoutes = () => {
   return (
     <Routes>
       <Route path="/dashboard" element={<StaffDashboard />} />
+      <Route path="/battery-inventory" element={<StaffBatteryInventory />} />
+      <Route path="/transaction-management" element={<StaffTransactionManagement />} />
       <Route path="/station-management" element={<StaffStationManagement />} />
       <Route path="/battery-stock" element={<StaffBatteryStock />} />
       <Route path="/swap-confirm" element={<StaffSwapConfirm />} />
