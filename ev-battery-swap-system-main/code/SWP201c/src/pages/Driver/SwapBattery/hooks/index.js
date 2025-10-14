@@ -1,5 +1,4 @@
-// Driver/SwapBattery/hooks/index.js
-// Barrel export for swap battery hooks
+// src/pages/Driver/SwapBattery/hooks/index.js
 
 export * from './useSwapData';
 export * from './useSwapSteps';

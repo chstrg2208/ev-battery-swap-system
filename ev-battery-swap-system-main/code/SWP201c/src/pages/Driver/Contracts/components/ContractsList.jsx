@@ -1,30 +1,26 @@
-// Driver/Contracts/components/ContractsList.jsx
-// Grid of contract cards
+// src/pages/Driver/Contracts/components/ContractsList.jsx
 
-import PropTypes from 'prop-types';
+import React from 'react';
 import ContractCard from './ContractCard';
 
-const ContractsList = ({ contracts, onContractClick }) => {
+const listStyle = {
+  display: 'grid',
+  gap: '16px',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' // Layout dạng lưới responsive
+};
+
+const ContractsList = ({ contracts, onViewDetails }) => {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-      gap: '1.5rem'
-    }}>
+    <div style={listStyle}>
       {contracts.map(contract => (
         <ContractCard
           key={contract.id}
           contract={contract}
-          onClick={onContractClick}
+          onViewDetails={onViewDetails} // Truyền hàm xuống component con
         />
       ))}
     </div>
   );
-};
-
-ContractsList.propTypes = {
-  contracts: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onContractClick: PropTypes.func.isRequired
 };
 
 export default ContractsList;

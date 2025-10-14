@@ -1,107 +1,66 @@
-// Driver/Subscriptions/index.jsx
-// Container component for Subscriptions page - orchestrates data and UI
+import React from 'react';
 
-import { useAuth } from '../../../context/AuthContext';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useSubscriptionsData, useSubscribe } from './hooks';
-import {
-  SubscriptionsHeader,
-  PlansGrid,
-  EmptyPlans,
-  FAQSection,
-  DebugInfo
-} from './components';
+// Import các component, bao gồm cả DebugInfo
+import SubscriptionsHeader from './components/SubscriptionsHeader';
+import PlansGrid from './components/PlansGrid';
+import FAQSection from './components/FAQSection';
+import DebugInfo from './components/DebugInfo'; // <-- IMPORT MỚI
 
-const Subscriptions = () => {
-  const { currentUser } = useAuth();
-
-  // Data fetching
-  const {
-    plans,
-    currentSubscription,
-    userContracts,
-    loading,
-    error,
-    refetch
-  } = useSubscriptionsData(currentUser);
-
-  // Subscription actions
-  const { subscribe, subscribing } = useSubscribe(currentUser, refetch);
-
-  // Loading state
-  if (loading) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#19c37d', fontSize: '1.5rem' }}>⏳ Đang tải...</div>
-        </div>
-      </DashboardLayout>
-    );
+// Dữ liệu giả
+const mockPlans = [
+  // ... (dữ liệu mockPlans giữ nguyên như trước)
+  {
+    id: 'plan_basic',
+    name: 'Gói Cơ Bản',
+    price: 1800000,
+    features: [
+      'Giới hạn 2,000 km/tháng',
+      'Phí đổi pin tiêu chuẩn',
+      'Hỗ trợ cơ bản 24/7'
+    ]
+  },
+  {
+    id: 'plan_pro',
+    name: 'Gói Pro',
+    price: 2500000,
+    features: [
+      'Không giới hạn quãng đường',
+      'Miễn phí 10 lần đổi pin/tháng',
+      'Ưu tiên hỗ trợ 24/7',
+      'Bảo dưỡng pin định kỳ'
+    ]
+  },
+  {
+    id: 'plan_flex',
+    name: 'Gói Linh Hoạt',
+    price: 900000,
+    features: [
+      'Giới hạn 1,000 km/tháng',
+      'Phù hợp cho người đi ít',
+      'Hỗ trợ cơ bản 24/7'
+    ]
   }
+];
+const currentDriverPlanId = 'plan_pro';
 
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#ff6b6b', fontSize: '1.2rem' }}>⚠️ {error}</div>
-          <button 
-            onClick={refetch}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              background: '#19c37d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#17b370';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#19c37d';
-            }}
-          >
-            Thử lại
-          </button>
-        </div>
-      </DashboardLayout>
-    );
-  }
+const DriverSubscriptions = () => {
+  // Truyền dữ liệu mà bạn muốn xem vào component DebugInfo
+  const debugData = {
+    allPlans: mockPlans,
+    currentPlan: currentDriverPlanId,
+    // Sau này có thể thêm dữ liệu từ API...
+  };
 
   return (
-    <DashboardLayout role="driver">
-      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Debug Info */}
-        <DebugInfo
-          currentUser={currentUser}
-          plans={plans}
-          userContracts={userContracts}
-          currentSubscription={currentSubscription}
-          error={error}
-        />
+    <div>
+      <SubscriptionsHeader />
+      <PlansGrid plans={mockPlans} currentPlanId={currentDriverPlanId} />
+      <FAQSection />
 
-        {/* Header */}
-        <SubscriptionsHeader />
-
-        {/* Plans Grid */}
-        {plans.length > 0 ? (
-          <PlansGrid
-            plans={plans}
-            onSubscribe={subscribe}
-            loading={subscribing}
-          />
-        ) : (
-          <EmptyPlans onRetry={refetch} />
-        )}
-
-        {/* FAQ Section */}
-        <FAQSection />
-      </div>
-    </DashboardLayout>
+      {/* Component DebugInfo sẽ tự động ẩn đi khi build sản phẩm */}
+      <DebugInfo data={debugData} />
+    </div>
   );
 };
 
-export default Subscriptions;
+export default DriverSubscriptions;

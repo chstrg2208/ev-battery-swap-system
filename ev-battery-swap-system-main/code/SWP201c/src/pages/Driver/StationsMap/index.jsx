@@ -1,143 +1,68 @@
-// Driver/StationsMap/index.jsx
-// Container component for StationsMap page - orchestrates stations display and booking
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; // Don't forget to import Leaflet's CSS
 
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useStationsData, useStationBooking, useStationSelection } from './hooks';
-import { getStationsStats } from './utils';
-import {
-  StationsMapHeader,
-  StationsList,
-  StationsStats
-} from './components';
+// Import child components
+import StationsMapHeader from './components/StationsMapHeader';
+import StationsStats from './components/StationsStats';
+import StationsList from './components/StationsList';
 
-const StationsMap = () => {
-  // Data fetching
-  const { stations, loading, error, refetch } = useStationsData();
+// Mock data, replace with your API call
+const mockStations = [
+  { id: 1, name: 'Trạm Vincom Thủ Đức', address: '216 Võ Văn Ngân, Thủ Đức', lat: 10.8507, lng: 106.7583, availableBateries: 5, totalSlots: 10 },
+  { id: 2, name: 'Trạm Giga Mall', address: '242 Phạm Văn Đồng, Thủ Đức', lat: 10.8273, lng: 106.7212, availableBateries: 0, totalSlots: 8 },
+  { id: 3, name: 'Trạm Emart Gò Vấp', address: '366 Phan Văn Trị, Gò Vấp', lat: 10.8285, lng: 106.6882, availableBateries: 8, totalSlots: 10 },
+];
 
-  // Booking handling
-  const { bookStation, booking } = useStationBooking(refetch);
+const DriverStationsMap = () => {
+  const [stations, setStations] = useState(mockStations);
+  const [filteredStations, setFilteredStations] = useState(mockStations);
+  const [mapCenter, setMapCenter] = useState([10.8231, 106.6297]); // Default to HCMC center
 
-  // Station selection (for future map integration)
-  const { selectedStation, selectStation } = useStationSelection();
-
-  // Calculate statistics
-  const stats = getStationsStats(stations);
-
-  // Handle booking
-  const handleBook = async (stationId) => {
-    await bookStation(stationId);
+  const handleSearch = (query) => {
+    const lowerCaseQuery = query.toLowerCase();
+    const results = stations.filter(station =>
+      station.name.toLowerCase().includes(lowerCaseQuery) ||
+      station.address.toLowerCase().includes(lowerCaseQuery)
+    );
+    setFilteredStations(results);
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{ 
-          padding: '20px', 
-          textAlign: 'center',
-          color: '#FFFFFF' 
-        }}>
-          <div style={{
-            fontSize: '3rem',
-            marginBottom: '15px',
-            animation: 'pulse 1.5s ease-in-out infinite'
-          }}>
-            🗺️
-          </div>
-          <p style={{ fontSize: '1.125rem' }}>Đang tải bản đồ trạm...</p>
-          <style>
-            {`
-              @keyframes pulse {
-                0%, 100% { opacity: 1; transform: scale(1); }
-                50% { opacity: 0.7; transform: scale(1.1); }
-              }
-            `}
-          </style>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{ 
-          padding: '20px',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            background: 'rgba(255, 107, 107, 0.1)',
-            border: '1px solid rgba(255, 107, 107, 0.3)',
-            borderRadius: '12px',
-            padding: '30px',
-            maxWidth: '500px',
-            margin: '0 auto'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
-            <h3 style={{ color: '#ff6b6b', marginBottom: '10px' }}>
-              Lỗi tải dữ liệu
-            </h3>
-            <p style={{ color: '#ff6b6b', marginBottom: '20px' }}>
-              {error}
-            </p>
-            <button
-              onClick={refetch}
-              style={{
-                padding: '10px 20px',
-                background: '#19c37d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '600'
-              }}
-            >
-              Thử lại
-            </button>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const handleSelectStation = (station) => {
+    // When a station is clicked in the list, center the map on it
+    setMapCenter([station.lat, station.lng]);
+  };
 
   return (
-    <DashboardLayout role="driver">
-      <div style={{ padding: '20px' }}>
-        {/* Header */}
-        <StationsMapHeader />
+    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '20px', height: 'calc(100vh - 100px)' }}>
 
-        {/* Statistics */}
-        {stations.length > 0 && (
-          <StationsStats stats={stats} />
-        )}
-
-        {/* Stations List */}
-        <StationsList
-          stations={stations}
-          onBook={handleBook}
-          booking={booking}
-          onSelect={selectStation}
-        />
-
-        {/* Debug info for selected station */}
-        {selectedStation && import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
-          <div style={{
-            marginTop: '20px',
-            padding: '15px',
-            background: 'rgba(255, 165, 0, 0.1)',
-            border: '1px solid rgba(255, 165, 0, 0.3)',
-            borderRadius: '10px',
-            color: '#ffa500',
-            fontSize: '0.875rem'
-          }}>
-            <strong>🔧 Selected Station:</strong> {selectedStation.name}
-          </div>
-        )}
+      {/* Left Panel: Search and List */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <StationsMapHeader onSearch={handleSearch} />
+        <StationsStats count={filteredStations.length} />
+        <StationsList stations={filteredStations} onSelectStation={handleSelectStation} />
       </div>
-    </DashboardLayout>
+
+      {/* Right Panel: Map */}
+      <div style={{ borderRadius: '16px', overflow: 'hidden' }}>
+        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {filteredStations.map(station => (
+            <Marker key={station.id} position={[station.lat, station.lng]}>
+              <Popup>
+                <strong>{station.name}</strong><br />
+                {station.address}<br />
+                Pin có sẵn: {station.availableBateries}/{station.totalSlots}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    </div>
   );
 };
 
-export default StationsMap;
+export default DriverStationsMap;

@@ -1,196 +1,53 @@
-// Driver/Contracts/components/ContractCard.jsx
-// Individual contract card component
+// src/pages/Driver/Contracts/components/ContractCard.jsx
 
-import PropTypes from 'prop-types';
-import {
-  formatCurrency,
-  formatShortDate,
-  getStatusColor,
-  getStatusLabel,
-  getPaymentStatusColor,
-  getPaymentStatusLabel,
-  calculateUsagePercentage,
-  getUsageColor
-} from '../utils';
+import React from 'react';
 
-const ContractCard = ({ contract, onClick }) => {
-  const usagePercentage = calculateUsagePercentage(contract.usedSwaps, contract.swapLimit);
-  const usageColor = getUsageColor(usagePercentage);
-
-  return (
-    <div
-      onClick={() => onClick(contract)}
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: '12px',
-        padding: '1.5rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        border: '1px solid #e0e0e0'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-      }}
-    >
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start',
-        marginBottom: '1rem'
-      }}>
-        <div>
-          <span
-            style={{
-              display: 'inline-block',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '12px',
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              backgroundColor: getStatusColor(contract.status) + '20',
-              color: getStatusColor(contract.status),
-              marginBottom: '0.5rem'
-            }}
-          >
-            {getStatusLabel(contract.status)}
-          </span>
-          <h3 style={{
-            fontSize: '1.25rem',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            marginBottom: '0.25rem'
-          }}>
-            {contract.planName}
-          </h3>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#666'
-          }}>
-            Mã: {contract.id}
-          </p>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            color: '#9c88ff',
-            marginBottom: '0.25rem'
-          }}>
-            {formatCurrency(contract.amount)}
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#666'
-          }}>
-            {contract.swapLimit} lần đổi
-          </p>
-        </div>
-      </div>
-
-      {/* Contract Details Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '1rem',
-        padding: '1rem',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '8px'
-      }}>
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Ngày bắt đầu
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            color: '#1a1a1a'
-          }}>
-            {formatShortDate(contract.startDate)}
-          </p>
-        </div>
-        
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Ngày kết thúc
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            color: '#1a1a1a'
-          }}>
-            {formatShortDate(contract.endDate)}
-          </p>
-        </div>
-        
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Đã sử dụng
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            color: usageColor
-          }}>
-            {contract.usedSwaps}/{contract.swapLimit} lần ({usagePercentage}%)
-          </p>
-        </div>
-        
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Thanh toán
-          </p>
-          <span style={{
-            display: 'inline-block',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '6px',
-            fontSize: '0.75rem',
-            fontWeight: '600',
-            backgroundColor: getPaymentStatusColor(contract.paymentStatus) + '20',
-            color: getPaymentStatusColor(contract.paymentStatus)
-          }}>
-            {getPaymentStatusLabel(contract.paymentStatus)}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
+const cardStyle = {
+  border: '1px solid #e0e0e0',
+  borderRadius: '8px',
+  padding: '16px',
+  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+  backgroundColor: 'white',
+  transition: 'transform 0.2s',
 };
 
-ContractCard.propTypes = {
-  contract: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    planName: PropTypes.string.isRequired,
-    status: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
-    swapLimit: PropTypes.number.isRequired,
-    startDate: PropTypes.string.isRequired,
-    endDate: PropTypes.string.isRequired,
-    usedSwaps: PropTypes.number,
-    paymentStatus: PropTypes.string
-  }).isRequired,
-  onClick: PropTypes.func.isRequired
+// Hàm để lấy màu dựa trên trạng thái
+const getStatusBadge = (status) => {
+  const styles = {
+    padding: '4px 8px',
+    borderRadius: '12px',
+    color: 'white',
+    fontSize: '12px',
+    fontWeight: 'bold',
+  };
+  if (status === 'active') {
+    return { ...styles, backgroundColor: '#28a745' }; // Xanh lá
+  }
+  if (status === 'expired') {
+    return { ...styles, backgroundColor: '#dc3545' }; // Đỏ
+  }
+  return { ...styles, backgroundColor: '#ffc107', color: 'black' }; // Vàng
+};
+
+const ContractCard = ({ contract, onViewDetails }) => {
+  return (
+    <div style={cardStyle}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ margin: '0 0 10px 0' }}>{contract.name}</h3>
+        <span style={getStatusBadge(contract.status)}>
+          {contract.status === 'active' ? 'Còn hiệu lực' : 'Đã hết hạn'}
+        </span>
+      </div>
+      <p style={{ margin: '4px 0' }}><strong>Phương tiện:</strong> {contract.vehicle}</p>
+      <p style={{ margin: '4px 0' }}><strong>Ngày bắt đầu:</strong> {contract.startDate}</p>
+      <button
+        onClick={() => onViewDetails(contract)} // Gọi hàm từ props khi click
+        style={{ marginTop: '12px', padding: '8px 12px', width: '100%', cursor: 'pointer' }}
+      >
+        Xem chi tiết
+      </button>
+    </div>
+  );
 };
 
 export default ContractCard;

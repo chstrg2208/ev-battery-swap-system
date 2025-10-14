@@ -1,42 +1,37 @@
-// Driver/Subscriptions/components/DebugInfo.jsx
-// Debug information display (development only)
+import React from 'react';
 
-import PropTypes from 'prop-types';
-import { getUserId } from '../utils';
-
-const DebugInfo = ({ currentUser, plans, userContracts, currentSubscription, error }) => {
-  // Only show in development
-  if (import.meta.env.VITE_ENABLE_DEBUG !== 'true') {
+// Component này chỉ dùng cho mục đích phát triển (debugging)
+const DebugInfo = ({ data }) => {
+  // Chỉ render component nếu đang ở môi trường development
+  if (process.env.NODE_ENV !== 'development') {
     return null;
   }
 
   return (
     <div style={{
-      background: 'rgba(255, 165, 0, 0.1)',
-      border: '1px solid rgba(255, 165, 0, 0.3)',
-      borderRadius: '10px',
+      background: '#111',
+      border: '1px solid #333',
+      borderRadius: '8px',
       padding: '15px',
-      marginBottom: '20px',
-      fontSize: '0.9rem',
-      color: '#ffa500'
+      marginTop: '40px',
+      fontFamily: 'monospace',
     }}>
-      <strong>🔧 Subscriptions Debug Info:</strong><br/>
-      User ID: {getUserId(currentUser) || 'N/A'}<br/>
-      Available Plans: {plans.length}<br/>
-      User Contracts: {userContracts.length}<br/>
-      Current Subscription: {currentSubscription ? 'Yes' : 'No'}<br/>
-      Plans Data: {plans.length > 0 ? 'Loaded' : 'Empty'}<br/>
-      Error: {error || 'None'}<br/>
+      <h4 style={{ margin: '0 0 10px 0', color: '#ffc107', textTransform: 'uppercase' }}>
+        🐞 Debug Info
+      </h4>
+      <pre style={{
+        color: '#eee',
+        background: '#222',
+        padding: '10px',
+        borderRadius: '5px',
+        whiteSpace: 'pre-wrap', // Giúp xuống dòng tự động
+        wordBreak: 'break-all', // Ngắt từ nếu quá dài
+        fontSize: '12px'
+      }}>
+        {JSON.stringify(data, null, 2)}
+      </pre>
     </div>
   );
-};
-
-DebugInfo.propTypes = {
-  currentUser: PropTypes.object,
-  plans: PropTypes.array.isRequired,
-  userContracts: PropTypes.array.isRequired,
-  currentSubscription: PropTypes.object,
-  error: PropTypes.string
 };
 
 export default DebugInfo;

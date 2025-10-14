@@ -1,88 +1,44 @@
-// Driver/Support/index.jsx
-// Container component for Support page - orchestrates tabs and forms
+import React, { useState } from 'react'; // <-- SỬA LỖI 1: Thêm dấu {} cho useState
 
-import { useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useSupportForm, useSupportSubmit } from './hooks';
-import { formatIssueReport } from './utils';
-import {
-  SupportHeader,
-  SupportTabs,
-  ContactForm,
-  IssueReportGrid,
-  FAQList,
-  ContactInfo
-} from './components';
+// Import tất cả component
+import SupportHeader from './components/SupportHeader';
+import SupportTabs from './components/SupportTabs';
+import FAQList from './components/FAQList';
+import IssueReportGrid from './components/IssueReportGrid';
+import ContactInfo from './components/ContactInfo';
+import ContactForm from './components/ContactForm';
 
-const Support = () => {
-  const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('contact');
-  
-  // Form management
-  const { formData, errors, updateField, validate, reset } = useSupportForm();
-  
-  // Submission handling
-  const { submitTicket, loading } = useSupportSubmit();
+const DriverSupport = () => { // <-- SỬA LỖI 2: THÊM DẤU { Ở ĐÂY
 
-  // Handle contact form submission
-  const handleSubmit = async () => {
-    if (!validate()) {
-      return;
+  const [activeTab, setActiveTab] = useState('Câu hỏi thường gặp');
+
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'Câu hỏi thường gặp':
+        return <FAQList />;
+      case 'Báo cáo sự cố':
+        return <IssueReportGrid />;
+      case 'Liên hệ trực tiếp':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '30px' }}>
+            <ContactInfo />
+            <ContactForm />
+          </div>
+        );
+      default:
+        return <FAQList />;
     }
-
-    const userId = currentUser?.id || currentUser?.user_id || currentUser?.userId;
-    const result = await submitTicket(formData, userId);
-
-    if (result.success) {
-      reset();
-    }
-  };
-
-  // Handle issue report click
-  const handleIssueClick = async (issue) => {
-    const userId = currentUser?.id || currentUser?.user_id || currentUser?.userId;
-    const reportData = formatIssueReport(issue.type, userId);
-    
-    console.log('📝 Reporting issue:', reportData);
-    
-    // Note: Backend cần API POST /api/support/tickets
-    alert(`Báo cáo ${issue.title}\n\nBackend cần implement API POST /api/support/tickets`);
   };
 
   return (
-    <DashboardLayout role="driver">
-      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header */}
-        <SupportHeader />
-
-        {/* Tabs */}
-        <SupportTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {/* Tab Content */}
-        {activeTab === 'contact' && (
-          <ContactForm
-            formData={formData}
-            onFieldChange={updateField}
-            onSubmit={handleSubmit}
-            loading={loading}
-            errors={errors}
-          />
-        )}
-
-        {activeTab === 'report' && (
-          <IssueReportGrid onIssueClick={handleIssueClick} />
-        )}
-
-        {activeTab === 'faq' && (
-          <FAQList />
-        )}
-
-        {/* Contact Info (always visible) */}
-        <ContactInfo />
+    <div>
+      <SupportHeader />
+      <SupportTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div>
+        {renderContent()}
       </div>
-    </DashboardLayout>
+    </div>
   );
-};
+}; // <-- Đóng dấu } của component
 
-export default Support;
+export default DriverSupport;

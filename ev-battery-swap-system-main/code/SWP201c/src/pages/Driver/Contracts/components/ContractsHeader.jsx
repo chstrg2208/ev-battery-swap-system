@@ -1,23 +1,24 @@
-// Driver/Contracts/components/ContractsHeader.jsx
-// Header section for contracts page
+// src/pages/Driver/Contracts/components/ContractsHeader.jsx
 
-const ContractsHeader = () => {
+import React from 'react';
+
+const headerStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  borderBottom: '2px solid #f0f0f0',
+  paddingBottom: '16px'
+};
+
+const ContractsHeader = ({ contractCount }) => {
   return (
-    <div style={{ marginBottom: '2rem' }}>
-      <h2 style={{
-        fontSize: '2rem',
-        fontWeight: '700',
-        color: '#1a1a1a',
-        marginBottom: '0.5rem'
-      }}>
-        Hợp Đồng Của Tôi
-      </h2>
-      <p style={{
-        fontSize: '1rem',
-        color: '#666'
-      }}>
-        Quản lý và theo dõi các hợp đồng dịch vụ của bạn
-      </p>
+    <div style={headerStyle}>
+      <h1 style={{ margin: 0 }}>Hợp đồng của tôi ({contractCount})</h1>
+      <button
+        style={{ padding: '10px 15px', background: '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+      >
+        Lọc hợp đồng
+      </button>
     </div>
   );
 };

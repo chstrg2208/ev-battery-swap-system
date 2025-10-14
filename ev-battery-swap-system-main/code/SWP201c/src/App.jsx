@@ -4,30 +4,34 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
-// Context Providers
+// --- Context Providers & Hooks ---
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SwapProvider } from './context/SwapContext';
 import { AppProvider } from './context/AppContext';
 
-// Components
+// --- Common Components & Protected Routes ---
 import LandingPage from './components/common/LandingPage';
 import LoginModal from './components/modals/LoginModal';
 import RegisterModal from './components/modals/RegisterModal';
 import LoadingFallback from './components/common/LoadingFallback';
 import { DriverRoute, StaffRoute, AdminRoute } from './components/ProtectedRoute';
 
-// Driver Pages
+// --- Layouts & Screens ---
+import DriverLayout from './layouts/DriverLayout';
+import VehicleSelectionScreen from './pages/Driver/Vehicles'; // Màn hình chọn xe
+
+// --- Driver Pages ---
 import DriverDashboard from './pages/Driver/Dashboard';
 import DriverSwapBattery from './pages/Driver/SwapBattery';
-import DriverVehicles from './pages/Driver/Vehicles';
 import DriverStationsMap from './pages/Driver/StationsMap';
 import DriverSubscriptions from './pages/Driver/Subscriptions';
 import DriverContracts from './pages/Driver/Contracts';
 import DriverPayments from './pages/Driver/Payments';
 import DriverSupport from './pages/Driver/Support';
 import DriverProfile from './pages/Driver/Profile';
+// Note: DriverVehicles is now the management page, not the selection screen.
 
-// Staff & Admin Dashboards
+// --- Staff & Admin Pages ---
 import StaffDashboard from './pages/Staff/Dashboard';
 import AdminDashboard from './pages/Admin/Dashboard';
 
@@ -39,7 +43,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Main App Content (uses context)
+// ====================================================================
+// GATEKEEPER COMPONENT
+// Checks if a driver has selected a vehicle before allowing access
+// to the main application layout.
+// ====================================================================
+function ProtectedDriverLayout() {
+  const { selectedVehicle } = useAuth();
+
+  if (!selectedVehicle) {
+    // If no vehicle is selected, force a redirect to the selection screen.
+    return <Navigate to="/driver/select-vehicle" replace />;
+  }
+
+  // If a vehicle is selected, render the main DriverLayout with the sidebar.
+  return <DriverLayout />;
+}
+
+// Main App Content with all routes
 function AppContent() {
   const { currentUser } = useAuth();
 
@@ -47,59 +68,52 @@ function AppContent() {
     <div className="App">
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          {/* Driver Routes - Only accessible by drivers */}
-          <Route path="/driver/dashboard" element={
-            <DriverRoute><DriverDashboard /></DriverRoute>
-          } />
-          <Route path="/driver/swap-battery" element={
-            <DriverRoute><DriverSwapBattery /></DriverRoute>
-          } />
-          <Route path="/driver/vehicles" element={
-            <DriverRoute><DriverVehicles /></DriverRoute>
-          } />
-          <Route path="/driver/stations-map" element={
-            <DriverRoute><DriverStationsMap /></DriverRoute>
-          } />
-          <Route path="/driver/subscriptions" element={
-            <DriverRoute><DriverSubscriptions /></DriverRoute>
-          } />
-          <Route path="/driver/contracts" element={
-            <DriverRoute><DriverContracts /></DriverRoute>
-          } />
-          <Route path="/driver/payments" element={
-            <DriverRoute><DriverPayments /></DriverRoute>
-          } />
-          <Route path="/driver/support" element={
-            <DriverRoute><DriverSupport /></DriverRoute>
-          } />
-          <Route path="/driver/profile" element={
-            <DriverRoute><DriverProfile /></DriverRoute>
-          } />
+          {/* === ROUTE FOR VEHICLE SELECTION (NO SIDEBAR) === */}
+          <Route 
+            path="/driver/select-vehicle" 
+            element={
+              <DriverRoute>
+                <VehicleSelectionScreen />
+              </DriverRoute>
+            } 
+          />
           
-          {/* Staff Routes - Only accessible by staff */}
-          <Route path="/staff/dashboard" element={
-            <StaffRoute><StaffDashboard /></StaffRoute>
-          } />
-          <Route path="/staff/*" element={
-            <StaffRoute><StaffDashboard /></StaffRoute>
-          } />
+          {/* === MAIN DRIVER ROUTES (WITH SIDEBAR, AFTER SELECTION) === */}
+          <Route 
+            path="/driver" 
+            element={
+              <DriverRoute>
+                <ProtectedDriverLayout />
+              </DriverRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} /> 
+            <Route path="dashboard" element={<DriverDashboard />} />
+            <Route path="swap-battery" element={<DriverSwapBattery />} />
+            <Route path="vehicles" element={<div
+            >Trang Quản lý Xe</div>} /> 
+            <Route path="stations-map" element={<DriverStationsMap />} />
+            <Route path="subscriptions" element={<DriverSubscriptions />} />
+            <Route path="contracts" element={<DriverContracts />} />
+            <Route path="payments" element={<DriverPayments />} />
+            <Route path="support" element={<DriverSupport />} />
+            <Route path="profile" element={<DriverProfile />} />
+          </Route>
           
-          {/* Admin Routes - Only accessible by admin */}
-          <Route path="/admin/dashboard" element={
-            <AdminRoute><AdminDashboard /></AdminRoute>
-          } />
-          <Route path="/admin/*" element={
-            <AdminRoute><AdminDashboard /></AdminRoute>
-          } />
+          {/* === STAFF ROUTES === */}
+          <Route path="/staff/dashboard" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
           
-          {/* Landing Page Route */}
+          {/* === ADMIN ROUTES === */}
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
+          {/* === PUBLIC & REDIRECT ROUTES === */}
           <Route path="/" element={
             currentUser ? (
               <Navigate to={
-                currentUser.role === 'driver' ? '/driver/dashboard' :
+                currentUser.role === 'driver' ? '/driver/dashboard' : // AuthContext will handle the select-vehicle redirect
                 currentUser.role === 'staff' ? '/staff/dashboard' :
                 currentUser.role === 'admin' ? '/admin/dashboard' :
-                '/driver/dashboard'
+                '/'
               } replace />
             ) : (
               <LandingPage />
@@ -107,18 +121,7 @@ function AppContent() {
           } />
           
           {/* Fallback for any unmatched routes */}
-          <Route path="*" element={
-            currentUser ? (
-              <Navigate to={
-                currentUser.role === 'driver' ? '/driver/dashboard' :
-                currentUser.role === 'staff' ? '/staff/dashboard' :
-                currentUser.role === 'admin' ? '/admin/dashboard' :
-                '/driver/dashboard'
-              } replace />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         
         {/* Modals */}
@@ -129,7 +132,7 @@ function AppContent() {
   );
 }
 
-// Main App Component (wraps with providers)
+// Main App Component that wraps everything with context providers
 function App() {
   return (
     <AuthProvider>

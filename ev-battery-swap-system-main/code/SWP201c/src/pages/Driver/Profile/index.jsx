@@ -1,177 +1,68 @@
-// Driver/Profile/index.jsx
-// Container for Driver Profile page - orchestrates all components and hooks
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext'; // Điều chỉnh đường dẫn
 
-import React from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useProfileData, useProfileForm, useProfileUpdate } from './hooks';
-import {
-  ProfileHeader,
-  ProfileAvatar,
-  ProfileDisplay,
-  ProfileFormFields,
-  ProfileFormActions,
-  ProfileStats
-} from './components';
+// Import tất cả component con
+import ProfileHeader from './components/ProfileHeader';
+import ProfileDisplay from './components/ProfileDisplay';
+import ProfileAvatar from './components/ProfileAvatar';
+import ProfileFormFields from './components/ProfileFormFields';
+import ProfileFormActions from './components/ProfileFormActions';
+
+// Dữ liệu giả
+const mockStats = {
+  joinDate: '15/07/2025',
+  totalTrips: 256,
+  rating: '4.8 ⭐'
+};
 
 const DriverProfile = () => {
-  // Custom hooks for data, form, and update
-  const { user, loading, error, refetch } = useProfileData();
-  const {
-    isEditing,
-    formData,
-    formErrors,
-    startEditing,
-    cancelEditing,
-    updateField,
-    validateForm,
-    setFormData
-  } = useProfileForm(user);
-  const { updating, updateProfile } = useProfileUpdate((updatedData) => {
-    // On successful update, update local user state
-    setFormData(updatedData);
-    cancelEditing();
-    refetch(); // Refetch to get latest data
-  });
+  const { currentUser } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', avatarUrl: '' });
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateForm()) {
-      return;
+  // Load dữ liệu người dùng vào form khi component được mount
+  useEffect(() => {
+    if (currentUser) {
+      setFormData({
+        name: currentUser.name || 'Nguyễn Văn A',
+        email: currentUser.email || 'example@email.com',
+        phone: currentUser.phone || '090xxxxxxx',
+        avatarUrl: currentUser.avatarUrl || 'https://i.pravatar.cc/150'
+      });
     }
+  }, [currentUser]);
 
-    // Update profile
-    const result = await updateProfile(user?.id, formData);
-    
-    if (!result.success && result.error) {
-      alert(result.error);
-    }
+  const handleToggleEdit = () => {
+    setIsEditing(!isEditing);
   };
 
-  // Loading state
-  if (loading && !user) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              border: '4px solid rgba(25, 195, 125, 0.2)',
-              borderTop: '4px solid #19c37d',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 20px'
-            }} />
-            <p style={{ color: '#B0B0B0', fontSize: '1.1rem' }}>
-              Đang tải hồ sơ...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            borderRadius: '12px',
-            padding: '30px',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            textAlign: 'center',
-            maxWidth: '500px'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
-            <h3 style={{ color: '#EF4444', marginBottom: '10px' }}>
-              Lỗi tải dữ liệu
-            </h3>
-            <p style={{ color: '#B0B0B0', marginBottom: '20px' }}>{error}</p>
-            <button
-              onClick={refetch}
-              style={{
-                padding: '10px 20px',
-                background: 'linear-gradient(135deg, #19c37d, #15a36a)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              Thử lại
-            </button>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const handleSave = () => {
+    console.log("Saving data:", formData);
+    // Sau này sẽ gọi API để cập nhật
+    setIsEditing(false); // Chuyển về chế độ xem
+  };
 
   return (
-    <DashboardLayout role="driver">
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
+    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+      <ProfileHeader isEditing={isEditing} onToggleEdit={handleToggleEdit} />
 
-      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <ProfileHeader />
-
-        {/* Main Profile Card */}
-        <div style={{
-          background: 'rgba(26, 32, 44, 0.8)',
-          borderRadius: '20px',
-          padding: '40px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          marginBottom: '25px'
-        }}>
-          <ProfileAvatar 
-            user={user} 
-            onEdit={startEditing}
-            isEditing={isEditing}
-          />
-
-          {/* Profile Content - Display or Edit Mode */}
-          {isEditing ? (
-            <form onSubmit={handleSubmit}>
-              <ProfileFormFields
-                formData={formData}
-                formErrors={formErrors}
-                onFieldChange={updateField}
-              />
-              <ProfileFormActions
-                onSave={handleSubmit}
-                onCancel={cancelEditing}
-                isSaving={updating}
-              />
-            </form>
-          ) : (
-            <ProfileDisplay user={user} />
-          )}
+      {isEditing ? (
+        // Chế độ CHỈNH SỬA
+        <div>
+          <ProfileAvatar avatarUrl={formData.avatarUrl} isEditing={true} />
+          <ProfileFormFields formData={formData} onChange={handleChange} />
+          <ProfileFormActions onSave={handleSave} />
         </div>
-
-        {/* Profile Statistics */}
-        <ProfileStats user={user} />
-      </div>
-    </DashboardLayout>
+      ) : (
+        // Chế độ XEM
+        <ProfileDisplay user={formData} stats={mockStats} />
+      )}
+    </div>
   );
 };
 

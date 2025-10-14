@@ -1,32 +1,40 @@
 import React, { useState } from 'react';
 
 const selectStyle = { 
-    width: '100%', 
-    padding: '12px', 
-    background: 'rgba(30, 41, 59, 0.8)', 
-    border: '1px solid #4A5568', 
-    borderRadius: '8px', 
-    color: 'white', 
-    fontSize: '16px',
-    boxSizing: 'border-box'
+    width: '100%', padding: '12px', background: 'rgba(30, 41, 59, 0.8)', 
+    border: '1px solid #4A5568', borderRadius: '8px', color: 'white', 
+    fontSize: '16px', boxSizing: 'border-box'
 };
 
-const StationSelector = ({ stations, towers, onConfirm, updateSelection }) => {
+const StationSelector = ({ stations = [], towers = [], onConfirm, updateSelection, isLoadingTowers }) => {
   const [selectedStationId, setSelectedStationId] = useState('');
-  const [selectedTower, setSelectedTower] = useState('');
+  const [selectedTowerId, setSelectedTowerId] = useState('');
 
   const handleStationChange = (e) => {
     const stationId = e.target.value;
-    const stationName = e.target.options[e.target.selectedIndex].text;
+    const station = stations.find(s => s.id.toString() === stationId);
+    
     setSelectedStationId(stationId);
-    setSelectedTower(''); // Reset lựa chọn trụ khi đổi trạm
-    updateSelection({ station: stationId ? stationName : null, tower: null });
+    setSelectedTowerId('');
+    
+    updateSelection({ 
+      stationId: stationId, 
+      stationName: station ? station.name : null, 
+      towerId: null, 
+      towerName: null 
+    });
   };
 
   const handleTowerChange = (e) => {
-    const towerName = e.target.value;
-    setSelectedTower(towerName);
-    updateSelection({ tower: towerName });
+    const towerId = e.target.value;
+    const tower = towers.find(t => (t.id || t.tower_id).toString() === towerId);
+
+    setSelectedTowerId(towerId);
+
+    updateSelection({ 
+      towerId: towerId, 
+      towerName: tower ? (tower.name || tower.tower_name) : null 
+    });
   };
 
   return (
@@ -35,32 +43,45 @@ const StationSelector = ({ stations, towers, onConfirm, updateSelection }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '8px' }}>Chọn trạm đổi pin</label>
-          <select style={selectStyle} onChange={handleStationChange}>
+          <select style={selectStyle} onChange={handleStationChange} value={selectedStationId}>
             <option value="">-- Vui lòng chọn trạm --</option>
-            {stations.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {stations.map(s => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '8px' }}>Chọn trụ sạc</label>
           <select 
             style={{ ...selectStyle, cursor: !selectedStationId ? 'not-allowed' : 'pointer' }} 
-            disabled={!selectedStationId}
-            value={selectedTower}
+            disabled={!selectedStationId || isLoadingTowers}
+            value={selectedTowerId}
             onChange={handleTowerChange}
           >
-            <option value="">-- Vui lòng chọn trụ --</option>
-            {towers
-              .filter(t => t.stationId === selectedStationId)
-              .map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+            <option value="">
+              {isLoadingTowers ? 'Đang tải danh sách trụ...' : '-- Vui lòng chọn trụ --'}
+            </option>
+            {towers.map(t => {
+              // Sửa lại để chấp nhận nhiều loại tên thuộc tính
+              const tower_id = t.id || t.tower_id;
+              const tower_name = t.name || t.tower_name;
+              return (
+                <option key={tower_id} value={tower_id}>
+                  {tower_name}
+                </option>
+              );
+            })}
           </select>
         </div>
         <button 
           onClick={onConfirm} 
-          disabled={!selectedStationId || !selectedTower}
+          disabled={!selectedStationId || !selectedTowerId}
           style={{ 
             background: '#6ab7ff', border: 'none', color: 'white', padding: '15px', 
             borderRadius: '8px', cursor: 'pointer', fontSize: '16px',
-            opacity: (!selectedStationId || !selectedTower) ? 0.5 : 1
+            opacity: (!selectedStationId || !selectedTowerId) ? 0.5 : 1
           }}>
           Tiếp tục
         </button>

@@ -532,6 +532,89 @@ class SwapService {
       };
     }
   }
+
+  // Create a new swap session
+  async createSwap(data) {
+    try {
+      console.log('SwapService: Create swap', data);
+
+      const response = await apiUtils.post('/api/batteries/swap', data);
+
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data || {},
+          message: 'Tạo giao dịch đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể tạo giao dịch đổi pin');
+      }
+    } catch (error) {
+      console.error('Create swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi tạo giao dịch đổi pin',
+        data: {},
+        error: errorInfo
+      };
+    }
+  }
+
+  // Update an existing swap session
+  async updateSwap(swapId, data) {
+    try {
+      console.log('SwapService: Update swap', swapId, data);
+
+      const response = await apiUtils.put(`/api/batteries/swap/${swapId}`, data);
+
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data || {},
+          message: 'Cập nhật giao dịch đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật giao dịch đổi pin');
+      }
+    } catch (error) {
+      console.error('Update swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi cập nhật giao dịch đổi pin',
+        data: {},
+        error: errorInfo
+      };
+    }
+  }
+
+  // Delete a swap session
+  async deleteSwap(swapId) {
+    try {
+      console.log('SwapService: Delete swap', swapId);
+
+      const response = await apiUtils.delete(`/api/batteries/swap/${swapId}`);
+
+      if (response.success) {
+        return {
+          success: true,
+          message: 'Xóa giao dịch đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể xóa giao dịch đổi pin');
+      }
+    } catch (error) {
+      console.error('Delete swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi xóa giao dịch đổi pin',
+        error: errorInfo
+      };
+    }
+  }
+
 }
 
 export default new SwapService();

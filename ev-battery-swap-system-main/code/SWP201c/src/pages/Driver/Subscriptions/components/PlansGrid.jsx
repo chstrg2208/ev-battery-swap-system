@@ -1,37 +1,27 @@
-// Driver/Subscriptions/components/PlansGrid.jsx
-// Grid of subscription plan cards
-
-import PropTypes from 'prop-types';
+import React from 'react';
 import PlanCard from './PlanCard';
-import { isPlanPopular } from '../utils';
+import EmptyPlans from './EmptyPlans';
 
-const PlansGrid = ({ plans, onSubscribe, loading }) => {
+const PlansGrid = ({ plans, currentPlanId }) => {
+  if (!plans || plans.length === 0) {
+    return <EmptyPlans />;
+  }
+
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
       gap: '30px',
-      marginBottom: '40px'
     }}>
-      {plans.map((plan, index) => (
+      {plans.map(plan => (
         <PlanCard
-          key={plan.id || index}
+          key={plan.id}
           plan={plan}
-          index={index}
-          totalPlans={plans.length}
-          isPopular={isPlanPopular(index, plans.length)}
-          onSubscribe={onSubscribe}
-          loading={loading}
+          isCurrent={plan.id === currentPlanId}
         />
       ))}
     </div>
   );
-};
-
-PlansGrid.propTypes = {
-  plans: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onSubscribe: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired
 };
 
 export default PlansGrid;

@@ -21,9 +21,9 @@ export const AuthProvider = ({ children }) => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [currentView, setCurrentView] = useState('landing');
-
-  // Thêm log để kiểm tra giá trị currentView
-  console.log('🔍 AuthContext: currentView =', currentView);
+  
+  // <-- 1. THÊM STATE MỚI ĐỂ LƯU XE ĐÃ CHỌN -->
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   const handleLogin = async (email, password) => {
     console.log('🔐 AuthContext: Starting login process for:', email);
@@ -35,41 +35,38 @@ export const AuthProvider = ({ children }) => {
       if (response.success) {
         const userData = response.user;
         setCurrentUser(userData);
+        setSelectedVehicle(null); // <-- THÊM: Reset xe đã chọn khi đăng nhập mới
         setCurrentView('dashboard');
         setShowLoginModal(false);
         
-        // Handle both frontend role format and database role format
         const normalizeRole = (role) => {
-          const roleMap = {
-            'Admin': 'admin',
-            'Staff': 'staff', 
-            'EV Driver': 'driver',
-            'admin': 'admin',
-            'staff': 'staff',
-            'driver': 'driver'
-          };
+          const roleMap = { 'Admin': 'admin', 'Staff': 'staff', 'EV Driver': 'driver', 'admin': 'admin', 'staff': 'staff', 'driver': 'driver' };
           return roleMap[role] || 'driver';
         };
 
         const normalizedRole = normalizeRole(userData.role);
-        
-        // Update user object with normalized role for consistency
         const updatedUser = { ...userData, role: normalizedRole };
         setCurrentUser(updatedUser);
         
-        // Navigate to appropriate dashboard
-        const dashboardPath = normalizedRole === 'admin' ? '/admin/dashboard' :
-                             normalizedRole === 'staff' ? '/staff/dashboard' :
-                             '/driver/dashboard';
+        // <-- 2. SỬA ĐỔI LOGIC ĐIỀU HƯỚNG -->
+        let navigationPath = '';
+        if (normalizedRole === 'admin') {
+            navigationPath = '/admin/dashboard';
+        } else if (normalizedRole === 'staff') {
+            navigationPath = '/staff/dashboard';
+        } else {
+            // THAY ĐỔI QUAN TRỌNG: Chuyển tài xế đến trang chọn xe
+            navigationPath = '/driver/select-vehicle'; 
+        }
         
-        console.log('🚀 AuthContext: Navigating to dashboard:', dashboardPath, 'for role:', normalizedRole);
-        showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');
+        console.log('🚀 AuthContext: Navigating to:', navigationPath, 'for role:', normalizedRole);
+        showToast(`Chào mừng ${userData.name}!`, 'success');
         
-        // Small delay to show the toast before navigating
         setTimeout(() => {
-          console.log('🎯 AuthContext: Executing navigation to:', dashboardPath);
-          navigate(dashboardPath);
+          console.log('🎯 AuthContext: Executing navigation to:', navigationPath);
+          navigate(navigationPath);
         }, 500);
+
       } else {
         showToast(response.message || 'Đăng nhập thất bại!', 'error');
       }
@@ -85,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.logout();
       setCurrentUser(null);
+      setSelectedVehicle(null); // <-- THÊM: Reset xe đã chọn khi đăng xuất
       setCurrentView('landing');
       navigate('/');
       showToast('Đã đăng xuất!', 'success');
@@ -92,6 +90,14 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
       showToast('Có lỗi xảy ra khi đăng xuất!', 'error');
     }
+  };
+
+  // <-- 3. THÊM HÀM MỚI ĐỂ CẬP NHẬT XE ĐƯỢC CHỌN -->
+  const selectVehicle = (vehicleData) => {
+    console.log('🚗 AuthContext: Vehicle selected:', vehicleData);
+    setSelectedVehicle(vehicleData);
+    // Sau khi chọn xe, chuyển người dùng đến dashboard chính
+    navigate('/driver/dashboard');
   };
 
   const value = {
@@ -106,10 +112,11 @@ export const AuthProvider = ({ children }) => {
     setCurrentView,
     handleLogin,
     handleLogout,
+    selectedVehicle, // <-- EXPORT STATE MỚI
+    selectVehicle,   // <-- EXPORT HÀM MỚI
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;
-

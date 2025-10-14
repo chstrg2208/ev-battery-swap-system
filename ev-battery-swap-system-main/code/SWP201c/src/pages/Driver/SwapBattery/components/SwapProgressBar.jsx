@@ -1,34 +1,24 @@
-// Swap Progress Bar Component
 import React from 'react';
 
-const SwapProgressBar = ({ currentStep }) => {
-  const steps = [
-    { number: 1, label: 'Chọn trạm' },
-    { number: 2, label: 'Chọn trụ' },
-    { number: 3, label: 'Chọn pin mới' },
-    { number: 4, label: 'Chọn slot trống' },
-    { number: 5, label: 'Xác nhận' },
-    { number: 6, label: 'Đặt pin cũ' },
-    { number: 7, label: 'Lấy pin mới' },
-    { number: 8, label: 'Đang xử lý' },
-    { number: 9, label: 'Hoàn tất' }
-  ];
-
+const SwapProgressBar = ({ currentStep, totalSteps }) => {
+  const steps = ['Chọn trạm', 'Xác nhận', 'Đặt pin cũ', 'Xử lý', 'Lấy pin mới', 'Hoàn tất'];
+  
   return (
-    <div className="swap-progress-bar">
-      {steps.map((step) => (
-        <div
-          key={step.number}
-          className={`progress-step ${currentStep >= step.number ? 'completed' : ''} ${
-            currentStep === step.number ? 'active' : ''
-          }`}
-        >
-          <div className="step-circle">
-            {currentStep > step.number ? '✓' : step.number}
+    <div style={{ display: 'flex', gap: '5px', padding: '10px 0' }}>
+      {steps.slice(0, totalSteps).map((label, index) => {
+        const stepNumber = index + 1;
+        const isActive = stepNumber <= currentStep;
+        const isCurrent = stepNumber === currentStep;
+
+        return (
+          <div key={index} style={{ flex: 1, textAlign: 'center' }}>
+            <div style={{ height: '8px', background: isActive ? '#6ab7ff' : '#4A5568', borderRadius: '4px', marginBottom: '8px', transition: 'background 0.3s' }}></div>
+            <div style={{ fontSize: '12px', color: isActive ? 'white' : '#9aa4c7', fontWeight: isCurrent ? 'bold' : 'normal' }}>
+              {label}
+            </div>
           </div>
-          <span className="step-label">{step.label}</span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

@@ -1,65 +1,42 @@
-// Custom Hook for managing swap steps and navigation
 import { useState } from 'react';
 
+// <-- SỬA LỖI: Dùng "export const" ở đây
 export const useSwapSteps = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedStation, setSelectedStation] = useState(null);
-  const [selectedTower, setSelectedTower] = useState(null);
-  const [selectedNewBatterySlot, setSelectedNewBatterySlot] = useState(null);
-  const [selectedEmptySlot, setSelectedEmptySlot] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [swapResult, setSwapResult] = useState(null);
-
-  const goToStep = (step) => {
-    if (!isProcessing) {
-      setCurrentStep(step);
-    }
-  };
+  const [selection, setSelection] = useState({
+    vehicle: null, // Sẽ được cập nhật từ AuthContext
+    stationId: null,
+    stationName: null,
+    towerId: null,
+    towerName: null,
+    oldBatterySlot: null,
+    newBatterySlot: null,
+  });
 
   const nextStep = () => {
-    if (!isProcessing) {
-      setCurrentStep(prev => Math.min(prev + 1, 7));
-    }
-  };
-
-  const prevStep = () => {
-    if (!isProcessing) {
-      setCurrentStep(prev => Math.max(prev - 1, 1));
-    }
+    setCurrentStep(prev => prev + 1);
   };
 
   const resetSelections = () => {
-    setSelectedStation(null);
-    setSelectedTower(null);
-    setSelectedNewBatterySlot(null);
-    setSelectedEmptySlot(null);
-    setSwapResult(null);
     setCurrentStep(1);
+    setSelection(prev => ({ 
+      ...prev, 
+      stationId: null,
+      stationName: null,
+      towerId: null,
+      towerName: null,
+      oldBatterySlot: null,
+      newBatterySlot: null,
+    }));
   };
 
   return {
-    // Current state
     currentStep,
-    selectedStation,
-    selectedTower,
-    selectedNewBatterySlot,
-    selectedEmptySlot,
-    isProcessing,
-    swapResult,
-    
-    // Setters
-    setCurrentStep,
-    setSelectedStation,
-    setSelectedTower,
-    setSelectedNewBatterySlot,
-    setSelectedEmptySlot,
-    setIsProcessing,
-    setSwapResult,
-    
-    // Navigation
-    goToStep,
+    selection,
+    setSelection,
     nextStep,
-    prevStep,
-    resetSelections
+    resetSelections,
   };
 };
+
+// **KHÔNG** có "export default" ở cuối file.

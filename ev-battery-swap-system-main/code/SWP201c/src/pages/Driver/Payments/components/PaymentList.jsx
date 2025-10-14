@@ -1,22 +1,11 @@
-// Payment List Component
 import React from 'react';
 import PaymentCard from './PaymentCard';
 
-const PaymentList = ({ payments, onViewDetails, formatDate, formatCurrency, getStatusStyle }) => {
+const PaymentList = ({ payments, onViewDetails }) => {
   return (
-    <div style={{ 
-      display: 'grid',
-      gap: '15px'
-    }}>
-      {payments.map((payment, index) => (
-        <PaymentCard
-          key={payment.id || index}
-          payment={payment}
-          onViewDetails={onViewDetails}
-          formatDate={formatDate}
-          formatCurrency={formatCurrency}
-          getStatusStyle={getStatusStyle}
-        />
+    <div>
+      {payments.map(payment => (
+        <PaymentCard key={payment.id} payment={payment} onViewDetails={onViewDetails} />
       ))}
     </div>
   );

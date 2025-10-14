@@ -1,22 +1,13 @@
-// Driver/Subscriptions/components/SubscriptionsHeader.jsx
-// Header section for subscriptions page
+import React from 'react';
 
 const SubscriptionsHeader = () => {
   return (
-    <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-      <h1 style={{ 
-        color: '#FFFFFF', 
-        margin: '0 0 15px 0',
-        fontSize: '2.5rem',
-        background: 'linear-gradient(135deg, #19c37d, #6ab7ff)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
-      }}>
-        💎 Gói dịch vụ
+    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+      <h1 style={{ margin: '0 0 10px 0', fontSize: '28px' }}>
+        Chọn Gói Dịch Vụ Phù Hợp
       </h1>
-      <p style={{ color: '#B0B0B0', margin: 0, fontSize: '1.1rem' }}>
-        Chọn gói phù hợp với nhu cầu của bạn
+      <p style={{ margin: 0, color: '#9aa4c7', maxWidth: '600px', margin: '0 auto' }}>
+        Khám phá các gói thuê pin linh hoạt của chúng tôi, được thiết kế để đáp ứng mọi nhu cầu di chuyển của bạn.
       </p>
     </div>
   );

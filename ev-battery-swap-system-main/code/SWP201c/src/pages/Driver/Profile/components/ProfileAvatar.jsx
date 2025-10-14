@@ -1,88 +1,26 @@
-// Driver/Profile/components/ProfileAvatar.jsx
-// Avatar and basic info section
-
 import React from 'react';
-import { getRoleBadgeColor, getUserInitials } from '../utils';
 
-export const ProfileAvatar = ({ user, onEdit, isEditing }) => {
-  const roleBadge = getRoleBadgeColor(user?.role);
-  const initials = getUserInitials(user);
-
+const ProfileAvatar = ({ avatarUrl, isEditing }) => {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '30px',
-      paddingBottom: '30px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      marginBottom: '30px'
-    }}>
-      {/* Avatar Circle */}
-      <div style={{
-        width: '120px',
-        height: '120px',
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #19c37d, #6ab7ff)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '3rem',
-        fontWeight: '700',
-        color: '#FFFFFF',
-        boxShadow: '0 10px 30px rgba(25, 195, 125, 0.3)'
-      }}>
-        {initials}
-      </div>
-
-      {/* User Info */}
-      <div style={{ flex: 1 }}>
-        <h2 style={{ 
-          color: '#FFFFFF', 
-          margin: '0 0 10px 0', 
-          fontSize: '1.8rem',
-          fontWeight: '600'
+    <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
+      <img
+        src={avatarUrl || 'https://via.placeholder.com/120'}
+        alt="Avatar"
+        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+      />
+      {isEditing && (
+        <label style={{
+          position: 'absolute', bottom: 0, right: 0, background: '#6ab7ff',
+          color: 'white', width: '36px', height: '36px', borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', border: '2px solid #1a202c'
         }}>
-          {user?.fullName || user?.username || 'Driver'}
-        </h2>
-        <p style={{ color: '#B0B0B0', margin: '0 0 15px 0', fontSize: '1rem' }}>
-          {user?.email || 'email@example.com'}
-        </p>
-        <div style={{
-          display: 'inline-block',
-          padding: '6px 15px',
-          background: roleBadge.bg,
-          color: roleBadge.color,
-          borderRadius: '20px',
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          border: roleBadge.border
-        }}>
-          {user?.role || 'DRIVER'}
-        </div>
-      </div>
-
-      {/* Edit Button */}
-      {!isEditing && (
-        <button
-          onClick={onEdit}
-          style={{
-            padding: '12px 24px',
-            background: 'linear-gradient(135deg, #19c37d, #15a36a)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600',
-            boxShadow: '0 4px 15px rgba(25, 195, 125, 0.3)',
-            transition: 'transform 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          ✏️ Chỉnh sửa
-        </button>
+          ✏️
+          <input type="file" style={{ display: 'none' }} />
+        </label>
       )}
     </div>
   );
 };
+
+export default ProfileAvatar;

@@ -2,9 +2,12 @@
 // Display mode for profile information (read-only)
 
 import React from 'react';
-import { formatPhoneNumber } from '../utils';
 
-export const ProfileDisplay = ({ user }) => {
+// Giả sử bạn có hàm này trong thư mục utils, nếu chưa có hãy tạo nó.
+// import { formatPhoneNumber } from '../utils';
+
+// --- Bắt đầu phần code ---
+const ProfileDisplay = ({ user }) => {
   const infoItemStyle = {
     marginBottom: '25px'
   };
@@ -23,6 +26,9 @@ export const ProfileDisplay = ({ user }) => {
     fontSize: '1.1rem',
     fontWeight: '500'
   };
+
+  // Hàm format số điện thoại (tạm thời để ở đây nếu bạn chưa có)
+  const formatPhoneNumber = (phone) => phone || '';
 
   return (
     <div style={{ 
@@ -64,3 +70,6 @@ export const ProfileDisplay = ({ user }) => {
     </div>
   );
 };
+
+// <-- SỬA LỖI: Thêm dòng "export default" vào cuối file
+export default ProfileDisplay;

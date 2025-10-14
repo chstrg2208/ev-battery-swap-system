@@ -1,17 +1,28 @@
-// Driver/Profile/components/ProfileHeader.jsx
-// Header section for profile page
-
 import React from 'react';
 
-export const ProfileHeader = () => {
+const ProfileHeader = ({ isEditing, onToggleEdit }) => {
   return (
-    <div style={{ marginBottom: '30px' }}>
-      <h1 style={{ color: '#FFFFFF', margin: '0 0 10px 0', fontSize: '2rem' }}>
-        👤 Hồ sơ của tôi
-      </h1>
-      <p style={{ color: '#B0B0B0', margin: 0 }}>
-        Quản lý thông tin cá nhân và cài đặt tài khoản
-      </p>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      paddingBottom: '20px',
+      marginBottom: '30px',
+    }}>
+      <h1 style={{ margin: 0, fontSize: '28px' }}>Hồ sơ của tôi</h1>
+      <button
+        onClick={onToggleEdit}
+        style={{
+          background: isEditing ? '#ff4757' : '#6ab7ff',
+          border: 'none', color: 'white', padding: '10px 20px',
+          borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
+        }}
+      >
+        {isEditing ? 'Hủy' : 'Chỉnh sửa'}
+      </button>
     </div>
   );
 };
+
+export default ProfileHeader;

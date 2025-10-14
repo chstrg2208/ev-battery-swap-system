@@ -1,37 +1,23 @@
-// Driver/Support/components/ContactInfo.jsx
-// Contact information display
-
-import { getContactInfo } from '../utils';
+import React from 'react';
 
 const ContactInfo = () => {
-  const contactInfo = getContactInfo();
-
   return (
-    <div style={{
-      marginTop: '30px',
-      background: 'linear-gradient(135deg, rgba(25, 195, 125, 0.1), rgba(106, 183, 255, 0.1))',
-      borderRadius: '15px',
-      padding: '25px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '20px'
-    }}>
-      {contactInfo.map((info, index) => (
-        <div key={index} style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '10px' }}>{info.icon}</div>
-          <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '5px' }}>
-            {info.label}
-          </div>
-          <div style={{ 
-            color: info.color, 
-            fontSize: info.type === 'phone' ? '1.2rem' : '1.1rem',
-            fontWeight: info.type === 'phone' ? '700' : 'normal'
-          }}>
-            {info.value}
-          </div>
+    <div style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '30px', borderRadius: '12px' }}>
+      <h3 style={{marginTop: 0}}>Thông tin liên hệ</h3>
+      <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        <div>
+          <div style={{color: '#9aa4c7'}}>Hotline 24/7</div>
+          <div style={{fontWeight: 600, fontSize: '18px'}}>1900 1234</div>
         </div>
-      ))}
+        <div>
+          <div style={{color: '#9aa4c7'}}>Email hỗ trợ</div>
+          <div style={{fontWeight: 600, fontSize: '18px'}}>support@swp201.com</div>
+        </div>
+        <div>
+          <div style={{color: '#9aa4c7'}}>Địa chỉ</div>
+          <div style={{fontWeight: 600, fontSize: '18px'}}>Lô E2a-7, Đường D1, Khu Công nghệ cao, Long Thạnh Mỹ, Thủ Đức, TPHCM</div>
+        </div>
+      </div>
     </div>
   );
 };

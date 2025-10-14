@@ -1,44 +1,30 @@
-// Driver/Payments/components/PaymentTabs.jsx
 import React from 'react';
 
-const PaymentTabs = ({ activeTab, onTabChange }) => {
+const PaymentTabs = ({ activeTab, setActiveTab }) => {
+  const tabs = ['Lịch sử giao dịch', 'Nạp tiền & Thanh toán'];
+
   const tabStyle = (isActive) => ({
-    padding: '12px 24px',
-    background: isActive 
-      ? 'linear-gradient(135deg, #19c37d, #15a36a)' 
-      : 'transparent',
-    color: '#FFFFFF',
-    border: isActive ? 'none' : '1px solid rgba(25, 195, 125, 0.3)',
-    borderRadius: '8px',
+    padding: '12px 20px',
     cursor: 'pointer',
-    fontSize: '1rem',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    boxShadow: isActive 
-      ? '0 4px 15px rgba(25, 195, 125, 0.3)' 
-      : 'none'
+    background: 'none',
+    border: 'none',
+    borderBottom: `3px solid ${isActive ? '#6ab7ff' : 'transparent'}`,
+    color: isActive ? '#6ab7ff' : '#9aa4c7',
+    fontWeight: isActive ? '600' : '500',
+    fontSize: '16px',
   });
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      gap: '10px',
-      marginBottom: '30px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      paddingBottom: '10px'
-    }}>
-      <button
-        onClick={() => onTabChange('history')}
-        style={tabStyle(activeTab === 'history')}
-      >
-        📜 Lịch sử
-      </button>
-      <button
-        onClick={() => onTabChange('payment')}
-        style={tabStyle(activeTab === 'payment')}
-      >
-        💰 Thanh toán
-      </button>
+    <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '30px' }}>
+      {tabs.map(tab => (
+        <button
+          key={tab}
+          onClick={() => setActiveTab(tab)}
+          style={tabStyle(activeTab === tab)}
+        >
+          {tab}
+        </button>
+      ))}
     </div>
   );
 };

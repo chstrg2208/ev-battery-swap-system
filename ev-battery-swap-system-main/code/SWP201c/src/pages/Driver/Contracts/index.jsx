@@ -1,132 +1,53 @@
-// Driver/Contracts/index.jsx
-// Container component for Contracts page - orchestrates data and UI
+// src/pages/Driver/Contracts/index.jsx
 
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useContractsData, useContractModal } from './hooks';
-import {
-  ContractsHeader,
-  ContractsList,
-  EmptyContracts,
-  ContractDetailModal
-} from './components';
+import React, { useState } from 'react';
 
-const Contracts = () => {
-  // Data fetching
-  const { contracts, loading, error } = useContractsData();
+// KHÔNG CẦN import DriverLayout ở đây nữa
 
-  // Modal state
-  const { selectedContract, isOpen, openModal, closeModal } = useContractModal();
+// Import các component con
+import ContractsHeader from './components/ContractsHeader';
+import ContractsList from './components/ContractsList';
+import EmptyContracts from './components/EmptyContracts';
+import ContractDetailModal from './components/ContractDetailModal';
 
-  // Loading state
-  if (loading) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px'
-        }}>
-          <div style={{
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '3rem',
-              marginBottom: '1rem',
-              animation: 'spin 1s linear infinite'
-            }}>
-              ⚡
-            </div>
-            <p style={{
-              fontSize: '1.125rem',
-              color: '#666'
-            }}>
-              Đang tải hợp đồng...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+// Dữ liệu giả để demo
+const mockContracts = [
+  { id: 'HD-001', name: 'Hợp đồng thuê xe Vinfast VF8', status: 'active', startDate: '2025-10-01', endDate: '2026-10-01', vehicle: 'VF8 - 51K-123.45', details: 'Hợp đồng thuê xe 12 tháng, bao gồm gói thuê pin cao cấp.' },
+  { id: 'HD-002', name: 'Hợp đồng thuê pin cơ bản', status: 'active', startDate: '2025-09-15', endDate: '2026-09-15', vehicle: 'VF8 - 51K-123.45', details: 'Gói thuê pin giới hạn 1500km/tháng.' },
+  { id: 'HD-003', name: 'Hợp đồng cũ VF e34', status: 'expired', startDate: '2024-01-01', endDate: '2025-01-01', vehicle: 'VFe34 - 51H-678.90', details: 'Hợp đồng đã hết hạn.' }
+];
 
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="driver">
-        <div style={{
-          padding: '2rem',
-          backgroundColor: '#fff3cd',
-          borderRadius: '12px',
-          border: '1px solid #ffc107',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            fontSize: '3rem',
-            marginBottom: '1rem'
-          }}>
-            ⚠️
-          </div>
-          <h3 style={{
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            color: '#856404',
-            marginBottom: '0.5rem'
-          }}>
-            Không thể tải danh sách hợp đồng
-          </h3>
-          <p style={{
-            fontSize: '1rem',
-            color: '#856404',
-            marginBottom: '1.5rem'
-          }}>
-            {error}
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#666'
-          }}>
-            Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn.
-          </p>
-        </div>
-      </DashboardLayout>
-    );
-  }
+// Tên component nên là DriverContracts để khớp với import trong App.jsx
+const DriverContracts = () => { 
+  const [contracts] = useState(mockContracts);
+  const [selectedContract, setSelectedContract] = useState(null);
+
+  const handleViewDetails = (contract) => setSelectedContract(contract);
+  const handleCloseModal = () => setSelectedContract(null);
 
   return (
-    <DashboardLayout role="driver">
-      <div style={{ padding: '2rem' }}>
-        {/* Header */}
-        <ContractsHeader />
+    // Component chỉ trả về nội dung của trang, không còn layout
+    <>
+      <ContractsHeader contractCount={contracts.length} />
 
-        {/* Content */}
-        {contracts.length === 0 ? (
-          <EmptyContracts />
-        ) : (
+      <div style={{ marginTop: '24px' }}>
+        {contracts.length > 0 ? (
           <ContractsList
             contracts={contracts}
-            onContractClick={openModal}
+            onViewDetails={handleViewDetails}
           />
+        ) : (
+          <EmptyContracts />
         )}
-
-        {/* Detail Modal */}
-        <ContractDetailModal
-          contract={selectedContract}
-          isOpen={isOpen}
-          onClose={closeModal}
-        />
       </div>
 
-      {/* Inline styles for spin animation */}
-      <style>
-        {`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-    </DashboardLayout>
+      <ContractDetailModal
+        isOpen={!!selectedContract}
+        contract={selectedContract}
+        onClose={handleCloseModal}
+      />
+    </>
   );
 };
 
-export default Contracts;
+export default DriverContracts;
