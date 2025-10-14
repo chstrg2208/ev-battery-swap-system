@@ -278,6 +278,49 @@ class BatteryService {
       };
     }
   }
+
+  // Update battery information (Staff feature)
+  async updateBattery(batteryId, updateData) {
+    try {
+      console.log('BatteryService: Update battery', batteryId, updateData);
+      
+      // Prepare update payload
+      const payload = {
+        status: updateData.status,
+        stateOfHealth: parseFloat(updateData.health) || parseFloat(updateData.stateOfHealth),
+        // Backend may use different field names, send both
+        health: parseFloat(updateData.health) || parseFloat(updateData.stateOfHealth)
+      };
+
+      // Add optional fields if provided
+      if (updateData.temperature !== undefined) {
+        payload.temperature = parseFloat(updateData.temperature);
+      }
+      if (updateData.voltage !== undefined) {
+        payload.voltage = parseFloat(updateData.voltage);
+      }
+
+      const response = await apiUtils.put(`${API_CONFIG.ENDPOINTS.BATTERIES.BASE}/${batteryId}`, payload);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Cập nhật pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật pin');
+      }
+    } catch (error) {
+      console.error('Update battery error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi cập nhật pin',
+        error: errorInfo
+      };
+    }
+  }
 }
 
 export default new BatteryService();

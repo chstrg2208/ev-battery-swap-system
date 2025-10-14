@@ -6,6 +6,7 @@ const BatteryUpdateModal = ({
   show,
   battery,
   updateData,
+  isUpdating = false,
   onUpdateField,
   onSave,
   onClose
@@ -103,29 +104,44 @@ const BatteryUpdateModal = ({
         }}>
           <button
             onClick={onClose}
+            disabled={isUpdating}
             style={{
               padding: '10px 20px',
               background: 'rgba(255, 255, 255, 0.1)',
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: '8px',
-              cursor: 'pointer'
+              cursor: isUpdating ? 'not-allowed' : 'pointer',
+              opacity: isUpdating ? 0.5 : 1
             }}
           >
             Hủy
           </button>
           <button
             onClick={onSave}
+            disabled={isUpdating}
             style={{
               padding: '10px 20px',
-              background: 'linear-gradient(135deg, #19c37d, #15a36a)',
+              background: isUpdating 
+                ? 'rgba(25, 195, 125, 0.5)' 
+                : 'linear-gradient(135deg, #19c37d, #15a36a)',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
-              cursor: 'pointer'
+              cursor: isUpdating ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}
           >
-            Lưu
+            {isUpdating ? (
+              <>
+                <span>⏳</span>
+                <span>Đang lưu...</span>
+              </>
+            ) : (
+              'Lưu'
+            )}
           </button>
         </div>
       </div>

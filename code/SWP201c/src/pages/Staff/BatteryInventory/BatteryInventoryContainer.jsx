@@ -33,6 +33,7 @@ const BatteryInventoryContainer = () => {
     showUpdateModal,
     selectedBattery,
     updateData,
+    isUpdating,
     openUpdateModal,
     closeUpdateModal,
     updateField,
@@ -101,6 +102,7 @@ const BatteryInventoryContainer = () => {
           show={showUpdateModal}
           battery={selectedBattery}
           updateData={updateData}
+          isUpdating={isUpdating}
           onUpdateField={updateField}
           onSave={handleUpdateBattery}
           onClose={closeUpdateModal}
