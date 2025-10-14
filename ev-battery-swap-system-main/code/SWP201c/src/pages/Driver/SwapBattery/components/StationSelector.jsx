@@ -8,18 +8,19 @@ const selectStyle = {
 
 const StationSelector = ({ stations = [], towers = [], onConfirm, updateSelection, isLoadingTowers }) => {
   const [selectedStationId, setSelectedStationId] = useState('');
-  const [selectedTowerId, setSelectedTowerId] = useState('');
+  const [selectedTower, setSelectedTower] = useState('');
 
   const handleStationChange = (e) => {
     const stationId = e.target.value;
-    const station = stations.find(s => s.id.toString() === stationId);
+    const stationName = e.target.options[e.target.selectedIndex].text;
     
     setSelectedStationId(stationId);
-    setSelectedTowerId('');
+    setSelectedTower('');
     
+    // Báo cho "bộ não" biết trạm nào đã được chọn
     updateSelection({ 
       stationId: stationId, 
-      stationName: station ? station.name : null, 
+      stationName: stationId ? stationName : null, 
       towerId: null, 
       towerName: null 
     });
@@ -27,14 +28,12 @@ const StationSelector = ({ stations = [], towers = [], onConfirm, updateSelectio
 
   const handleTowerChange = (e) => {
     const towerId = e.target.value;
-    const tower = towers.find(t => (t.id || t.tower_id).toString() === towerId);
+    const towerName = e.target.options[e.target.selectedIndex].text;
 
-    setSelectedTowerId(towerId);
+    setSelectedTower(towerId);
 
-    updateSelection({ 
-      towerId: towerId, 
-      towerName: tower ? (tower.name || tower.tower_name) : null 
-    });
+    // Báo cho "bộ não" biết trụ nào đã được chọn
+    updateSelection({ towerId: towerId, towerName: towerId ? towerName : null });
   };
 
   return (
@@ -43,45 +42,32 @@ const StationSelector = ({ stations = [], towers = [], onConfirm, updateSelectio
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '8px' }}>Chọn trạm đổi pin</label>
-          <select style={selectStyle} onChange={handleStationChange} value={selectedStationId}>
+          <select style={selectStyle} onChange={handleStationChange}>
             <option value="">-- Vui lòng chọn trạm --</option>
-            {stations.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
+            {stations.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '8px' }}>Chọn trụ sạc</label>
           <select 
             style={{ ...selectStyle, cursor: !selectedStationId ? 'not-allowed' : 'pointer' }} 
-            disabled={!selectedStationId || isLoadingTowers}
-            value={selectedTowerId}
+            disabled={!selectedStationId || isLoadingTowers} // Vô hiệu hóa khi đang tải trụ
+            value={selectedTower}
             onChange={handleTowerChange}
           >
             <option value="">
               {isLoadingTowers ? 'Đang tải danh sách trụ...' : '-- Vui lòng chọn trụ --'}
             </option>
-            {towers.map(t => {
-              // Sửa lại để chấp nhận nhiều loại tên thuộc tính
-              const tower_id = t.id || t.tower_id;
-              const tower_name = t.name || t.tower_name;
-              return (
-                <option key={tower_id} value={tower_id}>
-                  {tower_name}
-                </option>
-              );
-            })}
+            {towers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
         <button 
           onClick={onConfirm} 
-          disabled={!selectedStationId || !selectedTowerId}
+          disabled={!selectedStationId || !selectedTower}
           style={{ 
             background: '#6ab7ff', border: 'none', color: 'white', padding: '15px', 
             borderRadius: '8px', cursor: 'pointer', fontSize: '16px',
-            opacity: (!selectedStationId || !selectedTowerId) ? 0.5 : 1
+            opacity: (!selectedStationId || !selectedTower) ? 0.5 : 1
           }}>
           Tiếp tục
         </button>
