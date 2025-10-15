@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/batteries")
-@CrossOrigin(origins = "*")
 public class BatteryController {
 
     private final BatteryDao batteryDao = new BatteryDao();
@@ -78,21 +77,6 @@ public class BatteryController {
             Long oldBatteryId = swapRequest.containsKey("batteryId") ? 
                 Long.valueOf(swapRequest.get("batteryId").toString()) : null;
             
-            // Get contract_id from request (support both snake_case and camelCase)
-            Integer contractId = null;
-            if (swapRequest.containsKey("contract_id")) {
-                contractId = Integer.valueOf(swapRequest.get("contract_id").toString());
-            } else if (swapRequest.containsKey("contractId")) {
-                contractId = Integer.valueOf(swapRequest.get("contractId").toString());
-            }
-            
-            if (contractId == null) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "contract_id is required");
-                return ResponseEntity.badRequest().body(response);
-            }
-            
             // Find available battery at the station
             String findBatterySql = """
                 SELECT TOP 1 b.battery_id, sl.slot_number, t.tower_number
@@ -113,10 +97,10 @@ public class BatteryController {
                     int slotNumber = rs.getInt("slot_number");
                     int towerNumber = rs.getInt("tower_number");
                     
-                    // Create swap record with contract_id
+                    // Create swap record
                     String insertSwapSql = """
-                        INSERT INTO Swaps (user_id, station_id, old_battery_id, new_battery_id, contract_id, swap_date, status)
-                        VALUES (?, ?, ?, ?, ?, GETDATE(), 'INITIATED')
+                        INSERT INTO Swaps (user_id, station_id, old_battery_id, new_battery_id, swap_date, status)
+                        VALUES (?, ?, ?, ?, GETDATE(), 'INITIATED')
                     """;
                     
                     try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSwapSql, 
@@ -129,7 +113,6 @@ public class BatteryController {
                             insertPs.setNull(3, java.sql.Types.BIGINT);
                         }
                         insertPs.setLong(4, newBatteryId);
-                        insertPs.setInt(5, contractId);  // ← ADD contract_id here!
                         
                         int rowsAffected = insertPs.executeUpdate();
                         if (rowsAffected > 0) {

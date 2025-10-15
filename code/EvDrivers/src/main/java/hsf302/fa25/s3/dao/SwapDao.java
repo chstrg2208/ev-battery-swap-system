@@ -90,7 +90,7 @@ public class SwapDao {
 
     // Tạo swap mới
     public boolean createSwap(Swap swap) {
-        String sql = "INSERT INTO Swaps (contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, swap_status) " +
+        String sql = "INSERT INTO Swaps (contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -98,7 +98,12 @@ public class SwapDao {
             ps.setInt(1, swap.getContractId());
             ps.setInt(2, swap.getStationId());
             ps.setInt(3, swap.getTowerId());
-            ps.setInt(4, swap.getStaffId());
+            // staffId may be alphanumeric (e.g., "staff002") so use setObject(String) / setString
+            if (swap.getStaffId() != null) {
+                ps.setString(4, swap.getStaffId());
+            } else {
+                ps.setNull(4, java.sql.Types.VARCHAR);
+            }
             ps.setObject(5, swap.getOldBatteryId() != 0 ? swap.getOldBatteryId() : null);
             ps.setObject(6, swap.getNewBatteryId() != 0 ? swap.getNewBatteryId() : null);
             ps.setDouble(7, swap.getOdometerBefore());
@@ -113,7 +118,7 @@ public class SwapDao {
 
     // Cập nhật trạng thái swap
     public boolean updateSwapStatus(int swapId, String status) {
-        String sql = "UPDATE Swaps SET swap_status=? WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET status=? WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -128,7 +133,7 @@ public class SwapDao {
 
     // Hoàn thành swap
     public boolean completeSwap(int swapId) {
-        String sql = "UPDATE Swaps SET swap_status='COMPLETED', completed_time=GETDATE() WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET status='COMPLETED', swap_date=GETDATE() WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -143,7 +148,8 @@ public class SwapDao {
     // Lấy swap gần đây
     public List<Swap> getRecentSwaps(int limit) {
         List<Swap> list = new ArrayList<>();
-        String sql = "SELECT TOP (?) * FROM Swaps ORDER BY swap_id DESC";
+        // Use OFFSET/FETCH so we can parameterize the number of rows to return
+        String sql = "SELECT * FROM Swaps ORDER BY swap_id DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -218,14 +224,14 @@ public class SwapDao {
         Map<String, Object> stats = new HashMap<>();
         
         // Thống kê theo trạng thái
-        String statusSql = "SELECT swap_status, COUNT(*) as count FROM Swaps GROUP BY swap_status";
+        String statusSql = "SELECT status, COUNT(*) as count FROM Swaps GROUP BY status";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(statusSql)) {
 
             ResultSet rs = ps.executeQuery();
             Map<String, Integer> statusCount = new HashMap<>();
             while (rs.next()) {
-                statusCount.put(rs.getString("swap_status"), rs.getInt("count"));
+                statusCount.put(rs.getString("status"), rs.getInt("count"));
             }
             stats.put("byStatus", statusCount);
         } catch (Exception e) {
@@ -246,7 +252,7 @@ public class SwapDao {
         }
 
         // Swap trong tháng này
-        String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(created_time) = MONTH(GETDATE()) AND YEAR(created_time) = YEAR(GETDATE())";
+        String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(swap_date) = MONTH(GETDATE()) AND YEAR(created_time) = YEAR(GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(monthlySql)) {
 
@@ -268,12 +274,24 @@ public class SwapDao {
         swap.setContractId(rs.getInt("contract_id"));
         swap.setStationId(rs.getInt("station_id"));
         swap.setTowerId(rs.getInt("tower_id"));
-        swap.setStaffId(rs.getInt("staff_id"));
+        // staff_id in DB can be varchar (e.g., 'staff002'), read as String
+        try {
+            String staffVal = rs.getString("staff_id");
+            swap.setStaffId(staffVal);
+        } catch (Exception ex) {
+            // fallback: try to read as int and convert to String
+            try {
+                int staffInt = rs.getInt("staff_id");
+                swap.setStaffId(String.valueOf(staffInt));
+            } catch (Exception ignore) {
+                swap.setStaffId(null);
+            }
+        }
         swap.setOldBatteryId(rs.getInt("old_battery_id"));
         swap.setNewBatteryId(rs.getInt("new_battery_id"));
         swap.setOdometerBefore(rs.getDouble("odometer_before"));
         swap.setOdometerAfter(rs.getDouble("odometer_after"));
-        swap.setSwapStatus(rs.getString("swap_status"));
+        swap.setSwapStatus(rs.getString("status"));
         
         // Có thể thêm timestamp fields nếu cần trong tương lai
         

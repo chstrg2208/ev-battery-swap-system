@@ -15,7 +15,7 @@ public class Swap {
     private int contractId;
     private int stationId;
     private int towerId;
-    private int staffId;
+    private String staffId;
     private int oldBatteryId;
     private int newBatteryId;
     private double odometerBefore;
