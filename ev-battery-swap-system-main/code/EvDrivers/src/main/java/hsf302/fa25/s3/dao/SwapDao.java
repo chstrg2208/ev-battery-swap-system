@@ -90,7 +90,7 @@ public class SwapDao {
 
     // Tạo swap mới
     public boolean createSwap(Swap swap) {
-        String sql = "INSERT INTO Swaps (contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, swap_status) " +
+        String sql = "INSERT INTO Swaps (contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -118,7 +118,7 @@ public class SwapDao {
 
     // Cập nhật trạng thái swap
     public boolean updateSwapStatus(int swapId, String status) {
-        String sql = "UPDATE Swaps SET swap_status=? WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET status=? WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -133,7 +133,7 @@ public class SwapDao {
 
     // Hoàn thành swap
     public boolean completeSwap(int swapId) {
-        String sql = "UPDATE Swaps SET swap_status='COMPLETED', completed_time=GETDATE() WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET status='COMPLETED', swap_date=GETDATE() WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -148,7 +148,8 @@ public class SwapDao {
     // Lấy swap gần đây
     public List<Swap> getRecentSwaps(int limit) {
         List<Swap> list = new ArrayList<>();
-        String sql = "SELECT TOP (?) * FROM Swaps ORDER BY swap_id DESC";
+        // Use OFFSET/FETCH so we can parameterize the number of rows to return
+        String sql = "SELECT * FROM Swaps ORDER BY swap_id DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -223,14 +224,14 @@ public class SwapDao {
         Map<String, Object> stats = new HashMap<>();
         
         // Thống kê theo trạng thái
-        String statusSql = "SELECT swap_status, COUNT(*) as count FROM Swaps GROUP BY swap_status";
+        String statusSql = "SELECT status, COUNT(*) as count FROM Swaps GROUP BY status";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(statusSql)) {
 
             ResultSet rs = ps.executeQuery();
             Map<String, Integer> statusCount = new HashMap<>();
             while (rs.next()) {
-                statusCount.put(rs.getString("swap_status"), rs.getInt("count"));
+                statusCount.put(rs.getString("status"), rs.getInt("count"));
             }
             stats.put("byStatus", statusCount);
         } catch (Exception e) {
@@ -251,7 +252,7 @@ public class SwapDao {
         }
 
         // Swap trong tháng này
-        String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(created_time) = MONTH(GETDATE()) AND YEAR(created_time) = YEAR(GETDATE())";
+        String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(swap_date) = MONTH(GETDATE()) AND YEAR(created_time) = YEAR(GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(monthlySql)) {
 
