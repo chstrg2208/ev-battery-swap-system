@@ -6,6 +6,7 @@ import axios from 'axios';
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // Spring Boot backend
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000, // Increase timeout for backend calls
+  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'false') === 'true',
   ENDPOINTS: {
     // Authentication
     AUTH: {
@@ -163,7 +164,7 @@ export const apiUtils = {
       const response = await apiClient.get(url, { params });
       return response.data;
     } catch (error) {
-      console.error('API GET Error:', error);
+      // Reduce console noise; callers will log context-specific errors
       throw error;
     }
   },
@@ -174,7 +175,6 @@ export const apiUtils = {
       const response = await apiClient.post(url, data);
       return response.data;
     } catch (error) {
-      console.error('API POST Error:', error);
       throw error;
     }
   },
@@ -185,7 +185,6 @@ export const apiUtils = {
       const response = await apiClient.put(url, data);
       return response.data;
     } catch (error) {
-      console.error('API PUT Error:', error);
       throw error;
     }
   },
@@ -196,7 +195,6 @@ export const apiUtils = {
       const response = await apiClient.delete(url);
       return response.data;
     } catch (error) {
-      console.error('API DELETE Error:', error);
       throw error;
     }
   },

@@ -20,7 +20,7 @@ class UserService {
         throw new Error(response.message || 'Không thể lấy danh sách người dùng');
       }
     } catch (error) {
-      console.error('Get all users error:', error);
+      // Keep logs minimal; return structured error
       const errorInfo = apiUtils.handleError(error);
       return {
         success: false,
@@ -39,15 +39,33 @@ class UserService {
       if (response.success) {
         return {
           success: true,
-          data: response,
+          data: response.data,
           message: 'Lấy thông tin người dùng thành công'
         };
       } else {
         throw new Error(response.message || 'Không thể lấy thông tin người dùng');
       }
     } catch (error) {
-      console.error('Get user by ID error:', error);
       const errorInfo = apiUtils.handleError(error);
+      
+      // Offline/Not Found fallback: return minimal user from localStorage for demo
+      const shouldFallback =
+        errorInfo?.code === 'ERR_NETWORK' ||
+        errorInfo?.status === 0 ||
+        errorInfo?.status === 404;
+      if (shouldFallback) {
+        try {
+          const stored = localStorage.getItem('currentUser');
+          if (stored) {
+            const demoUser = JSON.parse(stored);
+            return {
+              success: true,
+              data: demoUser,
+              message: 'Dữ liệu demo từ localStorage (offline)'
+            };
+          }
+        } catch (_) {}
+      }
       
       // If it's a network error, try to parse the actual response
       if (error.response && error.response.data) {
@@ -294,8 +312,40 @@ class UserService {
         throw new Error(response.message || 'Không thể lấy dữ liệu dashboard');
       }
     } catch (error) {
-      console.error('Get user dashboard error:', error);
       const errorInfo = apiUtils.handleError(error);
+      const shouldFallback = ((API_CONFIG.USE_DEMO_FALLBACK === true) || (API_CONFIG.USE_DEMO_FALLBACK === 'true')) && (
+        errorInfo?.code === 'ERR_NETWORK' ||
+        errorInfo?.status === 0 ||
+        errorInfo?.status === 404
+      );
+      if (shouldFallback) {
+        try {
+          const stored = localStorage.getItem('currentUser');
+          if (stored) {
+            const user = JSON.parse(stored);
+            const demoDashboard = {
+              user,
+              vehicles: 2,
+              swapsThisMonth: 3,
+              totalSwaps: 12,
+              subscription: {
+                plan: 'Standard',
+                status: 'active',
+                renewDate: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString()
+              },
+              recentActivities: [
+                { id: 'a1', type: 'swap', time: new Date().toISOString(), station: 'Station A', result: 'success' },
+                { id: 'a2', type: 'payment', time: new Date(Date.now() - 86400000).toISOString(), amount: 149000 },
+              ]
+            };
+            return {
+              success: true,
+              data: demoDashboard,
+              message: 'Dữ liệu dashboard demo (offline)'
+            };
+          }
+        } catch (_) {}
+      }
       return {
         success: false,
         message: errorInfo.message || 'Lỗi khi lấy dữ liệu dashboard',

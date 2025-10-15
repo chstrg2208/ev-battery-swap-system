@@ -46,14 +46,16 @@ export const useDashboardData = () => {
       const userId = validation.userId;
       console.log('🆔 Using userId for API:', userId);
       
-      // Fetch user dashboard data
-      const userResponse = await userService.getUserById(userId);
-      console.log('📊 API Response:', userResponse);
+      // Prefer aggregated dashboard API with flexible shape + offline fallback
+      const dashboardResp = await userService.getUserDashboard(userId);
+      console.log('📊 Dashboard API Response:', dashboardResp);
       
-      if (userResponse.success && userResponse.data) {
-        const userData = userResponse.data;
-        const userVehicles = userData.vehicles || [];
-        const userDashboard = userData.dashboard || {};
+      if (dashboardResp.success && dashboardResp.data) {
+        const root = dashboardResp.data;
+        // Normalize shape: some backends wrap in { user, vehicles, dashboard }
+        const userData = root.user || root;
+        const userVehicles = root.vehicles || userData.vehicles || [];
+        const userDashboard = root.dashboard || {};
         
         // Process vehicles
         const processedVehicles = processVehicles(userVehicles);
@@ -79,7 +81,27 @@ export const useDashboardData = () => {
         
         console.log('✅ Successfully loaded dashboard data');
       } else {
-        throw new Error('API không trả về dữ liệu hợp lệ');
+        // Fallback: try basic user API or local demo
+        const userResponse = await userService.getUserById(userId);
+        console.log('📄 User API Response (fallback):', userResponse);
+        if (userResponse.success && userResponse.data) {
+          const userData = userResponse.data;
+          const userVehicles = userData.vehicles || [];
+          const userDashboard = userData.dashboard || {};
+          const processedVehicles = processVehicles(userVehicles);
+          const finalVehicles = updateVehiclesFromSession(processedVehicles);
+          setVehicles(finalVehicles);
+          const userContracts = await fetchContracts(userId, userDashboard);
+          setContracts(userContracts);
+          const payments = await fetchPayments(userId);
+          setRecentPayments(payments);
+          const calculatedStats = normalizeDashboardStats(
+            userDashboard, processedVehicles, userContracts, []
+          );
+          setStats(calculatedStats);
+        } else {
+          throw new Error('API không trả về dữ liệu hợp lệ');
+        }
       }
     } catch (err) {
       console.error('❌ Error fetching dashboard data:', err);

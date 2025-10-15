@@ -40,37 +40,8 @@ class AuthService {
   }
 
   async login(credentials) {
-    try {
-      console.log('AuthService: Login attempt with backend API', credentials);
-      
-      // Call real Spring Boot API first
-      const backendResponse = await apiUtils.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-        email: credentials.email || credentials.username,
-        password: credentials.password
-      });
-
-      console.log('AuthService: Backend response:', backendResponse);
-
-      if (backendResponse.success && backendResponse.user) {
-        // Save auth token if provided
-        if (backendResponse.token) {
-          localStorage.setItem('authToken', backendResponse.token);
-        }
-
-        // Save user data
-        this.saveUserToStorage(backendResponse.user);
-
-        return {
-          success: true,
-          user: backendResponse.user,
-          token: backendResponse.token || 'backend_token',
-          message: backendResponse.message || 'Đăng nhập thành công'
-        };
-      }
-      
-      // If backend fails, fallback to demo accounts for development
-      console.log('AuthService: Backend failed, trying demo accounts');
-      const DEMO_ACCOUNTS = [
+    // Demo accounts (development fallback)
+    const DEMO_ACCOUNTS = [
         {
           email: 'admin@evswap.com',
           password: 'admin123',
@@ -147,82 +118,100 @@ class AuthService {
           }
         }
       ];
-
-      // Check if using demo account
-      const demoAccount = DEMO_ACCOUNTS.find(account => 
-        account.email === credentials.email && account.password === credentials.password
+    
+    const tryDemoLogin = () => {
+      if (!(API_CONFIG.USE_DEMO_FALLBACK === true || API_CONFIG.USE_DEMO_FALLBACK === 'true')) {
+        return null;
+      }
+      const demoAccount = DEMO_ACCOUNTS.find(account =>
+        account.email === (credentials.email || credentials.username) &&
+        account.password === credentials.password
       );
-      
-      if (demoAccount) {
-        // Save demo user
-        this.saveUserToStorage(demoAccount.user);
-        
-        return {
-          success: true,
-          user: demoAccount.user,
-          token: `demo_token_${demoAccount.user.id}`,
-          message: `Đăng nhập thành công - ${demoAccount.user.role.toUpperCase()}`
-        };
-      }
-      
-      // Call real API
-      const response = await apiUtils.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-        email: credentials.email || credentials.username,
-        password: credentials.password
-      });
+      if (!demoAccount) return null;
+      this.saveUserToStorage(demoAccount.user);
+      return {
+        success: true,
+        user: demoAccount.user,
+        token: `demo_token_${demoAccount.user.id}`,
+        message: `Đăng nhập thành công - ${demoAccount.user.role.toUpperCase()}`
+      };
+    };
 
-      if (response.success && response.data) {
-        // Save auth token
-        if (response.data.token) {
-          localStorage.setItem('authToken', response.data.token);
+    try {
+      console.log('AuthService: Login attempt with backend API', credentials);
+
+      // Call real Spring Boot API
+      const backendResponse = await apiUtils.post(
+        API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+        {
+          email: credentials.email || credentials.username,
+          password: credentials.password
         }
+      );
 
-        // Save user data
-        this.saveUserToStorage(response.data.user);
+      console.log('AuthService: Backend response:', backendResponse);
 
+      // Handle various backend response shapes
+      const responseUser = backendResponse.user || backendResponse.data?.user;
+      const responseToken = backendResponse.token || backendResponse.data?.token;
+      const responseSuccess = backendResponse.success ?? backendResponse.data?.success ?? !!responseUser;
+
+      if (responseSuccess && responseUser) {
+        if (responseToken) {
+          localStorage.setItem('authToken', responseToken);
+        }
+        this.saveUserToStorage(responseUser);
         return {
           success: true,
-          user: response.data.user,
-          token: response.data.token,
-          message: 'Đăng nhập thành công'
+          user: responseUser,
+          token: responseToken || 'backend_token',
+          message: backendResponse.message || backendResponse.data?.message || 'Đăng nhập thành công'
         };
-      } else {
-        throw new Error(response.message || 'Đăng nhập thất bại');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      const errorInfo = apiUtils.handleError(error);
+
+      // Backend responded but not successful → try demo
+      const demoResult = tryDemoLogin();
+      if (demoResult) return demoResult;
+
       return {
         success: false,
-        message: errorInfo.message || 'Đăng nhập thất bại',
+        message: backendResponse.message || backendResponse.data?.message || 'Đăng nhập thất bại'
+      };
+    } catch (error) {
+      // Network/CORS error → try demo fallback
+      console.error('Login error:', error);
+      const demoResult = tryDemoLogin();
+      if (demoResult) return demoResult;
+
+      const errorInfo = apiUtils.handleError(error);
+      const isCorsOrNetwork = errorInfo?.code === 'ERR_NETWORK' || errorInfo?.status === 0;
+      return {
+        success: false,
+        message: isCorsOrNetwork
+          ? 'Không thể kết nối máy chủ (CORS/Network). Thử lại sau hoặc dùng tài khoản demo.'
+          : (errorInfo.message || 'Đăng nhập thất bại'),
         error: errorInfo
       };
     }
   }
 
   async logout() {
+    // Always clear local state first for instant UX
+    this.clearUserFromStorage();
+
+    // If there is no token, skip network call entirely
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      return { success: true, message: 'Đã đăng xuất (offline)' };
+    }
+
     try {
-      console.log('AuthService: Logout');
-      
-      // Call logout endpoint to invalidate token on server
+      // Best-effort server logout; ignore CORS/network issues
       await apiUtils.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
-      
-      // Clear local storage
-      this.clearUserFromStorage();
-      
-      return {
-        success: true,
-        message: 'Đăng xuất thành công'
-      };
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Clear local storage even if API call fails
-      this.clearUserFromStorage();
-      
-      return {
-        success: true,
-        message: 'Đăng xuất thành công'
-      };
+      return { success: true, message: 'Đăng xuất thành công' };
+    } catch (_) {
+      // Swallow errors to avoid noisy console when backend is unreachable
+      return { success: true, message: 'Đã đăng xuất (server không phản hồi)' };
     }
   }
 
