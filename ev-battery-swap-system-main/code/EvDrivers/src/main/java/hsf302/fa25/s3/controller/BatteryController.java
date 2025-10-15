@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/batteries")
-@CrossOrigin(origins = "*")
 public class BatteryController {
 
     private final BatteryDao batteryDao = new BatteryDao();
