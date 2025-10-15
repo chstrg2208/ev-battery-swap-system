@@ -274,7 +274,7 @@ public class StationDao {
         String swapSql = """
             SELECT COUNT(*) as today_swaps 
             FROM Swaps 
-            WHERE station_id = ? AND CAST(swap_time AS DATE) = CAST(GETDATE() AS DATE)
+            WHERE station_id = ? AND CAST(swap_date AS DATE) = CAST(GETDATE() AS DATE)
         """;
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(swapSql)) {

@@ -98,7 +98,12 @@ public class SwapDao {
             ps.setInt(1, swap.getContractId());
             ps.setInt(2, swap.getStationId());
             ps.setInt(3, swap.getTowerId());
-            ps.setInt(4, swap.getStaffId());
+            // staffId may be alphanumeric (e.g., "staff002") so use setObject(String) / setString
+            if (swap.getStaffId() != null) {
+                ps.setString(4, swap.getStaffId());
+            } else {
+                ps.setNull(4, java.sql.Types.VARCHAR);
+            }
             ps.setObject(5, swap.getOldBatteryId() != 0 ? swap.getOldBatteryId() : null);
             ps.setObject(6, swap.getNewBatteryId() != 0 ? swap.getNewBatteryId() : null);
             ps.setDouble(7, swap.getOdometerBefore());
@@ -268,12 +273,24 @@ public class SwapDao {
         swap.setContractId(rs.getInt("contract_id"));
         swap.setStationId(rs.getInt("station_id"));
         swap.setTowerId(rs.getInt("tower_id"));
-        swap.setStaffId(rs.getInt("staff_id"));
+        // staff_id in DB can be varchar (e.g., 'staff002'), read as String
+        try {
+            String staffVal = rs.getString("staff_id");
+            swap.setStaffId(staffVal);
+        } catch (Exception ex) {
+            // fallback: try to read as int and convert to String
+            try {
+                int staffInt = rs.getInt("staff_id");
+                swap.setStaffId(String.valueOf(staffInt));
+            } catch (Exception ignore) {
+                swap.setStaffId(null);
+            }
+        }
         swap.setOldBatteryId(rs.getInt("old_battery_id"));
         swap.setNewBatteryId(rs.getInt("new_battery_id"));
         swap.setOdometerBefore(rs.getDouble("odometer_before"));
         swap.setOdometerAfter(rs.getDouble("odometer_after"));
-        swap.setSwapStatus(rs.getString("swap_status"));
+        swap.setSwapStatus(rs.getString("status"));
         
         // Có thể thêm timestamp fields nếu cần trong tương lai
         
