@@ -52,7 +52,7 @@ export const useDashboardData = () => {
       
       if (dashboardResp.success && dashboardResp.data) {
         const root = dashboardResp.data;
-        // Normalize shape: some backends wrap in { user, vehicles, dashboard }
+        // Backend returns { success, user, dashboard, vehicles } directly
         const userData = root.user || root;
         const userVehicles = root.vehicles || userData.vehicles || [];
         const userDashboard = root.dashboard || {};

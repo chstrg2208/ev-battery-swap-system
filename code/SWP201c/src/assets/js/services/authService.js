@@ -120,9 +120,6 @@ class AuthService {
       ];
     
     const tryDemoLogin = () => {
-      if (!(API_CONFIG.USE_DEMO_FALLBACK === true || API_CONFIG.USE_DEMO_FALLBACK === 'true')) {
-        return null;
-      }
       const demoAccount = DEMO_ACCOUNTS.find(account =>
         account.email === (credentials.email || credentials.username) &&
         account.password === credentials.password
@@ -209,8 +206,9 @@ class AuthService {
       // Best-effort server logout; ignore CORS/network issues
       await apiUtils.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       return { success: true, message: 'Đăng xuất thành công' };
-    } catch (_) {
+    } catch (err) {
       // Swallow errors to avoid noisy console when backend is unreachable
+      console.warn('Logout API failed (expected if backend unreachable):', err.message);
       return { success: true, message: 'Đã đăng xuất (server không phản hồi)' };
     }
   }

@@ -147,6 +147,7 @@ const DriverDashboard = () => {
           vehicles={vehicles}
           contracts={contracts}
           error={error}
+          onRefresh={refetch}
         />
         
         {/* Welcome Header */}

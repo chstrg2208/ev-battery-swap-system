@@ -6,7 +6,6 @@ import axios from 'axios';
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // Spring Boot backend
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000, // Increase timeout for backend calls
-  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'false') === 'true',
   ENDPOINTS: {
     // Authentication
     AUTH: {

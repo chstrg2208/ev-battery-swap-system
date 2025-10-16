@@ -1,9 +1,9 @@
 // Debug Info Component
 import React from 'react';
 
-const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
-  // Only show in development mode
-  if (import.meta.env.VITE_ENABLE_DEBUG !== 'true') return null;
+const DebugInfo = ({ currentUser, vehicles, contracts, error, onRefresh }) => {
+  // Always show debug info for now
+  // if (import.meta.env.VITE_ENABLE_DEBUG !== 'true') return null;
 
   const handleLogout = () => {
     console.log('🚪 Debug logout clicked');
@@ -31,7 +31,10 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
       Error: {error || 'None'}<br/>
       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
         <button 
-          onClick={() => window.open('http://localhost:8080/api/users/driver002', '_blank')} 
+          onClick={() => {
+            const userId = currentUser?.id || currentUser?.user_id || currentUser?.userId || 'driver002';
+            window.open(`http://localhost:8080/api/users/${userId}`, '_blank');
+          }} 
           style={{
             padding: '5px 10px',
             background: 'rgba(25, 195, 125, 0.2)',
@@ -43,6 +46,20 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
           }}
         >
           Test API Direct
+        </button>
+        <button 
+          onClick={onRefresh}
+          style={{
+            padding: '5px 10px',
+            background: 'rgba(59, 130, 246, 0.2)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            borderRadius: '5px',
+            color: '#3b82f6',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}
+        >
+          🔄 Force Refresh
         </button>
         <button 
           onClick={handleLogout}

@@ -46,14 +46,12 @@ class UserService {
         throw new Error(response.message || 'Không thể lấy thông tin người dùng');
       }
     } catch (error) {
+      console.error('Get user by ID error:', error);
       const errorInfo = apiUtils.handleError(error);
       
-      // Offline/Not Found fallback: return minimal user from localStorage for demo
-      const shouldFallback =
-        errorInfo?.code === 'ERR_NETWORK' ||
-        errorInfo?.status === 0 ||
-        errorInfo?.status === 404;
-      if (shouldFallback) {
+      // Network/CORS fallback: return minimal user from localStorage for demo
+      const isCorsOrNetwork = errorInfo?.code === 'ERR_NETWORK' || errorInfo?.status === 0;
+      if (isCorsOrNetwork) {
         try {
           const stored = localStorage.getItem('currentUser');
           if (stored) {
@@ -64,7 +62,9 @@ class UserService {
               message: 'Dữ liệu demo từ localStorage (offline)'
             };
           }
-        } catch (_) {}
+        } catch (err) {
+          console.warn('Failed to parse stored user:', err);
+        }
       }
       
       // If it's a network error, try to parse the actual response
@@ -300,43 +300,52 @@ class UserService {
     try {
       console.log('UserService: Get user dashboard', userId);
       
-      const response = await apiUtils.get(`/api/users/${userId}/dashboard`);
+      // Backend endpoint is /api/users/{id}, not /api/users/{id}/dashboard
+      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.USERS.BY_ID(userId));
       
       if (response.success) {
+        // Backend returns { success, user, dashboard, vehicles } directly
         return {
           success: true,
-          data: response.data,
+          data: response, // Use entire response as data since backend returns user, dashboard, vehicles
           message: 'Lấy dữ liệu dashboard thành công'
         };
       } else {
         throw new Error(response.message || 'Không thể lấy dữ liệu dashboard');
       }
     } catch (error) {
+      console.error('Get user dashboard error:', error);
       const errorInfo = apiUtils.handleError(error);
-      const shouldFallback = ((API_CONFIG.USE_DEMO_FALLBACK === true) || (API_CONFIG.USE_DEMO_FALLBACK === 'true')) && (
-        errorInfo?.code === 'ERR_NETWORK' ||
-        errorInfo?.status === 0 ||
-        errorInfo?.status === 404
-      );
-      if (shouldFallback) {
+      // Network/CORS fallback: synthesize demo dashboard from stored user
+      const isCorsOrNetwork = errorInfo?.code === 'ERR_NETWORK' || errorInfo?.status === 0;
+      if (isCorsOrNetwork) {
         try {
           const stored = localStorage.getItem('currentUser');
           if (stored) {
             const user = JSON.parse(stored);
             const demoDashboard = {
               user,
-              vehicles: 2,
-              swapsThisMonth: 3,
-              totalSwaps: 12,
-              subscription: {
-                plan: 'Standard',
-                status: 'active',
-                renewDate: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString()
-              },
-              recentActivities: [
-                { id: 'a1', type: 'swap', time: new Date().toISOString(), station: 'Station A', result: 'success' },
-                { id: 'a2', type: 'payment', time: new Date(Date.now() - 86400000).toISOString(), amount: 149000 },
-              ]
+              vehicles: [
+                {
+                  vehicleId: 'demo001',
+                  plateNumber: '30A-12345',
+                  vehicleModel: 'VinFast VF8',
+                  health: 85,
+                  batteryLevel: 85,
+                  currentOdometer: 15000,
+                  batteryId: 'bat001',
+                  batteryModel: 'VinFast Battery V1',
+                  batteryType: 'Lithium-ion'
+                }
+              ],
+              dashboard: {
+                totalSwaps: 12,
+                monthlySwaps: 3,
+                totalDistance: 1500,
+                monthlyDistance: 200,
+                contractNumber: 'CT001',
+                contractStatus: 'active'
+              }
             };
             return {
               success: true,
@@ -344,7 +353,9 @@ class UserService {
               message: 'Dữ liệu dashboard demo (offline)'
             };
           }
-        } catch (_) {}
+        } catch (err) {
+          console.warn('Failed to parse stored user:', err);
+        }
       }
       return {
         success: false,
